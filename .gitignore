@@ -1,0 +1,5 @@
+.venv/
+dedup/
+lists/
+**/*.egg-info/
+**/__pycache__/
