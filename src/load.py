@@ -3,10 +3,10 @@
 import json
 from pathlib import Path
 
-DEFAULT_VERBOSE = False
+from src.defaults import defaults
 
 
-def frompath(path: Path, verbose: bool = DEFAULT_VERBOSE) -> dict:
+def frompath(path: Path, verbose: bool = defaults.VERBOSE) -> dict:
     if verbose:
         print(f"Loading list from {path}...")
     with open(path, "r", encoding="utf-8") as f:

@@ -7,14 +7,11 @@ from itertools import count
 from subprocess import run, PIPE
 from shlex import split as splitsh
 
+from src.defaults import defaults
 from src import get
 from src.error import pr as error
 from src.verify import containsdirs, isdate
 from src import search
-
-DEFAULT_VERBOSE = False
-DEFAULT_MINLEVEL = 1
-DEFAULT_MAXLEVEL = 2
 
 
 def page(webpage: str, listonly: bool = False) -> str:
@@ -38,7 +35,7 @@ def until(
     type1: list | tuple,
     type2: list | tuple | int,
     lowerlimit: int | float,
-    verbose: bool = DEFAULT_VERBOSE,
+    verbose: bool = defaults.VERBOSE,
 ) -> Iterator:
     for a in type1:
         foundLimit = False
@@ -57,7 +54,7 @@ def until(
 def aoty(
     albumType: str,
     pageNumber: int,
-    verbose: bool = DEFAULT_VERBOSE,
+    verbose: bool = defaults.VERBOSE,
 ) -> Iterator:
     if verbose:
         print(f"- Downloading {albumType}, page {pageNumber}...")
@@ -119,7 +116,7 @@ def proggenre(pageNumber: int) -> str:
 
 
 def progarchives(
-    pagenumber: int, albumType: int, verbose: bool = DEFAULT_VERBOSE
+    pagenumber: int, albumType: int, verbose: bool = defaults.VERBOSE
 ) -> Iterator:
     genre = proggenre(pagenumber)
     if verbose:
@@ -168,8 +165,8 @@ def progarchives(
 
 def dirs(
     path: Path,
-    minLevel: int = DEFAULT_MINLEVEL,
-    maxLevel: int = DEFAULT_MAXLEVEL,
+    minLevel: int = defaults.MIN_LEVEL,
+    maxLevel: int = defaults.MAX_LEVEL,
 ) -> Iterator[Path]:
     for d in path.rglob("*"):
         if (

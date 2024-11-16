@@ -26,22 +26,38 @@ def SAVE(name: str, suffix: str, direction: str) -> str:
 def PATH(
     name: str,
     default_path: Path,
+    default_text_path: Path,
+    letter: str | None = None,
     flag: str | None = None,
     text: bool = False,
     read: bool = False,
 ):
     if not flag:
         flag = name.lower()[:4]
+    flag = f"--{flag}" + ("-text" if text else "") + "-path"
+    file_type = FILE_FROM if read else FILE_TO
+    default_path = default_text_path if text else default_path
     direction = "from" if read else "to"
-    return click.option(
-        f"--{flag}" + "-text" if text else "" + "-path",
-        type=FILE_FROM if read else FILE_TO,
-        default=default_path,
-        show_default=True,
-        help=SAVE(
-            name, default.TEXT_SUFFIX if text else default.SUFFIX, direction
-        ),
+    help_message = SAVE(
+        name, default.TEXT_SUFFIX if text else default.SUFFIX, direction
     )
+    if letter:
+        return click.option(
+            "-" + letter,
+            flag,
+            type=file_type,
+            default=default_path,
+            show_default=True,
+            help=help_message,
+        )
+    else:
+        return click.option(
+            flag,
+            type=file_type,
+            default=default_path,
+            show_default=True,
+            help=help_message,
+        )
 
 
 music = click.argument(
@@ -61,29 +77,72 @@ dedup = click.option(
 )
 
 
-def aoty(text: bool = False, read: bool = False):
-    return PATH("AOTY", default.AOTY_PATH, text=text, read=read)
-
-
-def prog(text: bool = False, read: bool = False):
-    return PATH("Progarchives", default.AOTY_PATH, text=text, read=read)
-
-
-def merge(text: bool = False, read: bool = False):
+def aoty(letter: str | None = None, text: bool = False, read: bool = False):
     return PATH(
-        "merge", default.MERGE_PATH, flag="merge", text=text, read=read
+        name="AOTY",
+        default_path=default.AOTY_PATH,
+        default_text_path=default.AOTY_TEXT_PATH,
+        letter=letter,
+        text=text,
+        read=read,
     )
 
 
-def dirs(text: bool = False, read: bool = False):
+def prog(letter: str | None = None, text: bool = False, read: bool = False):
     return PATH(
-        "directories", default.DIRS_PATH, flag="dirs", text=text, read=read
+        name="Progarchives",
+        default_path=default.PROG_PATH,
+        default_text_path=default.PROG_TEXT_PATH,
+        letter=letter,
+        text=text,
+        read=read,
     )
 
 
-def wanted(text: bool = False, read: bool = False):
-    return PATH("wanted", default.WANTED_PATH, text=text, read=read)
+def merge(letter: str | None = None, text: bool = False, read: bool = False):
+    return PATH(
+        name="merge",
+        default_path=default.MERGE_PATH,
+        default_text_path=default.MERGE_TEXT_PATH,
+        flag="merge",
+        letter=letter,
+        text=text,
+        read=read,
+    )
 
 
-def leftover(text: bool = False, read: bool = False):
-    return PATH("left over", default.LEFTOVER_PATH, text=text, read=read)
+def dirs(letter: str | None = None, text: bool = False, read: bool = False):
+    return PATH(
+        name="directories",
+        default_path=default.DIRS_PATH,
+        default_text_path=default.DIRS_TEXT_PATH,
+        flag="dirs",
+        letter=letter,
+        text=text, read=read,
+    )
+
+
+def wanted(letter: str | None = None, text: bool = False, read: bool = False):
+    return PATH(
+        name="wanted",
+        default_path=default.WANTED_PATH,
+        default_text_path=default.WANTED_TEXT_PATH,
+        flag="wanted",
+        letter=letter,
+        text=text,
+        read=read,
+    )
+
+
+def leftover(
+    letter: str | None = None, text: bool = False, read: bool = False
+):
+    return PATH(
+        name="left over",
+        default_path=default.LEFTOVER_PATH,
+        default_text_path=default.LEFTOVER_TEXT_PATH,
+        flag="leftover",
+        letter=letter,
+        text=text,
+        read=read,
+    )

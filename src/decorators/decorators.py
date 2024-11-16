@@ -28,10 +28,6 @@ def count_time(func):
     return wrapper
 
 
-def SAVE(name: str, suffix: str, direction: str) -> str:
-    return f"Path to save {name} {suffix} file {direction}."
-
-
 def LOWER_LIMIT(name: str):
     return f"Lower limit for {name} score."
 
@@ -92,39 +88,81 @@ re_download = click.option(
 )
 
 
-def add(func, decorators: tuple):
-    for dec in decorators:
+def add(func, decs: tuple):
+    for dec in reversed(decs):
         func = dec(func)
     return func
 
 
-def new_command(func):
-    return add(func, (comm, verbose, version))
+def command(func, decs: tuple):
+    return add(func, (count_time, version, verbose, comm) + decs)
 
 
 def aoty(func):
-    return add(func, (path.aoty(text=True), text, path.aoty, aoty_lower))
+    return command(
+        func, (aoty_lower, path.aoty("p"), text, path.aoty(text=True))
+    )
 
 
 def prog(func):
-    return add(func, (path.prog(text=True), text, path.prog, prog_lower))
+    return command(
+        func, (prog_lower, path.prog("p"), text, path.prog(text=True))
+    )
 
 
 def dedup(func):
-    return add(func, (path.dedup, deduplic))
+    return add(func, (deduplic, path.dedup))
 
 
 def merge(func):
-    return add(func, (path.merge(text=True), text, path.merge, re_download))
+    return command(
+        func, (
+            re_download,
+            dedup,
+            path.merge("p"),
+            text,
+            path.merge(text=True),
+            aoty_lower,
+            prog_lower,
+            path.aoty(),
+            path.prog(),
+        )
+    )
 
 
 def dirs(func):
-    return add(func, (path.dirs(text=True), text, path.dirs))
+    return command(
+        func, (path.music, path.dirs("p"), text, path.dirs(text=True))
+    )
 
 
 def wanted(func):
-    return add(func, (path.wanted(text=True), text, path.leftover))
+    return command(
+        func, (
+            dedup,
+            path.wanted("p"),
+            text,
+            path.wanted(text=True),
+            path.merge(),
+            path.dirs()
+        )
+    )
 
 
 def leftover(func):
-    return add(func, (path.leftover(text=True), text, path.leftover))
+    return command(
+        func, (
+            dedup,
+            path.leftover("p"),
+            text,
+            path.leftover(text=True),
+            path.dirs(),
+            path.merge()
+        )
+    )
+
+
+def copy(func):
+    return command(
+        func, (path.music, path.destination, path.wanted(read=True))
+    )

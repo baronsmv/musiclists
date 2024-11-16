@@ -7,9 +7,7 @@ from src import write
 from src.copy import copy as cp
 
 
-@de.new_command
 @de.aoty
-@de.count_time
 def aoty(
     aoty_lower: int,
     aoty_path: Path,
@@ -34,9 +32,7 @@ def aoty(
     )
 
 
-@de.new_command
 @de.prog
-@de.count_time
 def prog(
     prog_lower: float,
     prog_path: Path,
@@ -61,49 +57,39 @@ def prog(
     )
 
 
-@de.new_command
 @de.merge
-@de.dedup
-@de.aoty
-@de.prog
-@de.count_time
 def merge(
     re_download: str,
-    merge_path: Path,
-    merge_text_path: Path,
     dedup: bool,
     dedup_path: Path,
-    aoty_lower: int,
-    aoty_path: Path,
-    aoty_text_path: Path,
-    prog_lower: float,
-    prog_path: Path,
-    prog_text_path: Path,
+    merge_path: Path,
     text: bool,
-    text_dir: Path,
+    merge_text_path: Path,
+    aoty_lower: int,
+    prog_lower: float,
+    aoty_path: Path,
+    prog_path: Path,
     verbose: bool,
 ):
     """
     Merges lists into one.
     """
-    print("Merging lists...")
-    print()
     if re_download == "all" or re_download == "aoty":
         write.aoty(
             path=aoty_path,
-            text_path=aoty_text_path,
             lowerlimit=aoty_lower,
-            text=text,
+            text=False,
             verbose=verbose,
         )
+        print()
     if re_download == "all" or re_download == "prog":
         write.prog(
             path=prog_path,
-            text_path=prog_text_path,
             lowerlimit=prog_lower,
-            text=text,
+            text=False,
             verbose=verbose,
         )
+        print()
     write.all(
         path=merge_path,
         text_path=merge_text_path,
@@ -116,11 +102,10 @@ def merge(
     )
 
 
-@de.new_command
-@de.path.music
 @de.dirs
-@de.count_time
 def dirs(music_path, dirs_path, text, dirs_text_path, verbose):
+    """
+    """
     write.dirs(
         musicdir=music_path,
         dirspath=dirs_path,
@@ -130,20 +115,15 @@ def dirs(music_path, dirs_path, text, dirs_text_path, verbose):
     )
 
 
-@de.new_command
 @de.wanted
-@de.path.merge
-@de.path.dirs
-@de.dedup
-@de.count_time
 def wanted(
+    dedup: bool,
+    dedup_path: Path,
     wanted_path: Path,
     text: bool,
     wanted_text_path: Path,
     merge_path: Path,
     dirs_path: Path,
-    dedup: bool,
-    dedup_dir: Path,
     verbose: bool,
 ):
     """
@@ -155,25 +135,20 @@ def wanted(
         data2=dirs_path,
         name="wanted",
         dedup=dedup,
-        dedupdir=dedup_dir,
+        dedupdir=dedup_path,
         text=text,
         verbose=verbose,
     )
 
 
-@de.new_command
 @de.leftover
-@de.path.dirs
-@de.path.merge
-@de.dedup
-@de.count_time
 def leftover(
+    dedup: bool,
+    dedup_path: Path,
     leftover_path: Path,
     leftover_text_path: Path,
     dirs_path: Path,
     merge_path: Path,
-    dedup: bool,
-    dedup_dir: Path,
     text: bool,
     verbose: bool,
 ):
@@ -186,17 +161,13 @@ def leftover(
         data2=merge_path,
         name="left",
         dedup=dedup,
-        dedupdir=dedup_dir,
+        dedupdir=dedup_path,
         text=text,
         verbose=verbose,
     )
 
 
-@de.new_command
-@de.path.music
-@de.path.destination
-@de.path.wanted
-@de.count_time
+@de.copy
 def copy(
     music_path: Path,
     destination_path: Path,

@@ -7,30 +7,25 @@ from pprint import pprint
 
 from src.diff import diff
 from src.dedup import dedup
+from src.defaults import defaults
 from src import dump
 from src import get
 from src.load import frompath as load
 from src import search
 
-DEFAULT_VERBOSE = False
-
-DEFAULT_AOTY_SCORE = 83
-DEFAULT_PROG_SCORE = 3.95
-
-DEFAULT_KEY_LENGTH = 14
-
-DEFAULT_AUTO_FIELD = "possible"
-DEFAULT_DEDUP_FIELD = "verified"
-DEFAULT_SUFFIX = "json"
-
 
 def to_text(
     path: Path,
-    text_path: Path,
+    text_path: Path | None = None,
     suffix: str = "txt",
     sep: str = " - ",
-    sorted: bool = True
+    sorted: bool = True,
+    verbose: bool = defaults.VERBOSE,
 ):
+    if not text_path:
+        return
+    if verbose:
+        print(f"Saving {defaults.TEXT_SUFFIX} list to {text_path}...")
     lines = [get.path(d, sep=sep) + "\n" for d in load(path).values()]
     if sorted:
         lines.sort()
@@ -41,16 +36,16 @@ def to_text(
 def to_path(
     path: Path,
     data: dict | set,
-    text_path: Path,
+    text_path: Path | None = None,
     text: bool = False,
-    verbose: bool = DEFAULT_VERBOSE
+    verbose: bool = defaults.VERBOSE
 ):
     if verbose:
-        print(f"Saving list to {path}...")
+        print(f"Saving {defaults.SUFFIX} list to {path}...")
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
     if text:
-        to_text(path=path, text_path=text_path)
+        to_text(path=path, text_path=text_path, verbose=verbose)
 
 
 def albums(
@@ -58,16 +53,16 @@ def albums(
     function,
     type1,
     type2,
-    text_path: Path,
     lowerlimit: int | float,
+    text_path: Path | None = None,
     name: str | None = None,
     text: bool = False,
-    verbose: bool = DEFAULT_VERBOSE,
+    verbose: bool = defaults.VERBOSE,
 ):
     if verbose:
         print("Process started:")
-        print(f"- {DEFAULT_SUFFIX.upper()} output: {path.absolute()}")
-        if text:
+        print(f"- {defaults.SUFFIX.upper()} output: {path.absolute()}")
+        if text and text_path:
             print(f"- TXT output: {text_path}")
         print("- Types: ", end="")
         pprint(type1)
@@ -106,10 +101,10 @@ def albums(
 
 def aoty(
     path: Path,
-    text_path: Path,
-    lowerlimit: int = DEFAULT_AOTY_SCORE,
+    text_path: Path | None = None,
+    lowerlimit: int = defaults.AOTY_SCORE,
     text: bool = False,
-    verbose: bool = DEFAULT_VERBOSE,
+    verbose: bool = defaults.VERBOSE,
 ):
     albums(
         path=path,
@@ -123,8 +118,8 @@ def aoty(
             "Soundtrack",
         ),
         type2=1,
-        text_path=text_path,
         lowerlimit=lowerlimit,
+        text_path=text_path,
         name="AOTY",
         text=text,
         verbose=verbose,
@@ -133,10 +128,10 @@ def aoty(
 
 def prog(
     path: Path,
-    text_path: Path,
-    lowerlimit: float = DEFAULT_PROG_SCORE,
+    text_path: Path | None = None,
+    lowerlimit: float = defaults.PROG_SCORE,
     text: bool = False,
-    verbose: bool = DEFAULT_VERBOSE,
+    verbose: bool = defaults.VERBOSE,
 ):
     if verbose:
         print("Generating list of genres...")
@@ -146,8 +141,8 @@ def prog(
         function=dump.progarchives,
         type1=genres,
         type2=(1),
-        text_path=text_path,
         lowerlimit=lowerlimit,
+        text_path=text_path,
         name="Progarchives",
         text=text,
         verbose=verbose,
@@ -157,9 +152,9 @@ def prog(
 def dirs(
     musicdir: Path,
     dirspath: Path,
-    text_path: Path,
+    text_path: Path | None = None,
     text: bool = False,
-    verbose: bool = DEFAULT_VERBOSE,
+    verbose: bool = defaults.VERBOSE,
 ):
     data = dict()
     if verbose:
@@ -194,10 +189,10 @@ def all(
     aotypath: Path,
     progpath: Path,
     dedupdir: Path,
-    text_path: Path,
+    text_path: Path | None = None,
     dedup: bool = True,
     text: bool = False,
-    verbose: bool = DEFAULT_VERBOSE,
+    verbose: bool = defaults.VERBOSE,
 ):
     if verbose:
         print("Merging lists...")
@@ -220,14 +215,14 @@ def duplicates(
     data1: Path,
     data2: Path,
     dedupdir: Path,
-    text_path: Path,
+    text_path: Path | None = None,
     lowerlimit: int | float = 0.6,
     upperlimit: int | float = 1,
-    field: str = DEFAULT_AUTO_FIELD,
+    field: str = defaults.AUTO_FIELD,
     keysep: str = "-",
-    keysuffix: str = DEFAULT_SUFFIX,
+    keysuffix: str = defaults.SUFFIX,
     text: bool = False,
-    verbose: bool = DEFAULT_VERBOSE
+    verbose: bool = defaults.VERBOSE
 ) -> None:
     if verbose:
         print("Deduplicating lists...")
@@ -264,14 +259,14 @@ def differences(
     data2: Path,
     name: str,
     dedupdir: Path,
-    text_path: Path,
-    suffix: str = DEFAULT_SUFFIX,
+    text_path: Path | None = None,
+    suffix: str = defaults.SUFFIX,
     dedup: bool = True,
     text: bool = True,
-    verbose: bool = DEFAULT_VERBOSE,
+    verbose: bool = defaults.VERBOSE,
 ) -> None:
     if verbose:
-        print(f"Writting to {path.name}:")
+        print(f"Writting to {path}:")
     data = dict()
     for a1, a2 in diff(
         data1=data1, data2=data2, dedupdir=dedupdir, dedup=dedup
