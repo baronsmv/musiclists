@@ -15,6 +15,7 @@ KEY_LENGTH = 14
 AUTO_FIELD = "possible"
 DEDUP_FIELD = "verified"
 SUFFIX = "json"
+TEXT_SUFFIX = "txt"
 
 CURRENT_DIR = Path(__file__).parent
 SRC_DIR = CURRENT_DIR.parent
@@ -37,3 +38,10 @@ MERGE_PATH = Path(JSON_DIR / f"merge.{SUFFIX}")
 DIRS_PATH = Path(JSON_DIR / f"dirs.{SUFFIX}")
 WANTED_PATH = Path(JSON_DIR / f"wanted.{SUFFIX}")
 LEFTOVER_PATH = Path(JSON_DIR / f"leftover.{SUFFIX}")
+
+AOTY_TEXT_PATH = Path(LIST_DIR / f"aoty.{TEXT_SUFFIX}")
+PROG_TEXT_PATH = Path(LIST_DIR / f"prog.{TEXT_SUFFIX}")
+MERGE_TEXT_PATH = Path(LIST_DIR / f"merge.{TEXT_SUFFIX}")
+DIRS_TEXT_PATH = Path(LIST_DIR / f"dirs.{TEXT_SUFFIX}")
+WANTED_TEXT_PATH = Path(LIST_DIR / f"wanted.{TEXT_SUFFIX}")
+LEFTOVER_TEXT_PATH = Path(LIST_DIR / f"leftover.{TEXT_SUFFIX}")

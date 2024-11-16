@@ -24,25 +24,24 @@ DEFAULT_DEDUP_FIELD = "verified"
 DEFAULT_SUFFIX = "json"
 
 
-def totext(
+def to_text(
     path: Path,
-    textdir: Path,
+    text_path: Path,
     suffix: str = "txt",
     sep: str = " - ",
     sorted: bool = True
 ):
-    txtPath = Path(Path(textdir) / f"{path.stem}.{suffix}")
     lines = [get.path(d, sep=sep) + "\n" for d in load(path).values()]
     if sorted:
         lines.sort()
-    with open(txtPath, "w", encoding="utf-8") as f:
+    with open(text_path, "w", encoding="utf-8") as f:
         f.writelines(lines)
 
 
-def topath(
+def to_path(
     path: Path,
     data: dict | set,
-    textdir: Path,
+    text_path: Path,
     text: bool = False,
     verbose: bool = DEFAULT_VERBOSE
 ):
@@ -51,7 +50,7 @@ def topath(
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
     if text:
-        totext(path=path, textdir=textdir)
+        to_text(path=path, text_path=text_path)
 
 
 def albums(
@@ -59,7 +58,7 @@ def albums(
     function,
     type1,
     type2,
-    textdir: Path,
+    text_path: Path,
     lowerlimit: int | float,
     name: str | None = None,
     text: bool = False,
@@ -69,7 +68,7 @@ def albums(
         print("Process started:")
         print(f"- {DEFAULT_SUFFIX.upper()} output: {path.absolute()}")
         if text:
-            print(f"- TXT output: {textdir}/{path.stem}.txt")
+            print(f"- TXT output: {text_path}")
         print("- Types: ", end="")
         pprint(type1)
         print("- Types: ", end="")
@@ -98,14 +97,16 @@ def albums(
                 print(f"Elemento repetido:\n{album}")
                 exit(1)
             data.update(album)
-    topath(path=path, data=data, textdir=textdir, text=text, verbose=verbose)
+    to_path(
+        path=path, data=data, text_path=text_path, text=text, verbose=verbose
+    )
     if verbose:
         print("Process completed.")
 
 
 def aoty(
     path: Path,
-    textdir: Path,
+    text_path: Path,
     lowerlimit: int = DEFAULT_AOTY_SCORE,
     text: bool = False,
     verbose: bool = DEFAULT_VERBOSE,
@@ -122,7 +123,7 @@ def aoty(
             "Soundtrack",
         ),
         type2=1,
-        textdir=textdir,
+        text_path=text_path,
         lowerlimit=lowerlimit,
         name="AOTY",
         text=text,
@@ -132,7 +133,7 @@ def aoty(
 
 def prog(
     path: Path,
-    textdir: Path,
+    text_path: Path,
     lowerlimit: float = DEFAULT_PROG_SCORE,
     text: bool = False,
     verbose: bool = DEFAULT_VERBOSE,
@@ -145,7 +146,7 @@ def prog(
         function=dump.progarchives,
         type1=genres,
         type2=(1),
-        textdir=textdir,
+        text_path=text_path,
         lowerlimit=lowerlimit,
         name="Progarchives",
         text=text,
@@ -156,7 +157,7 @@ def prog(
 def dirs(
     musicdir: Path,
     dirspath: Path,
-    textdir: Path,
+    text_path: Path,
     text: bool = False,
     verbose: bool = DEFAULT_VERBOSE,
 ):
@@ -179,10 +180,10 @@ def dirs(
             }
         }
         data.update(album)
-    topath(
+    to_path(
         path=dirspath,
         data=data,
-        textdir=textdir,
+        text_path=text_path,
         text=text,
         verbose=verbose,
     )
@@ -193,14 +194,14 @@ def all(
     aotypath: Path,
     progpath: Path,
     dedupdir: Path,
-    textdir: Path,
+    text_path: Path,
     dedup: bool = True,
     text: bool = False,
     verbose: bool = DEFAULT_VERBOSE,
 ):
     if verbose:
         print("Merging lists...")
-    topath(
+    to_path(
         path=path,
         data=dict(diff(
             data1=Path(aotypath),
@@ -209,7 +210,7 @@ def all(
             dedup=dedup),
         )
         | load(Path(progpath)),
-        textdir=textdir,
+        text_path=text_path,
         text=text,
         verbose=verbose,
     )
@@ -219,7 +220,7 @@ def duplicates(
     data1: Path,
     data2: Path,
     dedupdir: Path,
-    textdir: Path,
+    text_path: Path,
     lowerlimit: int | float = 0.6,
     upperlimit: int | float = 1,
     field: str = DEFAULT_AUTO_FIELD,
@@ -252,7 +253,9 @@ def duplicates(
     for match in data[field]:
         if isinstance(match, list) and len(match) == 1:
             match = match[0]
-    topath(path=path, data=data, textdir=textdir, text=text, verbose=verbose)
+    to_path(
+        path=path, data=data, text_path=text_path, text=text, verbose=verbose
+    )
 
 
 def differences(
@@ -261,7 +264,7 @@ def differences(
     data2: Path,
     name: str,
     dedupdir: Path,
-    textdir: Path,
+    text_path: Path,
     suffix: str = DEFAULT_SUFFIX,
     dedup: bool = True,
     text: bool = True,
@@ -274,4 +277,6 @@ def differences(
         data1=data1, data2=data2, dedupdir=dedupdir, dedup=dedup
     ):
         data[a1] = a2
-    topath(path=path, data=data, textdir=textdir, text=text, verbose=verbose)
+    to_path(
+        path=path, data=data, text_path=text_path, text=text, verbose=verbose
+    )

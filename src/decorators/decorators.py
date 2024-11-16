@@ -3,9 +3,9 @@
 import click
 from click_help_colors import HelpColorsGroup, HelpColorsCommand, version_option
 from functools import wraps
-from pathlib import Path
 from time import time
 
+from src.decorators import path
 from src.defaults import defaults as default
 
 
@@ -28,19 +28,13 @@ def count_time(func):
     return wrapper
 
 
-FILE = click.Path(
-    exists=False, dir_okay=False, writable=True, path_type=Path,
-)
-DIR = click.Path(
-    exists=True, dir_okay=True, path_type=Path,
-)
+def SAVE(name: str, suffix: str, direction: str) -> str:
+    return f"Path to save {name} {suffix} file {direction}."
 
 
-group = click.group(
-    cls=HelpColorsGroup,
-    help_headers_color="yellow",
-    help_options_color="green",
-)
+def LOWER_LIMIT(name: str):
+    return f"Lower limit for {name} score."
+
 
 comm = cli.command(
     cls=HelpColorsCommand,
@@ -64,13 +58,6 @@ text = click.option(
     type=click.BOOL,
     help="Output the list as a text file as well.",
 )
-text_dir = click.option(
-    "--text-dir",
-    type=DIR,
-    default=default.TXT_DIR,
-    show_default=True,
-    help="Directory of text file.",
-)
 deduplic = click.option(
     "-d",
     "--dedup/--no-dedup",
@@ -80,47 +67,19 @@ deduplic = click.option(
     show_default=True,
     help="Deduplicate the output based on its deduplicates file.",
 )
-dedup_dir = click.option(
-    "--dedup-dir",
-    type=DIR,
-    default=default.DEDUP_DIR,
-    show_default=True,
-    help="Directory of deduplicates files.",
-)
-aoty_path = click.option(
-    "--aoty-path",
-    type=FILE,
-    default=default.AOTY_PATH,
-    show_default=True,
-    help="Path to save AOTY list.",
-)
 aoty_lower = click.option(
     "--aoty-lower",
     type=click.INT,
     default=default.AOTY_SCORE,
     show_default=True,
-    help="Lower limit for AOTY score.",
-)
-prog_path = click.option(
-    "--prog-path",
-    type=FILE,
-    default=default.PROG_PATH,
-    show_default=True,
-    help="Path to save Progarchives list.",
+    help=LOWER_LIMIT("AOTY"),
 )
 prog_lower = click.option(
     "--prog-lower",
     type=click.FLOAT,
     default=default.PROG_SCORE,
     show_default=True,
-    help="Lower limit for Progarchives score.",
-)
-merge_path = click.option(
-    "--merge-path",
-    type=FILE,
-    default=default.MERGE_PATH,
-    show_default=True,
-    help="Path to save merged list.",
+    help=LOWER_LIMIT("Progarchives"),
 )
 re_download = click.option(
     "-r",
@@ -131,38 +90,9 @@ re_download = click.option(
     show_default=True,
     help="Re-download lists before merge.",
 )
-music_path = click.argument(
-    "music_path",
-    type=DIR,
-)
-dirs_path = click.option(
-    "--dirs-path",
-    type=FILE,
-    default=default.DIRS_PATH,
-    show_default=True,
-    help="Path to save list.",
-)
-wanted_path = click.option(
-    "--wanted-path",
-    type=FILE,
-    default=default.WANTED_PATH,
-    show_default=True,
-    help="Path to save list.",
-)
-leftover_path = click.option(
-    "--left-path",
-    type=FILE,
-    default=default.LEFTOVER_PATH,
-    show_default=True,
-    help="Path to save list.",
-)
-destination_path = click.argument(
-    "destination_path",
-    type=DIR,
-)
 
 
-def add(func, decorators):
+def add(func, decorators: tuple):
     for dec in decorators:
         func = dec(func)
     return func
@@ -172,17 +102,29 @@ def new_command(func):
     return add(func, (comm, verbose, version))
 
 
-def new_list(func):
-    return add(func, (comm, text, text_dir, verbose, version))
-
-
 def aoty(func):
-    return add(func, (aoty_path, aoty_lower))
+    return add(func, (path.aoty(text=True), text, path.aoty, aoty_lower))
 
 
 def prog(func):
-    return add(func, (prog_path, prog_lower))
+    return add(func, (path.prog(text=True), text, path.prog, prog_lower))
 
 
 def dedup(func):
-    return add(func, (dedup_dir, deduplic))
+    return add(func, (path.dedup, deduplic))
+
+
+def merge(func):
+    return add(func, (path.merge(text=True), text, path.merge, re_download))
+
+
+def dirs(func):
+    return add(func, (path.dirs(text=True), text, path.dirs))
+
+
+def wanted(func):
+    return add(func, (path.wanted(text=True), text, path.leftover))
+
+
+def leftover(func):
+    return add(func, (path.leftover(text=True), text, path.leftover))
