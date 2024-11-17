@@ -15,7 +15,8 @@ def copy(
     verbose: bool = defaults.VERBOSE,
 ) -> None:
     """
-    Copy the directories registered in a list, from one directory to another.
+    Copy recursively the directories registered in a list, from one directory
+    to another.
 
     The intended use is to copy the top albums (found in the ``wanted`` list)
     from a big music library to a more selective one.
@@ -34,12 +35,17 @@ def copy(
             Show information about current processes.
     """
     if verbose:
-        print(f"Moving files in {data.name}:")
+        print(f"""
+              Moving directories registered in {data.name}
+              Origin: {origin}
+              Destination: {destination}
+              """)
     for d in load(data):
+        path = get.path(d)
         if verbose:
-            print(f"Moving {d}...")
-        fromPath = Path(origin / get.path(d))
-        toPath = Path(destination / get.path(d))
+            print(f"Moving {path}.")
+        fromPath = Path(origin / path)
+        toPath = Path(destination / path)
         cp(fromPath, toPath)
     if verbose:
-        print("Operation completed.")
+        print("Process completed.")
