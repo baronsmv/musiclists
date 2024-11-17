@@ -4,16 +4,15 @@ from pathlib import Path
 from shutil import copy as cp
 
 from src import get
+from src.defaults import defaults
 from src.load import frompath as load
-
-DEFAULT_VERBOSE = False
 
 
 def copy(
     data: Path,
     origin: Path,
     destination: Path,
-    verbose: bool = DEFAULT_VERBOSE,
+    verbose: bool = defaults.VERBOSE,
 ) -> None:
     """
     Copy the directories registered in a list, from one directory to another.
