@@ -14,6 +14,7 @@ def aoty(
     aoty_text_path: Path,
     text: bool,
     verbose: bool,
+    debug: bool,
 ):
     """
     Downloads list with the top albums by users from albumoftheyear.org
@@ -29,6 +30,7 @@ def aoty(
         lowerlimit=aoty_lower,
         text=text,
         verbose=verbose,
+        debug=debug,
     )
 
 
@@ -39,6 +41,7 @@ def prog(
     prog_text_path: Path,
     text: bool,
     verbose: bool,
+    debug: bool,
 ):
     """
     Downloads list with the top albums by users from progarchives.com
@@ -54,6 +57,7 @@ def prog(
         lowerlimit=prog_lower,
         text=text,
         verbose=verbose,
+        debug=debug,
     )
 
 
@@ -70,6 +74,7 @@ def merge(
     aoty_path: Path,
     prog_path: Path,
     verbose: bool,
+    debug: bool,
 ):
     """
     Merges lists into one.
@@ -80,6 +85,7 @@ def merge(
             lowerlimit=aoty_lower,
             text=False,
             verbose=verbose,
+            debug=debug,
         )
         print()
     if re_download == "all" or re_download == "prog":
@@ -88,6 +94,7 @@ def merge(
             lowerlimit=prog_lower,
             text=False,
             verbose=verbose,
+            debug=debug,
         )
         print()
     write.all(
@@ -99,11 +106,19 @@ def merge(
         dedup=dedup,
         text=text,
         verbose=verbose,
+        debug=debug,
     )
 
 
 @de.dirs
-def dirs(music_path, dirs_path, text, dirs_text_path, verbose):
+def dirs(
+    music_path: Path,
+    dirs_path: Path,
+    text: bool,
+    dirs_text_path: Path,
+    verbose: bool,
+    debug: bool,
+):
     """
     """
     write.dirs(
@@ -112,6 +127,7 @@ def dirs(music_path, dirs_path, text, dirs_text_path, verbose):
         text_path=dirs_text_path,
         text=text,
         verbose=verbose,
+        debug=debug,
     )
 
 
@@ -125,6 +141,7 @@ def wanted(
     merge_path: Path,
     dirs_path: Path,
     verbose: bool,
+    debug: bool,
 ):
     """
     """
@@ -138,6 +155,7 @@ def wanted(
         dedupdir=dedup_path,
         text=text,
         verbose=verbose,
+        debug=debug,
     )
 
 
@@ -151,6 +169,7 @@ def leftover(
     merge_path: Path,
     text: bool,
     verbose: bool,
+    debug: bool,
 ):
     """
     """
@@ -164,6 +183,7 @@ def leftover(
         dedupdir=dedup_path,
         text=text,
         verbose=verbose,
+        debug=debug,
     )
 
 
@@ -173,14 +193,16 @@ def copy(
     destination_path: Path,
     wanted_path: Path,
     verbose: bool,
+    debug: bool,
 ):
     """
     """
     cp(
-        origin=music_path,
+        source=music_path,
         destination=destination_path,
         data=wanted_path,
         verbose=verbose,
+        debug=debug,
     )
 
 
