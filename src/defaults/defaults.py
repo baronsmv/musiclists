@@ -6,6 +6,7 @@ VERSION = "0.1"
 DL_CHOICES = ("all", "aoty", "prog", "none")
 
 VERBOSE = False
+DEBUG = False
 DEDUP = True
 
 AOTY_SCORE = 83

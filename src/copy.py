@@ -10,41 +10,45 @@ from src.load import frompath as load
 
 def copy(
     data: Path,
-    origin: Path,
+    source: Path,
     destination: Path,
     verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ) -> None:
     """
-    Copy recursively the directories registered in a list, from one directory
-    to another.
+    Recursively copy directories listed in a JSON file from one directory to
+    another.
 
-    The intended use is to copy the top albums (found in the ``wanted`` list)
-    from a big music library to a more selective one.
+    The primary use case is to copy selected albums (from the ``wanted`` list)
+    from a large music library to a more curated or selective library.
 
     Parameters
     ----------
         data:
             Path to the JSON file, which contains a dictionary of album
             objects, each with at least the fields: artist, title, and year.
-        origin:
-            Path to the directory containing individual album directories,
-            each representing an album from ``data`` objects.
+        source:
+            Path to the source directory containing the albums.
         destination:
-            Path where the directories from ``origin`` will be copied to.
+            Path to the target directory where albums will be copied.
         verbose:
-            Show information about current processes.
+            Show detailed information about the copy process, such as the
+            directories being copied.
+        debug:
+            Enable debug-level logging for troubleshooting, showing additional
+            information for debugging purposes.
     """
     if verbose:
         print(f"""
               Moving directories registered in {data.name}
-              Origin: {origin}
+              Origin: {source}
               Destination: {destination}
               """)
     for d in load(data):
         path = get.path(d)
         if verbose:
             print(f"Moving {path}.")
-        fromPath = Path(origin / path)
+        fromPath = Path(source / path)
         toPath = Path(destination / path)
         cp(fromPath, toPath)
     if verbose:

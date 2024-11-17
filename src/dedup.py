@@ -13,6 +13,7 @@ def dedup(
     upperlimit: int | float = 1,
 ) -> Iterator[dict[str, str]]:
     """
+    Compare each of the objects
     """
     for d1 in data1.values():
         for d2 in data2.values():
