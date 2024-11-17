@@ -10,11 +10,30 @@ DEFAULT_VERBOSE = False
 
 
 def copy(
-    destination: Path,
-    origin: Path,
     data: Path,
+    origin: Path,
+    destination: Path,
     verbose: bool = DEFAULT_VERBOSE,
 ) -> None:
+    """
+    Copy the directories registered in a list, from one directory to another.
+
+    The intended use is to copy the top albums (found in the ``wanted`` list)
+    from a big music library to a more selective one.
+
+    Parameters
+    ----------
+        data:
+            Path of the json file, which contains name/value pairs with
+            objects with, at least, artist, title and year.
+        origin:
+            Directory that must store the albums corresponding to the data
+            objects.
+        destination:
+            Directory the files will be copied to.
+        verbose:
+            Show information about current processes.
+    """
     if verbose:
         print(f"Moving files in {data.name}:")
     for d in load(data):
