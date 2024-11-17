@@ -5,6 +5,9 @@ VERSION = "0.1"
 
 DL_CHOICES = ("all", "aoty", "prog", "none")
 
+HEADERS_COLOR = "yellow"
+OPTIONS_COLOR = "green"
+
 VERBOSE = False
 DEBUG = False
 

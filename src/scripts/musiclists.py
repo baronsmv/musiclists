@@ -9,30 +9,33 @@ from src.copy import copy as cp
 
 @de.aoty
 def aoty(
-    aoty_min_score: int,
-    aoty_path: Path,
-    aoty_text_path: Path,
+    min_score: int,
+    path: Path,
+    text_path: Path,
     text: bool,
     verbose: bool,
     debug: bool,
 ):
     """
-    Download a list of top albums from AlbumOfTheYear.org (AOTY) based on user
-    ratings.
+    Download a list of top albums from AlbumOfTheYear.org (AOTY).
 
-    The function downloads albums data whose scores meet the criteria set by
-    `aoty_lower`, and saves them in the specified `aoty_path` in JSON format.
-
-    The albums are downloaded in order of their score, and the process will
-    stop as soon as an album with a score lower than `aoty_lower` is found.
+    This function downloads albums data whose scores (based on user ratings)
+    meet the criteria set by `min_score`, and saves them in the specified
+    `path` in JSON format.
 
     Optionally, if `text` is enabled, the album data is also saved in a text
-    format in the directory specified by `aoty_text_path`.
+    format in the directory specified by `text_path`.
+
+    The albums are downloaded in order of their score, and the process will
+    stop as soon as an album with a score lower than `min_score` is found.
+
+    The function provides detailed logging if `verbose` is enabled, and
+    additional debugging information if `debug` is turned on.
     """
     write.aoty(
-        path=aoty_path,
-        text_path=aoty_text_path,
-        lowerlimit=aoty_min_score,
+        path=path,
+        text_path=text_path,
+        lowerlimit=min_score,
         text=text,
         verbose=verbose,
         debug=debug,
@@ -41,25 +44,33 @@ def aoty(
 
 @de.prog
 def prog(
-    prog_min_score: float,
-    prog_path: Path,
-    prog_text_path: Path,
+    min_score: float,
+    path: Path,
+    text_path: Path,
     text: bool,
     verbose: bool,
     debug: bool,
 ):
     """
-    Downloads list with the top albums by users from progarchives.com
+    Download a list of top albums from ProgArchives.com.
 
-    It saves them in a list in <PROG-PATH> (in JSON format), and optionally in
-    directory <TEXTDIR> (in TXT format) if the <TEXT> if enabled.
+    This function downloads albums data whose scores (based on user ratings)
+    meet the criteria set by `min_score`, and saves them in the specified
+    `path` in JSON format.
 
-    It continues until a score lower than <LOWERLIMIT> is reached.
+    Optionally, if `text` is enabled, the album data is also saved in a text
+    format in the directory specified by `text_path`.
+
+    The albums are downloaded in order of their score, and the process will
+    stop as soon as an album with a score lower than `min_score` is found.
+
+    The function provides detailed logging if `verbose` is enabled, and
+    additional debugging information if `debug` is turned on.
     """
     write.prog(
-        path=prog_path,
-        text_path=prog_text_path,
-        lowerlimit=prog_min_score,
+        path=path,
+        text_path=text_path,
+        lowerlimit=min_score,
         text=text,
         verbose=verbose,
         debug=debug,
@@ -69,11 +80,11 @@ def prog(
 @de.merge
 def merge(
     re_download: str,
+    path: Path,
+    text: bool,
+    text_path: Path,
     dedup: bool,
     dedup_path: Path,
-    merge_path: Path,
-    text: bool,
-    merge_text_path: Path,
     aoty_min_score: int,
     prog_min_score: float,
     aoty_path: Path,
@@ -82,7 +93,27 @@ def merge(
     debug: bool,
 ):
     """
-    Merges lists into one.
+    Merge downloaded lists into one.
+
+    This function combines top album data from all sources, dealing with
+    duplicates by their ID, and saves the result in the specified `path` in
+    JSON format.
+
+    If `re_download` is specified, the albums in it will be downloaded again,
+    otherwise, existing data will be reused.
+
+    If `dedup` is enabled, besides the standard deduplication by ID, any
+    duplicate albums found between the two sources registered in `dedup-path`
+    will be removed as well.
+
+    Optionally, if `text` is enabled, the album data is also saved in a text
+    format in the directory specified by `text_path`.
+
+    The process stops once all albums from both sources are merged, and albums
+    that meet the minimum score criteria are included.
+
+    The function provides detailed logging if `verbose` is enabled, and
+    additional debugging information if `debug` is turned on.
     """
     if re_download == "all" or re_download == "aoty":
         write.aoty(
@@ -103,8 +134,8 @@ def merge(
         )
         print()
     write.all(
-        path=merge_path,
-        text_path=merge_text_path,
+        path=path,
+        text_path=text_path,
         aotypath=aoty_path,
         progpath=prog_path,
         dedupdir=dedup_path,
@@ -117,18 +148,30 @@ def merge(
 
 @de.dirs
 def dirs(
-    music_path: Path,
-    dirs_path: Path,
+    source_path: Path,
+    path: Path,
     text: bool,
-    dirs_text_path: Path,
+    text_path: Path,
     verbose: bool,
     debug: bool,
 ):
-    """ """
+    """
+    Read album data from a directory and write it to a JSON file.
+
+    This function scans the `source_path` directory, where albums are stored,
+    and extracts their artist, name and year. The album data is then written
+    to a JSON file in the `path` directory.
+
+    Optionally, if `text` is enabled, the album data will also be saved in a
+    text format in the directory specified by `text_path`.
+
+    The function provides detailed logging if `verbose` is enabled, and
+    additional debugging information if `debug` is turned on.
+    """
     write.dirs(
-        musicdir=music_path,
-        dirspath=dirs_path,
-        text_path=dirs_text_path,
+        musicdir=source_path,
+        dirspath=path,
+        text_path=text_path,
         text=text,
         verbose=verbose,
         debug=debug,
@@ -137,20 +180,43 @@ def dirs(
 
 @de.wanted
 def wanted(
+    path: Path,
+    text: bool,
+    text_path: Path,
     dedup: bool,
     dedup_path: Path,
-    wanted_path: Path,
-    text: bool,
-    wanted_text_path: Path,
     merge_path: Path,
     dirs_path: Path,
     verbose: bool,
     debug: bool,
 ):
-    """ """
+    """
+    Identify the wanted but missing albums.
+
+    This function takes two lists of albums:
+
+        `merge_path` generated by the `merge` function (which combines albums
+        from multiple sources).
+
+        `dirs_path` generated by the `dirs` function (which stores albums
+        from a directory)
+
+    It compares these lists to identify which albums are `wanted` — i.e., the
+    albums that are in the `merge` list but are missing from the `dirs` list.
+    The resulting `wanted` albums will be saved in the `path` directory.
+
+    If `dedup` is enabled, any duplicate albums found between the two lists
+    registered in `dedup-path` will be ommited.
+
+    Optionally, if `text` is enabled, the `wanted` albums will also be saved in
+    text format in the directory specified by `text_path`.
+
+    The function provides detailed logging if `verbose` is enabled, and
+    additional debugging information if `debug` is turned on.
+    """
     write.differences(
-        path=wanted_path,
-        text_path=wanted_text_path,
+        path=path,
+        text_path=text_path,
         data1=merge_path,
         data2=dirs_path,
         name="wanted",
@@ -164,20 +230,43 @@ def wanted(
 
 @de.leftover
 def leftover(
+    path: Path,
+    text: bool,
+    text_path: Path,
     dedup: bool,
     dedup_path: Path,
-    leftover_path: Path,
-    leftover_text_path: Path,
     dirs_path: Path,
     merge_path: Path,
-    text: bool,
     verbose: bool,
     debug: bool,
 ):
-    """ """
+    """
+    Identify the owned but unwanted albums.
+
+    This function takes two lists of albums:
+
+        `dirs_path` generated by the `dirs` function (which stores albums
+        from a directory)
+
+        `merge_path` generated by the `merge` function (which combines albums
+        from multiple sources).
+
+    It compares these lists to identify which albums are `leftover` — i.e., the
+    albums that are in the `dirs` list but are missing from the `merge` list.
+    The resulting `leftover` albums will be saved in the `path` directory.
+
+    If `dedup` is enabled, any duplicate albums found between the two lists
+    registered in `dedup-path` will be ommited.
+
+    Optionally, if `text` is enabled, the `leftover` albums will also be saved
+    in text format in the directory specified by `text_path`.
+
+    The function provides detailed logging if `verbose` is enabled, and
+    additional debugging information if `debug` is turned on.
+    """
     write.differences(
-        path=leftover_path,
-        text_path=leftover_text_path,
+        path=path,
+        text_path=text_path,
         data1=dirs_path,
         data2=merge_path,
         name="left",
@@ -191,15 +280,27 @@ def leftover(
 
 @de.copy
 def copy(
-    music_path: Path,
+    source_path: Path,
     destination_path: Path,
     wanted_path: Path,
     verbose: bool,
     debug: bool,
 ):
-    """ """
+    """
+    Copy wanted albums.
+
+    This function copies directories (representing albums) from the
+    `source_path` directory to the `destination_path` directory.
+
+    It only copies directories that are listed in the `wanted_path` list,
+    ensuring that only the `wanted` albums are moved.
+
+    The albums are copied one by one, and the function provides detailed
+    output if `verbose` is enabled, with additional debugging information
+    available if `debug` is turned on.
+    """
     cp(
-        source=music_path,
+        source=source_path,
         destination=destination_path,
         data=wanted_path,
         verbose=verbose,

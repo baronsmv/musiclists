@@ -33,7 +33,7 @@ def HELP(
     name: str, suffix: str, direction: str, extra: str | None = None
 ) -> str:
     return f"""
-    File path where the list of albums from {name.capitalize()} will be
+    File path where the list of albums from `{name}` will be
     {direction}, in {suffix.upper()} format""" + (
         f" ({extra})." if extra else "."
     )
@@ -83,8 +83,8 @@ def PATH(
         )
 
 
-music = click.argument(
-    "music_path",
+source = click.argument(
+    "source_path",
     type=EXISTING_DIR,
 )
 destination = click.argument(

@@ -1,21 +1,12 @@
 #!/usr/bin/env python3
 
 import click
-from click_help_colors import HelpColorsGroup, HelpColorsCommand, version_option
+from click_help_colors import HelpColorsCommand, version_option
 from functools import wraps
 from time import time
 
-from src.decorators import path, score
+from src.decorators import groups, path, score
 from src.defaults import defaults
-
-
-@click.group(
-    cls=HelpColorsGroup,
-    help_headers_color="yellow",
-    help_options_color="green",
-)
-def cli() -> None:
-    pass
 
 
 def count_time(func):
@@ -28,13 +19,20 @@ def count_time(func):
     return wrapper
 
 
+def subcomm(supercomm):
+    return supercomm.command(
+        cls=HelpColorsCommand,
+    )
+
+
+cli = groups.cli
 comm = cli.command(
     cls=HelpColorsCommand,
 )
 version = version_option(
     version=defaults.VERSION,
     prog_name=defaults.PROG_NAME,
-    message_color="green"
+    message_color="green",
 )
 verbose = click.option(
     "-v",
@@ -88,29 +86,43 @@ def add(func, decs: tuple):
     return func
 
 
-def command(func, decs: tuple):
-    return add(func, (count_time, version, debug, verbose, comm) + decs)
+def command(func, decs: tuple, supercomm=None):
+    return add(
+        func,
+        (
+            count_time,
+            version,
+            debug,
+            verbose,
+            subcomm(supercomm) if supercomm else comm,
+        )
+        + decs,
+    )
 
 
 def aoty(func):
     return command(
-        func, (
+        func,
+        (
             score.aoty(letter="m", no_name_option=True),
             path.aoty(letter="p", no_name_option=True),
             text,
-            path.aoty(text=True, no_name_option=True)
-        )
+            path.aoty(text=True, no_name_option=True),
+        ),
+        groups.download,
     )
 
 
 def prog(func):
     return command(
-        func, (
+        func,
+        (
             score.prog(letter="m", no_name_option=True),
             path.prog(letter="p", no_name_option=True),
             text,
-            path.prog(text=True, no_name_option=True)
-        )
+            path.prog(text=True, no_name_option=True),
+        ),
+        groups.download,
     )
 
 
@@ -120,7 +132,8 @@ def dedup(func):
 
 def merge(func):
     return command(
-        func, (
+        func,
+        (
             re_download,
             dedup,
             path.merge(letter="p", no_name_option=True),
@@ -130,47 +143,47 @@ def merge(func):
             score.prog(),
             path.aoty(),
             path.prog(),
-        )
+        ),
     )
 
 
 def dirs(func):
     return command(
-        func, (path.music, path.dirs(letter="p"), text, path.dirs(text=True))
+        func, (path.source, path.dirs(letter="p"), text, path.dirs(text=True))
     )
 
 
 def wanted(func):
     return command(
-        func, (
-            dedup,
+        func,
+        (
             path.wanted(letter="p", no_name_option=True),
             text,
             path.wanted(text=True, no_name_option=True),
+            dedup,
             path.merge(read=True),
-            path.dirs(read=True)
-        )
+            path.dirs(read=True),
+        ),
+        groups.identify
     )
 
 
 def leftover(func):
     return command(
-        func, (
-            dedup,
+        func,
+        (
             path.leftover(letter="p", no_name_option=True),
             text,
             path.leftover(text=True, no_name_option=True),
+            dedup,
             path.dirs(read=True),
-            path.merge(read=True)
-        )
+            path.merge(read=True),
+        ),
+        groups.identify
     )
 
 
 def copy(func):
     return command(
-        func, (
-            path.music,
-            path.destination,
-            path.wanted(read=True)
-        )
+        func, (path.source, path.destination, path.wanted(read=True))
     )
