@@ -102,7 +102,7 @@ def albums(
 def aoty(
     path: Path,
     text_path: Path | None = None,
-    lowerlimit: int = defaults.AOTY_SCORE,
+    lowerlimit: int = defaults.AOTY_MIN_SCORE,
     text: bool = False,
     verbose: bool = defaults.VERBOSE,
 ):
@@ -129,7 +129,7 @@ def aoty(
 def prog(
     path: Path,
     text_path: Path | None = None,
-    lowerlimit: float = defaults.PROG_SCORE,
+    lowerlimit: float = defaults.PROG_MIN_SCORE,
     text: bool = False,
     verbose: bool = defaults.VERBOSE,
 ):

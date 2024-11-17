@@ -6,21 +6,37 @@ from pathlib import Path
 from src.defaults import defaults as default
 
 EXISTING_DIR = click.Path(
-    exists=True, dir_okay=True, path_type=Path,
+    exists=True,
+    dir_okay=True,
+    path_type=Path,
 )
 NEW_DIR = click.Path(
-    exists=False, dir_okay=True, path_type=Path,
+    exists=False,
+    dir_okay=True,
+    path_type=Path,
 )
 FILE_TO = click.Path(
-    exists=False, dir_okay=False, writable=True, path_type=Path,
+    exists=False,
+    dir_okay=False,
+    writable=True,
+    path_type=Path,
 )
 FILE_FROM = click.Path(
-    exists=True, dir_okay=False, readable=True, path_type=Path,
+    exists=True,
+    dir_okay=False,
+    readable=True,
+    path_type=Path,
 )
 
 
-def SAVE(name: str, suffix: str, direction: str) -> str:
-    return f"Path to save {name} {suffix} file {direction}."
+def HELP(
+    name: str, suffix: str, direction: str, extra: str | None = None
+) -> str:
+    return f"""
+    File path where the list of albums from {name.capitalize()} will be
+    {direction}, in {suffix.upper()} format""" + (
+        f" ({extra})." if extra else "."
+    )
 
 
 def PATH(
@@ -28,23 +44,30 @@ def PATH(
     default_path: Path,
     default_text_path: Path,
     letter: str | None = None,
-    flag: str | None = None,
+    option: str | None = None,
     text: bool = False,
     read: bool = False,
+    help_message: str | None = None,
+    no_name_option: bool = False,
 ):
-    if not flag:
-        flag = name.lower()[:4]
-    flag = f"--{flag}" + ("-text" if text else "") + "-path"
+    if no_name_option:
+        option = str()
+    else:
+        option = (option if option else name[:4]).lower() + "-"
+    option = "--" + option + ("text-" if text else "") + "path"
     file_type = FILE_FROM if read else FILE_TO
     default_path = default_text_path if text else default_path
-    direction = "from" if read else "to"
-    help_message = SAVE(
-        name, default.TEXT_SUFFIX if text else default.SUFFIX, direction
+    direction = "loaded from" if read else "saved"
+    help_message = help_message if help_message else HELP(
+        name=name,
+        suffix=default.TEXT_SUFFIX if text else default.SUFFIX,
+        direction=direction,
+        extra="if `text` is enabled" if text else None,
     )
     if letter:
         return click.option(
             "-" + letter,
-            flag,
+            option,
             type=file_type,
             default=default_path,
             show_default=True,
@@ -52,7 +75,7 @@ def PATH(
         )
     else:
         return click.option(
-            flag,
+            option,
             type=file_type,
             default=default_path,
             show_default=True,
@@ -77,72 +100,145 @@ dedup = click.option(
 )
 
 
-def aoty(letter: str | None = None, text: bool = False, read: bool = False):
+def aoty(
+    name: str = "AOTY",
+    default_path: Path = default.AOTY_PATH,
+    default_text_path: Path = default.AOTY_TEXT_PATH,
+    option: str | None = None,
+    letter: str | None = None,
+    text: bool = False,
+    read: bool = False,
+    help_message: str | None = None,
+    no_name_option: bool = False,
+):
     return PATH(
-        name="AOTY",
-        default_path=default.AOTY_PATH,
-        default_text_path=default.AOTY_TEXT_PATH,
+        name=name,
+        default_path=default_path,
+        default_text_path=default_text_path,
+        option=option,
         letter=letter,
         text=text,
         read=read,
+        help_message=help_message,
+        no_name_option=no_name_option,
     )
 
 
-def prog(letter: str | None = None, text: bool = False, read: bool = False):
+def prog(
+    name: str = "Progarchives",
+    default_path: Path = default.PROG_PATH,
+    default_text_path: Path = default.PROG_TEXT_PATH,
+    option: str | None = None,
+    letter: str | None = None,
+    text: bool = False,
+    read: bool = False,
+    help_message: str | None = None,
+    no_name_option: bool = False,
+):
     return PATH(
-        name="Progarchives",
-        default_path=default.PROG_PATH,
-        default_text_path=default.PROG_TEXT_PATH,
+        name=name,
+        default_path=default_path,
+        default_text_path=default_text_path,
+        option=option,
         letter=letter,
         text=text,
         read=read,
+        help_message=help_message,
+        no_name_option=no_name_option,
     )
 
 
-def merge(letter: str | None = None, text: bool = False, read: bool = False):
+def merge(
+    name: str = "merge",
+    default_path: Path = default.MERGE_PATH,
+    default_text_path: Path = default.MERGE_TEXT_PATH,
+    option: str | None = "merge",
+    letter: str | None = None,
+    text: bool = False,
+    read: bool = False,
+    help_message: str | None = None,
+    no_name_option: bool = False,
+):
     return PATH(
-        name="merge",
-        default_path=default.MERGE_PATH,
-        default_text_path=default.MERGE_TEXT_PATH,
-        flag="merge",
+        name=name,
+        default_path=default_path,
+        default_text_path=default_text_path,
+        option=option,
         letter=letter,
         text=text,
         read=read,
+        help_message=help_message,
+        no_name_option=no_name_option,
     )
 
 
-def dirs(letter: str | None = None, text: bool = False, read: bool = False):
+def dirs(
+    name: str = "directories",
+    default_path: Path = default.DIRS_PATH,
+    default_text_path: Path = default.DIRS_TEXT_PATH,
+    option: str | None = "dirs",
+    letter: str | None = None,
+    text: bool = False,
+    read: bool = False,
+    help_message: str | None = None,
+    no_name_option: bool = False,
+):
     return PATH(
-        name="directories",
-        default_path=default.DIRS_PATH,
-        default_text_path=default.DIRS_TEXT_PATH,
-        flag="dirs",
-        letter=letter,
-        text=text, read=read,
-    )
-
-
-def wanted(letter: str | None = None, text: bool = False, read: bool = False):
-    return PATH(
-        name="wanted",
-        default_path=default.WANTED_PATH,
-        default_text_path=default.WANTED_TEXT_PATH,
-        flag="wanted",
+        name=name,
+        default_path=default_path,
+        default_text_path=default_text_path,
+        option=option,
         letter=letter,
         text=text,
         read=read,
+        help_message=help_message,
+        no_name_option=no_name_option,
+    )
+
+
+def wanted(
+    name: str = "wanted",
+    default_path: Path = default.WANTED_PATH,
+    default_text_path: Path = default.WANTED_TEXT_PATH,
+    option: str | None = "wanted",
+    letter: str | None = None,
+    text: bool = False,
+    read: bool = False,
+    help_message: str | None = None,
+    no_name_option: bool = False,
+):
+    return PATH(
+        name=name,
+        default_path=default_path,
+        default_text_path=default_text_path,
+        option=option,
+        letter=letter,
+        text=text,
+        read=read,
+        help_message=help_message,
+        no_name_option=no_name_option,
     )
 
 
 def leftover(
-    letter: str | None = None, text: bool = False, read: bool = False
+    name: str = "leftover",
+    default_path: Path = default.LEFTOVER_PATH,
+    default_text_path=default.LEFTOVER_TEXT_PATH,
+    option: str | None = "leftover",
+    letter: str | None = None,
+    text: bool = False,
+    read: bool = False,
+    help_message: str | None = None,
+    no_name_option: bool = False,
 ):
     return PATH(
-        name="left over",
-        default_path=default.LEFTOVER_PATH,
-        default_text_path=default.LEFTOVER_TEXT_PATH,
-        flag="leftover",
+        name=name,
+        default_path=default_path,
+        default_text_path=default_text_path,
+        option=option,
         letter=letter,
         text=text,
         read=read,
+        help_message=help_message,
+        no_name_option=no_name_option,
     )

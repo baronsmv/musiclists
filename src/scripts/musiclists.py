@@ -9,7 +9,7 @@ from src.copy import copy as cp
 
 @de.aoty
 def aoty(
-    aoty_lower: int,
+    aoty_min_score: int,
     aoty_path: Path,
     aoty_text_path: Path,
     text: bool,
@@ -17,17 +17,22 @@ def aoty(
     debug: bool,
 ):
     """
-    Downloads list with the top albums by users from albumoftheyear.org
+    Download a list of top albums from AlbumOfTheYear.org (AOTY) based on user
+    ratings.
 
-    It saves them in a list in <AOTY-PATH> (in JSON format), and optionally in
-    directory <TEXTDIR> (in TXT format) if the <TEXT> if enabled.
+    The function downloads albums data whose scores meet the criteria set by
+    `aoty_lower`, and saves them in the specified `aoty_path` in JSON format.
 
-    It continues until a score lower than <LOWERLIMIT> is reached.
+    The albums are downloaded in order of their score, and the process will
+    stop as soon as an album with a score lower than `aoty_lower` is found.
+
+    Optionally, if `text` is enabled, the album data is also saved in a text
+    format in the directory specified by `aoty_text_path`.
     """
     write.aoty(
         path=aoty_path,
         text_path=aoty_text_path,
-        lowerlimit=aoty_lower,
+        lowerlimit=aoty_min_score,
         text=text,
         verbose=verbose,
         debug=debug,
@@ -36,7 +41,7 @@ def aoty(
 
 @de.prog
 def prog(
-    prog_lower: float,
+    prog_min_score: float,
     prog_path: Path,
     prog_text_path: Path,
     text: bool,
@@ -54,7 +59,7 @@ def prog(
     write.prog(
         path=prog_path,
         text_path=prog_text_path,
-        lowerlimit=prog_lower,
+        lowerlimit=prog_min_score,
         text=text,
         verbose=verbose,
         debug=debug,
@@ -69,8 +74,8 @@ def merge(
     merge_path: Path,
     text: bool,
     merge_text_path: Path,
-    aoty_lower: int,
-    prog_lower: float,
+    aoty_min_score: int,
+    prog_min_score: float,
     aoty_path: Path,
     prog_path: Path,
     verbose: bool,
@@ -82,7 +87,7 @@ def merge(
     if re_download == "all" or re_download == "aoty":
         write.aoty(
             path=aoty_path,
-            lowerlimit=aoty_lower,
+            lowerlimit=aoty_min_score,
             text=False,
             verbose=verbose,
             debug=debug,
@@ -91,7 +96,7 @@ def merge(
     if re_download == "all" or re_download == "prog":
         write.prog(
             path=prog_path,
-            lowerlimit=prog_lower,
+            lowerlimit=prog_min_score,
             text=False,
             verbose=verbose,
             debug=debug,
@@ -119,8 +124,7 @@ def dirs(
     verbose: bool,
     debug: bool,
 ):
-    """
-    """
+    """ """
     write.dirs(
         musicdir=music_path,
         dirspath=dirs_path,
@@ -143,8 +147,7 @@ def wanted(
     verbose: bool,
     debug: bool,
 ):
-    """
-    """
+    """ """
     write.differences(
         path=wanted_path,
         text_path=wanted_text_path,
@@ -171,8 +174,7 @@ def leftover(
     verbose: bool,
     debug: bool,
 ):
-    """
-    """
+    """ """
     write.differences(
         path=leftover_path,
         text_path=leftover_text_path,
@@ -195,8 +197,7 @@ def copy(
     verbose: bool,
     debug: bool,
 ):
-    """
-    """
+    """ """
     cp(
         source=music_path,
         destination=destination_path,

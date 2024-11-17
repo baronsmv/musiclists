@@ -5,7 +5,7 @@ from click_help_colors import HelpColorsGroup, HelpColorsCommand, version_option
 from functools import wraps
 from time import time
 
-from src.decorators import path
+from src.decorators import path, score
 from src.defaults import defaults
 
 
@@ -26,10 +26,6 @@ def count_time(func):
         print(f"Program concluded in {round(time() - start, 2)} seconds.")
         return result
     return wrapper
-
-
-def LOWER_LIMIT(name: str):
-    return f"Lower limit for {name} score."
 
 
 comm = cli.command(
@@ -75,20 +71,6 @@ deduplic = click.option(
     show_default=True,
     help="Deduplicate the output based on its deduplicates file.",
 )
-aoty_lower = click.option(
-    "--aoty-lower",
-    type=click.INT,
-    default=defaults.AOTY_SCORE,
-    show_default=True,
-    help=LOWER_LIMIT("AOTY"),
-)
-prog_lower = click.option(
-    "--prog-lower",
-    type=click.FLOAT,
-    default=defaults.PROG_SCORE,
-    show_default=True,
-    help=LOWER_LIMIT("Progarchives"),
-)
 re_download = click.option(
     "-r",
     "--re-download",
@@ -112,13 +94,23 @@ def command(func, decs: tuple):
 
 def aoty(func):
     return command(
-        func, (aoty_lower, path.aoty("p"), text, path.aoty(text=True))
+        func, (
+            score.aoty(letter="m", no_name_option=True),
+            path.aoty(letter="p", no_name_option=True),
+            text,
+            path.aoty(text=True, no_name_option=True)
+        )
     )
 
 
 def prog(func):
     return command(
-        func, (prog_lower, path.prog("p"), text, path.prog(text=True))
+        func, (
+            score.prog(letter="m", no_name_option=True),
+            path.prog(letter="p", no_name_option=True),
+            text,
+            path.prog(text=True, no_name_option=True)
+        )
     )
 
 
@@ -131,11 +123,11 @@ def merge(func):
         func, (
             re_download,
             dedup,
-            path.merge("p"),
+            path.merge(letter="p", no_name_option=True),
             text,
-            path.merge(text=True),
-            aoty_lower,
-            prog_lower,
+            path.merge(text=True, no_name_option=True),
+            score.aoty(),
+            score.prog(),
             path.aoty(),
             path.prog(),
         )
@@ -144,7 +136,7 @@ def merge(func):
 
 def dirs(func):
     return command(
-        func, (path.music, path.dirs("p"), text, path.dirs(text=True))
+        func, (path.music, path.dirs(letter="p"), text, path.dirs(text=True))
     )
 
 
@@ -152,11 +144,11 @@ def wanted(func):
     return command(
         func, (
             dedup,
-            path.wanted("p"),
+            path.wanted(letter="p", no_name_option=True),
             text,
-            path.wanted(text=True),
-            path.merge(),
-            path.dirs()
+            path.wanted(text=True, no_name_option=True),
+            path.merge(read=True),
+            path.dirs(read=True)
         )
     )
 
@@ -165,16 +157,20 @@ def leftover(func):
     return command(
         func, (
             dedup,
-            path.leftover("p"),
+            path.leftover(letter="p", no_name_option=True),
             text,
-            path.leftover(text=True),
-            path.dirs(),
-            path.merge()
+            path.leftover(text=True, no_name_option=True),
+            path.dirs(read=True),
+            path.merge(read=True)
         )
     )
 
 
 def copy(func):
     return command(
-        func, (path.music, path.destination, path.wanted(read=True))
+        func, (
+            path.music,
+            path.destination,
+            path.wanted(read=True)
+        )
     )
