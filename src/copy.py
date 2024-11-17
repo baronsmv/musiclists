@@ -15,7 +15,8 @@ def copy(
     verbose: bool = defaults.VERBOSE,
 ) -> None:
     """
-    Copy recursively the directories registered in a list, from one directory to another.
+    Copy recursively the directories registered in a list, from one directory
+    to another.
 
     The intended use is to copy the top albums (found in the ``wanted`` list)
     from a big music library to a more selective one.
