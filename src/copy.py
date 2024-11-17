@@ -24,13 +24,13 @@ def copy(
     Parameters
     ----------
         data:
-            Path of the json file, which contains name/value pairs with
-            objects with, at least, artist, title and year.
+            Path to the JSON file, which contains a dictionary of album
+            objects, each with at least the fields: artist, title, and year.
         origin:
-            Directory that must store the albums corresponding to the data
-            objects.
+            Path to the directory containing individual album directories,
+            each representing an album from ``data`` objects.
         destination:
-            Directory the files will be copied to.
+            Path where the directories from ``origin`` will be copied to.
         verbose:
             Show information about current processes.
     """
