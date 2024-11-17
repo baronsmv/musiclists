@@ -9,8 +9,9 @@ def HELP(name: str, maximum: bool = False):
     return f"""
         The {"maximum" if maximum else "minimum"} score threshold for {name}
         albums to be included in the list.
-        The process will stop once an album with a score lower than this
-        threshold is encountered.
+        The process will {"begin" if maximum else "stop"} once an album with a
+        score {"equal to" if maximum else "lower than"} this threshold is
+        encountered.
         """
 
 
