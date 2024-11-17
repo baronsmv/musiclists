@@ -7,6 +7,8 @@ DL_CHOICES = ("all", "aoty", "prog", "none")
 
 VERBOSE = False
 DEBUG = False
+
+TEXT = False
 DEDUP = True
 
 AOTY_SCORE = 83

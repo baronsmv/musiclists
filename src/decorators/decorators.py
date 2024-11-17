@@ -6,7 +6,7 @@ from functools import wraps
 from time import time
 
 from src.decorators import path
-from src.defaults import defaults as default
+from src.defaults import defaults
 
 
 @click.group(
@@ -36,8 +36,8 @@ comm = cli.command(
     cls=HelpColorsCommand,
 )
 version = version_option(
-    version=default.VERSION,
-    prog_name=default.PROG_NAME,
+    version=defaults.VERSION,
+    prog_name=defaults.PROG_NAME,
     message_color="green"
 )
 verbose = click.option(
@@ -45,13 +45,25 @@ verbose = click.option(
     "--verbose",
     is_flag=True,
     type=click.BOOL,
-    help="Show information of process.",
+    default=defaults.VERBOSE,
+    show_default=True,
+    help="Show detailed information about the process.",
+)
+debug = click.option(
+    "--debug",
+    is_flag=True,
+    type=click.BOOL,
+    default=defaults.DEBUG,
+    show_default=True,
+    help="Enable debug-level logging for troubleshooting.",
 )
 text = click.option(
     "-t",
     "--text",
     is_flag=True,
     type=click.BOOL,
+    default=defaults.TEXT,
+    show_default=True,
     help="Output the list as a text file as well.",
 )
 deduplic = click.option(
@@ -66,23 +78,23 @@ deduplic = click.option(
 aoty_lower = click.option(
     "--aoty-lower",
     type=click.INT,
-    default=default.AOTY_SCORE,
+    default=defaults.AOTY_SCORE,
     show_default=True,
     help=LOWER_LIMIT("AOTY"),
 )
 prog_lower = click.option(
     "--prog-lower",
     type=click.FLOAT,
-    default=default.PROG_SCORE,
+    default=defaults.PROG_SCORE,
     show_default=True,
     help=LOWER_LIMIT("Progarchives"),
 )
 re_download = click.option(
     "-r",
     "--re-download",
-    type=click.Choice(default.DL_CHOICES, case_sensitive=False),
+    type=click.Choice(defaults.DL_CHOICES, case_sensitive=False),
     show_choices=True,
-    default=default.DL_CHOICES[0],
+    default=defaults.DL_CHOICES[0],
     show_default=True,
     help="Re-download lists before merge.",
 )
@@ -95,7 +107,7 @@ def add(func, decs: tuple):
 
 
 def command(func, decs: tuple):
-    return add(func, (count_time, version, verbose, comm) + decs)
+    return add(func, (count_time, version, debug, verbose, comm) + decs)
 
 
 def aoty(func):
