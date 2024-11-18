@@ -16,12 +16,12 @@ main_group = click.group(
 def cli() -> None:
     """
     A command-line tool for downloading, merging, and analyzing top album lists
-    from websites like AOTY.org and Progarchives.
+    from websites like AOTY.org and ProgArchives.com.
 
     Features:
 
         - Download lists of the top albums from multiple platforms such as
-            AOTY.org and Progarchives.
+            AOTY.org and Progarchives.com.
 
         - Merge these lists into a single JSON file for further analysis.
 
