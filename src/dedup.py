@@ -74,6 +74,6 @@ def dedup(
             if minimum <= sim < maximum:
                 if only_highest_match and sim > highest_match[0]:
                     highest_match = (sim, {a1: a2})
-                else:
+                elif not only_highest_match:
                     yield {a1: a2}
             yield highest_match[1]
