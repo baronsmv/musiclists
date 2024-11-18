@@ -3,8 +3,15 @@
 from dateutil.parser import parse
 from pathlib import Path
 
+from src.defaults import defaults
 
-def verify(path: Path, dir: bool = False):
+
+def verify(
+    path: Path,
+    dir: bool = False,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+):
     if not path.exists():
         print(f"'{path}' no existe.")
         exit(1)
@@ -13,7 +20,12 @@ def verify(path: Path, dir: bool = False):
         exit(1)
 
 
-def isdate(string: str, fuzzy: bool = False) -> bool:
+def isdate(
+    string: str,
+    fuzzy: bool = False,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+) -> bool:
     """
     Return whether the string can be interpreted as a date.
 

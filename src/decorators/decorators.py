@@ -26,6 +26,7 @@ def subcomm(supercomm):
 
 
 cli = groups.cli
+
 comm = cli.command(
     cls=HelpColorsCommand,
 )

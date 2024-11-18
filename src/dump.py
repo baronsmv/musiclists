@@ -14,7 +14,12 @@ from src.verify import containsdirs, isdate
 from src import search
 
 
-def page(webpage: str, listonly: bool = False) -> str:
+def page(
+    webpage: str,
+    listonly: bool = False,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+) -> str:
     bashCommand = "lynx -dump -width=1000 "
     bashCommand += "-listonly" if listonly else "-nolist"
     bashCommand += f" {webpage}"
@@ -36,13 +41,14 @@ def until(
     type2: list | tuple | int,
     lowerlimit: int | float,
     verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ) -> Iterator:
     for a in type1:
         foundLimit = False
         iterType = count(type2) if isinstance(type2, int) else iter(type2)
         while not foundLimit:
             b = next(iterType)
-            for album in function(a, b, verbose=verbose):
+            for album in function(a, b, verbose=verbose, debug=debug):
                 score = get.score(album)
                 if score and score < lowerlimit:
                     foundLimit = True
@@ -55,6 +61,7 @@ def aoty(
     albumType: str,
     pageNumber: int,
     verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ) -> Iterator:
     if verbose:
         print(f"- Downloading {albumType}, page {pageNumber}...")
@@ -97,14 +104,21 @@ def aoty(
         }
 
 
-def proggenres() -> Iterator:
+def proggenres(
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+) -> Iterator:
     pg = "https://www.progarchives.com/"
     data = page(pg, listonly=True)
     for lines in search.lines(r"subgenre\.asp\?style=", data):
         yield lines.group().split("=")[-1]
 
 
-def proggenre(pageNumber: int) -> str:
+def proggenre(
+    pageNumber: int,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+) -> str:
     pg = "https://www.progarchives.com/subgenre.asp"
     result = page(f"{pg}?style={pageNumber}")
     genre = re.search(".*Top Albums.*", result)
@@ -116,7 +130,10 @@ def proggenre(pageNumber: int) -> str:
 
 
 def progarchives(
-    pagenumber: int, albumType: int, verbose: bool = defaults.VERBOSE
+    pagenumber: int,
+    albumType: int,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ) -> Iterator:
     genre = proggenre(pagenumber)
     if verbose:
@@ -167,6 +184,8 @@ def dirs(
     path: Path,
     minLevel: int = defaults.MIN_LEVEL,
     maxLevel: int = defaults.MAX_LEVEL,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ) -> Iterator[Path]:
     for d in path.rglob("*"):
         if (

@@ -21,6 +21,7 @@ def to_text(
     sep: str = " - ",
     sorted: bool = True,
     verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ):
     if not text_path:
         return
@@ -38,14 +39,15 @@ def to_path(
     data: dict | set,
     text_path: Path | None = None,
     text: bool = False,
-    verbose: bool = defaults.VERBOSE
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ):
     if verbose:
         print(f"Saving {defaults.SUFFIX} list to {path}...")
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=4)
     if text:
-        to_text(path=path, text_path=text_path, verbose=verbose)
+        to_text(path=path, text_path=text_path, verbose=verbose, debug=debug)
 
 
 def albums(
@@ -58,6 +60,7 @@ def albums(
     name: str | None = None,
     text: bool = False,
     verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ):
     if verbose:
         print("Process started:")
@@ -81,6 +84,7 @@ def albums(
         type2=type2,
         lowerlimit=lowerlimit,
         verbose=verbose,
+        debug=debug,
     )
     multithread = False
     if multithread:
@@ -93,7 +97,12 @@ def albums(
                 exit(1)
             data.update(album)
     to_path(
-        path=path, data=data, text_path=text_path, text=text, verbose=verbose
+        path=path,
+        data=data,
+        text_path=text_path,
+        text=text,
+        verbose=verbose,
+        debug=debug,
     )
     if verbose:
         print("Process completed.")
@@ -105,6 +114,7 @@ def aoty(
     lowerlimit: int = defaults.AOTY_MIN_SCORE,
     text: bool = False,
     verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ):
     albums(
         path=path,
@@ -123,6 +133,7 @@ def aoty(
         name="AOTY",
         text=text,
         verbose=verbose,
+        debug=debug,
     )
 
 
@@ -132,6 +143,7 @@ def prog(
     lowerlimit: float = defaults.PROG_MIN_SCORE,
     text: bool = False,
     verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ):
     if verbose:
         print("Generating list of genres...")
@@ -146,6 +158,7 @@ def prog(
         name="Progarchives",
         text=text,
         verbose=verbose,
+        debug=debug,
     )
 
 
@@ -155,6 +168,7 @@ def dirs(
     text_path: Path | None = None,
     text: bool = False,
     verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ):
     data = dict()
     if verbose:
@@ -181,6 +195,7 @@ def dirs(
         text_path=text_path,
         text=text,
         verbose=verbose,
+        debug=debug,
     )
 
 
@@ -193,21 +208,25 @@ def all(
     dedup: bool = True,
     text: bool = False,
     verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ):
     if verbose:
         print("Merging lists...")
     to_path(
         path=path,
-        data=dict(diff(
-            data1=Path(aotypath),
-            data2=Path(progpath),
-            dedupdir=dedupdir,
-            dedup=dedup),
+        data=dict(
+            diff(
+                data1=Path(aotypath),
+                data2=Path(progpath),
+                dedupdir=dedupdir,
+                dedup=dedup,
+            ),
         )
         | load(Path(progpath)),
         text_path=text_path,
         text=text,
         verbose=verbose,
+        debug=debug,
     )
 
 
@@ -222,7 +241,8 @@ def duplicates(
     keysep: str = "-",
     keysuffix: str = defaults.SUFFIX,
     text: bool = False,
-    verbose: bool = defaults.VERBOSE
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ) -> None:
     if verbose:
         print("Deduplicating lists...")
@@ -234,9 +254,7 @@ def duplicates(
         keysep=keysep,
         keysuffix=keysuffix,
     )
-    for a1, a2 in dedup(
-        load(data1), load(data2), lowerlimit, upperlimit
-    ):
+    for a1, a2 in dedup(load(data1), load(data2), lowerlimit, upperlimit):
         if inv:
             a1, a2 = a2, a1
         if a1 not in data[field]:
@@ -249,7 +267,12 @@ def duplicates(
         if isinstance(match, list) and len(match) == 1:
             match = match[0]
     to_path(
-        path=path, data=data, text_path=text_path, text=text, verbose=verbose
+        path=path,
+        data=data,
+        text_path=text_path,
+        text=text,
+        verbose=verbose,
+        debug=debug,
     )
 
 
@@ -264,6 +287,7 @@ def differences(
     dedup: bool = True,
     text: bool = True,
     verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ) -> None:
     if verbose:
         print(f"Writting to {path}:")
@@ -273,5 +297,10 @@ def differences(
     ):
         data[a1] = a2
     to_path(
-        path=path, data=data, text_path=text_path, text=text, verbose=verbose
+        path=path,
+        data=data,
+        text_path=text_path,
+        text=text,
+        verbose=verbose,
+        debug=debug,
     )

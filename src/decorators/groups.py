@@ -47,9 +47,15 @@ sub_group = cli.group(
 
 @sub_group
 def download() -> None:
+    """
+    Download
+    """
     pass
 
 
 @sub_group
 def identify() -> None:
+    """
+    Identify
+    """
     pass

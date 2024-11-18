@@ -9,7 +9,12 @@ from src.load import frompath as load
 
 
 def lines(
-    pattern: str, content: str, before: int = 0, after: int = 0
+    pattern: str,
+    content: str,
+    before: int = 0,
+    after: int = 0,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ) -> Iterator:
     return re.finditer(
         (r"(.*\n){" + str(before) + "}" if before > 0 else "")
@@ -29,6 +34,8 @@ def dedup(
     field: str = defaults.AUTO_FIELD,
     keysep: str = defaults.KEY_SEP,
     keysuffix: str = defaults.SUFFIX,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ) -> tuple[Path, dict[str, dict[str, str | list]], bool]:
     key = Path(dedupdir / f"{data1.stem}{keysep}{data2.stem}.{keysuffix}")
     invKey = Path(dedupdir / f"{data2.stem}{keysep}{data1.stem}.{keysuffix}")

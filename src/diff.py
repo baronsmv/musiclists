@@ -16,6 +16,7 @@ def diff(
     field: str = defaults.VERIFIED_FIELD,
     dedup: bool = defaults.DEDUP,
     verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ) -> Iterator[tuple[str, dict]]:
     if not data1.exists() and not data2.exists():
         print("ERROR: Neither of list files exists, exiting...")

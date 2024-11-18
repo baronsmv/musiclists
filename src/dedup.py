@@ -3,6 +3,7 @@
 from collections.abc import Iterator
 from difflib import SequenceMatcher
 
+from src.defaults import defaults
 from src import get
 
 
@@ -11,6 +12,8 @@ def dedup(
     data2: dict,
     lowerlimit: int | float = 0.6,
     upperlimit: int | float = 1,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.VERBOSE,
 ) -> Iterator[dict[str, str]]:
     """
     Compare each of the objects

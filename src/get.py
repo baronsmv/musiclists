@@ -4,8 +4,15 @@ from pathlib import Path
 import re
 from unicodedata import normalize
 
+from src.defaults import defaults
 
-def get(data: dict, key: str):
+
+def get(
+    data: dict,
+    key: str,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+):
     if not data.get(key):
         if key in tuple(data.values())[0]:
             return tuple(data.values())[0][key]
@@ -15,19 +22,35 @@ def get(data: dict, key: str):
         return data.get(key)
 
 
-def artist(data: dict) -> str:
+def artist(
+    data: dict,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+) -> str:
     return get(data, "artist")
 
 
-def title(data: dict) -> str:
+def title(
+    data: dict,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+) -> str:
     return get(data, "title")
 
 
-def year(data: dict) -> int:
+def year(
+    data: dict,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+) -> int:
     return get(data, "year")
 
 
-def score(data: dict) -> int | float:
+def score(
+    data: dict,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+) -> int | float:
     return get(data, "score")
 
 
@@ -35,6 +58,8 @@ def id(
     data: list | tuple | dict[str, str | int | list] | str,
     length: int = 14,
     sep: str = "",
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ) -> str:
     if isinstance(data, str):
         res = re.search(
@@ -62,6 +87,8 @@ def path(
     data: dict[str, str | list | int | float],
     sep: str = "/",
     includeyear: bool = True,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ) -> str:
     return (
         artist(data)
@@ -71,7 +98,13 @@ def path(
     )
 
 
-def level(child: Path, parent: Path, lvl: int = 0) -> int:
+def level(
+    child: Path,
+    parent: Path,
+    lvl: int = 0,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+) -> int:
     if child.parent.absolute() == parent.absolute():
         return lvl
     else:
