@@ -18,13 +18,7 @@ def dedup(
 ) -> Iterator[dict[str, str]]:
     """
     Compare each object (album) in two dictionaries containing music album
-    data from two JSON files and returns a generator of matching album entries
-    where the similarity score falls within a specified range.
-
-    The comparison is done using difflib.SequenceMatcher, which computes a
-    similarity ratio between pairs of album objects. Only albums with a
-    similarity score within the specified range (inclusive on the low end,
-    exclusive on the high end) are yielded.
+    data from two JSON files.
 
     Parameters
     ----------
@@ -53,7 +47,8 @@ def dedup(
     Notes
     -----
     - The function uses difflib.SequenceMatcher to calculate the similarity
-      between the album entries. The similarity ratio ranges from 0 to 1, with
+      between the album entries. The string used for the match is:
+      `artist - Title (year)`. The similarity ratio ranges from 0 to 1, with
       1 indicating identical objects.
     - To fine-tune the matching process, adjust the `minimum` and
       `maximum` values. For instance, a minimum value of 0.7 and an maximum
@@ -62,18 +57,20 @@ def dedup(
     - When `only_highest_match` is set to `True`, for each album in `data1`,
       only the match from `data2` with the highest similarity score will be
       returned. This can be useful when you want to minimize the number of
-      matches and focus on the best possible pairings.
+      matches and focus on the best possible pairings. Though, there are cases
+      where each album could have more than one correct pairing.
     """
-    if only_highest_match:
-        highest_match = (float(), {str(): str()})
     for d1 in data1.values():
+        a1 = get.path(d1)
+        if only_highest_match:
+            highest_ratio = 0.0
         for d2 in data2.values():
-            a1 = get.path(d1)
             a2 = get.path(d2)
             sim = SequenceMatcher(None, a1, a2).ratio()
             if minimum <= sim < maximum:
-                if only_highest_match and sim > highest_match[0]:
-                    highest_match = (sim, {a1: a2})
+                if only_highest_match and sim > highest_ratio:
+                    highest_match = {a1: a2}
                 elif not only_highest_match:
                     yield {a1: a2}
-            yield highest_match[1]
+            if highest_match:
+                yield highest_match
