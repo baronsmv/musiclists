@@ -57,6 +57,53 @@ def until(
                     yield album
 
 
+def aoty_tracks(
+    url: str,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+) -> tuple[list[dict[str, str | int]], str]:
+    result = page(url, no_list=True)
+    for data in search.lines(
+        r"^Track List", result, end="Total Length: ", after=1
+    ):
+        data = data.group().splitlines()
+    tracks = list()  # type: list[dict[str, str | int]]
+    t = dict()  # type: dict[str, str | int]
+    disc = None
+    for d in data[2:]:
+        if not d:
+            continue
+        d = str(d)
+        if debug:
+            print(d)
+        if bool(re.search(r"[ ]{3}Total Length: ", d)):
+            length = d.replace("Total Length: ", "").replace(" hour, ", ":")
+            length = length.replace(" minutes", "").strip()
+            return tracks, length
+        elif "rating" in t:
+            tracks.append(t.copy())
+            t.clear()
+        if bool(re.search(r"^[ ]{3}Disc \d+", d)):
+            disc = d.replace("Disc ", "").strip()
+        elif "number" not in t and bool(re.search(r"^[ ]{3}\d+ ", d)):
+            t["number"] = ((disc + "-" if disc else "") + d.split(" ", 1)[0])
+            t["number"] = str(t["number"]).strip()
+            t["title"] = d.split(" ", 1)[1].strip()
+        elif "duration" not in t and bool(re.search(r"^[ ]{3}\d+:\d+$", d)):
+            t["duration"] = d.strip()
+        elif "featuring" not in t and bool(re.search(r"^[ ]{3}feat. ", d)):
+            t["featuring"] = d.replace("feat. ", "").strip()
+        elif "rating" not in t and bool(re.search(r"^[ ]{3}\d+$", d)):
+            t["rating"] = int(d.strip())
+        elif bool(re.search(r"^[ ]{4} \d+", d)):
+            t["title"] = str(t["title"]) + "\n" + d
+        else:
+            disc = d.strip()
+    print("ERROR: EOF without length.")
+    exit(1)
+    return tracks, length
+
+
 def aoty(
     albumType: str,
     pageNumber: int,
