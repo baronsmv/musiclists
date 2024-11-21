@@ -72,5 +72,5 @@ def dedup(
                     highest_match = {a1: a2}
                 elif not only_highest_match:
                     yield {a1: a2}
-            if highest_match:
-                yield highest_match
+        if highest_match:
+            yield highest_match
