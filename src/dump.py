@@ -115,7 +115,7 @@ def aoty(
         print(f"- Downloading {albumType}, page {pageNumber}...")
     basePage = "albumoftheyear.org/ratings/user-highest-rated"
     pg = f"{basePage}/{albumType}/all/{pageNumber}/"
-    result = page(pg)
+    result = page(pg, no_list=True)
     for data in search.lines(r"\d\. ", result, end=r"\d ratings"):
         base = 0
         lines = data.group().splitlines()
@@ -168,7 +168,7 @@ def proggenre(
     debug: bool = defaults.DEBUG,
 ) -> str:
     pg = "https://www.progarchives.com/subgenre.asp"
-    result = page(f"{pg}?style={pageNumber}")
+    result = page(f"{pg}?style={pageNumber}", no_list=True)
     genre = re.search(".*Top Albums.*", result)
     if genre:
         return genre.group().replace(" Top Albums", "").strip()
@@ -193,7 +193,7 @@ def progarchives(
         + f"&salbumtypes={albumType}"
         + "&smaxresults=250#list"
     )
-    result = page(pg)
+    result = page(pg, no_list=True)
     for data in search.lines("QWR = ", result, before=2, after=3):
         try:
             lines = data.group().splitlines()
