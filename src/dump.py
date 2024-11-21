@@ -68,7 +68,7 @@ def aoty(
     basePage = "albumoftheyear.org/ratings/user-highest-rated"
     pg = f"{basePage}/{albumType}/all/{pageNumber}/"
     result = page(pg)
-    for data in search.lines(r"\d\. ", result, 0, 7):
+    for data in search.lines(r"\d\. ", result, end=r"\d ratings"):
         base = 0
         lines = data.group().splitlines()
         try:
@@ -146,7 +146,7 @@ def progarchives(
         + "&smaxresults=250#list"
     )
     result = page(pg)
-    for data in search.lines("QWR = ", result, 2, 3):
+    for data in search.lines("QWR = ", result, before=2, after=3):
         try:
             lines = data.group().splitlines()
             position = int(lines[0].split("[", 1)[0])

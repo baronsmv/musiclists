@@ -11,6 +11,7 @@ from src.load import frompath as load
 def lines(
     pattern: str,
     content: str,
+    end: str | None = None,
     before: int = 0,
     after: int = 0,
     verbose: bool = defaults.VERBOSE,
@@ -21,6 +22,7 @@ def lines(
         + r".*"
         + pattern
         + r".*"
+        + (r"(\n.*?){0,}" + end + r".*" if end else "")
         + (r"(\n.*){" + str(after) + "}" if after > 0 else ""),
         content,
         re.MULTILINE,
