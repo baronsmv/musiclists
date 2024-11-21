@@ -120,9 +120,6 @@ def aoty(
         path=path,
         function=dump.aoty,
         type1=(
-            "LP",
-            "EP",
-            "Mixtape",
             "Compilation",
             "Live",
             "Soundtrack",
