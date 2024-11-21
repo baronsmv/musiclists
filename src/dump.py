@@ -157,7 +157,7 @@ def proggenres(
     debug: bool = defaults.DEBUG,
 ) -> Iterator:
     pg = "https://www.progarchives.com/"
-    data = page(pg, listonly=True)
+    data = page(pg, list_only=True)
     for lines in search.lines(r"subgenre\.asp\?style=", data):
         yield lines.group().split("=")[-1]
 
