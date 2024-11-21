@@ -84,19 +84,21 @@ def aoty_tracks(
         elif "rating" in t:
             tracks.append(t.copy())
             t.clear()
-        if bool(re.search(r"^[ ]{3}Disc \d+", d)):
+        if bool(re.search(r"^[ ]{3}Disc \d{1,}", d)):
             disc = d.replace("Disc ", "").strip()
-        elif "number" not in t and bool(re.search(r"^[ ]{3}\d+ ", d)):
-            t["number"] = ((disc + "-" if disc else "") + d.split(" ", 1)[0])
+        elif "number" not in t and bool(re.search(r"^[ ]{3}\d{1,} ", d)):
+            t["number"] = (disc + "-" if disc else "") + d.split(" ", 1)[0]
             t["number"] = str(t["number"]).strip()
             t["title"] = d.split(" ", 1)[1].strip()
-        elif "duration" not in t and bool(re.search(r"^[ ]{3}\d+:\d+$", d)):
+        elif "duration" not in t and bool(
+            re.search(r"^[ ]{3}\d{1,}:\d{1,}$", d)
+        ):
             t["duration"] = d.strip()
         elif "featuring" not in t and bool(re.search(r"^[ ]{3}feat. ", d)):
             t["featuring"] = d.replace("feat. ", "").strip()
-        elif "rating" not in t and bool(re.search(r"^[ ]{3}\d+$", d)):
+        elif "rating" not in t and bool(re.search(r"^[ ]{3}\d{1,}$", d)):
             t["rating"] = int(d.strip())
-        elif bool(re.search(r"^[ ]{4} \d+", d)):
+        elif bool(re.search(r"^[ ]{4} \d{1,}", d)):
             t["title"] = str(t["title"]) + "\n" + d
         else:
             disc = d.strip()
@@ -108,6 +110,7 @@ def aoty_tracks(
 def aoty(
     albumType: str,
     pageNumber: int,
+    download_tracks: bool = True,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator:
@@ -116,11 +119,35 @@ def aoty(
     basePage = "albumoftheyear.org/ratings/user-highest-rated"
     pg = f"{basePage}/{albumType}/all/{pageNumber}/"
     result = page(pg, no_list=True)
+    if download_tracks:
+        result_w_list = page(pg)
     for data in search.lines(r"\d\. ", result, end=r"\d ratings"):
         base = 0
         lines = data.group().splitlines()
         try:
             line = lines[base + 0].strip().split(". ", 1)
+            if download_tracks:
+                count = 0
+                for m in search.lines(
+                    r"[^\d]" + line[0] + r"\. \[(?P<url_id>\d{1,})\]",
+                    result_w_list,
+                ):
+                    url_id = m.group("url_id")
+                    count = count + 1
+                if count != 1:
+                    print(f"ERROR en URL_ID({count}): {line[0]}. {line[1]}")
+                    exit(1)
+                count = 0
+                for m in search.lines(
+                    r"[^\d]" + url_id + r"\. (?P<url>http.*)",
+                    result_w_list,
+                ):
+                    url = m.group("url")
+                    count = count + 1
+                if count != 1:
+                    print(f"ERROR en URL({count}): {line[0]}. {line[1]}")
+                    exit(1)
+                tracks, length = aoty_tracks(url, verbose=verbose, debug=debug)
             position = int(line[0])
             artist, title = line[1].replace("/", "_").split(" - ", 1)
             if not isdate(lines[base + 3].strip()):
