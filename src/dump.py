@@ -16,12 +16,13 @@ from src import search
 
 def page(
     webpage: str,
-    listonly: bool = False,
+    no_list: bool = False,
+    list_only: bool = False,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> str:
-    bashCommand = "lynx -dump -width=1000 "
-    bashCommand += "-listonly" if listonly else "-nolist"
+    bashCommand = "lynx -dump -width=1000"
+    bashCommand += " -nolist" if no_list else " -listonly" if list_only else ""
     bashCommand += f" {webpage}"
     try:
         return run(
