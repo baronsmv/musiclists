@@ -70,11 +70,33 @@ def until(
                     yield album
 
 
+def insert_track(
+    track: dict[str, str | int | list],
+    tracks: list[dict[str, str | int | list]],
+    disc: str | int | None = None,
+):
+    if isinstance(track["number"], str):
+        track["number"] = int(track["number"])
+    if isinstance(disc, str) and disc.isnumeric():
+        disc = int(disc)
+    if disc:
+        track["disc"] = disc
+    tracks.append(track.copy())
+    track.clear()
+
+
+def add_track_subtitle(track: dict[str, str | int | list], subtitle):
+    if "subtitle" not in track:
+        track["subtitle"] = list()
+    if isinstance(track["subtitle"], list):
+        track["subtitle"].append(subtitle.strip())
+
+
 def aoty_tracks(
     url: str,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
-) -> list[dict[str, str | int]]:
+) -> list[dict[str, str | int | list]]:
     result = page(url, no_list=True)
     for data in search.lines(
         r"^Track List",
@@ -83,34 +105,20 @@ def aoty_tracks(
         after=1,
     ):
         data = data.group().splitlines()
-    tracks = list()  # type: list[dict[str, str | int]]
-    t = dict()  # type: dict[str, str | int]
+    tracks = list()  # type: list[dict[str, str | int | list]]
+    t = dict()  # type: dict[str, str | int | list]
     disc = None
-    for d in data[2:]:
+    for d in data[2:-1]:
         if not d:
             continue
         d = str(d)
-        if bool(re.search(r"[ ]{3}Total Length: ", d)):
-            return tracks
-        elif "rating" in t:
-            if disc:
-                t["disc"] = disc
-            tracks.append(t.copy())
-            t.clear()
         if bool(re.search(r"^[ ]{3}Disc \d{1,}", d)):
             disc = d.replace("Disc ", "").strip()
-            if disc.isnumeric():
-                disc = int(disc)
         elif "number" not in t and bool(re.search(r"^[ ]{3}\d{1,} ", d)):
             t["number"], t["title"] = d.strip().split(" ", 1)
-            t["number"] = int(t["number"])
         elif "number" not in t and bool(re.search(r"^[ ]{3,4}\d{1,}\. ", d)):
             t["number"], t["title"] = d.strip().split(". ", 1)
-            t["number"] = int(t["number"])
-            if disc:
-                t["disc"] = disc
-            tracks.append(t.copy())
-            t.clear()
+            insert_track(t, tracks, disc)
         elif "duration" not in t and bool(
             re.search(r"^[ ]{3}\d{1,}:\d{1,}$", d)
         ):
@@ -121,10 +129,11 @@ def aoty_tracks(
             t["featuring"] = d.replace("with ", "").strip()
         elif "rating" not in t and bool(re.search(r"^[ ]{3}\d{1,}$", d)):
             t["rating"] = int(d.strip())
+            insert_track(t, tracks, disc)
         elif bool(re.search(r"^[ ]{4} \d{1,}", d)):
-            t["title"] = str(t["title"]) + "\n" + d.strip()
+            add_track_subtitle(t, d)
         elif bool(re.search(r"^[ ]{5}\* ", d)):
-            t["title"] = str(t["title"]) + "\n" + d.replace("* ", "").strip()
+            add_track_subtitle(t, d.replace("* ", ""))
         else:
             disc = d.strip()
     return tracks
