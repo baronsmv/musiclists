@@ -55,7 +55,7 @@ def albums(
     function,
     type1,
     type2,
-    lowerlimit: int | float,
+    min_score: int | float,
     text_path: Path | None = None,
     name: str | None = None,
     include_url: bool = defaults.INCLUDE_URL,
@@ -73,7 +73,7 @@ def albums(
         pprint(type1)
         print("- Types: ", end="")
         pprint(type2)
-        print(f"- Lower limit: {lowerlimit}")
+        print(f"- Lower limit: {min_score}")
         print()
         if name:
             print(f"Downloading lists from {name}:")
@@ -84,7 +84,7 @@ def albums(
         function=function,
         type1=type1,
         type2=type2,
-        lowerlimit=lowerlimit,
+        min_score=min_score,
         include_url=include_url,
         include_tracks=include_tracks,
         verbose=verbose,
@@ -117,7 +117,7 @@ def aoty(
     text_path: Path | None = None,
     types: tuple = defaults.AOTY_TYPES,
     start_page: int = 1,
-    lowerlimit: int = defaults.AOTY_MIN_SCORE,
+    min_score: int = defaults.AOTY_MIN_SCORE,
     include_url: bool = defaults.INCLUDE_URL,
     include_tracks: bool = defaults.INCLUDE_TRACKS,
     text: bool = defaults.TEXT,
@@ -129,7 +129,7 @@ def aoty(
         function=dump.aoty,
         type1=defaults.AOTY_TYPES if "all" in types else types,
         type2=start_page,
-        lowerlimit=lowerlimit,
+        min_score=min_score,
         text_path=text_path,
         name="AOTY",
         include_url=include_url,
@@ -144,7 +144,7 @@ def prog(
     path: Path,
     text_path: Path | None = None,
     types: tuple = defaults.PROG_TYPES,
-    lowerlimit: float = defaults.PROG_MIN_SCORE,
+    min_score: float = defaults.PROG_MIN_SCORE,
     include_url: bool = defaults.INCLUDE_URL,
     include_tracks: bool = defaults.INCLUDE_TRACKS,
     text: bool = defaults.TEXT,
@@ -153,7 +153,7 @@ def prog(
 ):
     if verbose:
         print("Generating list of genres...")
-    genres = tuple(i for i in dump.proggenres())
+    genres = tuple(i for i in dump.prog_genres())
     name_types = list()
     for i, t in enumerate(defaults.PROG_TYPES):
         if "all" in types or t in types:
@@ -163,7 +163,7 @@ def prog(
         function=dump.progarchives,
         type1=genres,
         type2=name_types,
-        lowerlimit=lowerlimit,
+        min_score=min_score,
         text_path=text_path,
         name="Progarchives",
         include_url=include_url,
@@ -247,7 +247,7 @@ def duplicates(
     data2: Path,
     dedupdir: Path,
     text_path: Path | None = None,
-    lowerlimit: int | float = 0.6,
+    min_score: int | float = 0.6,
     upperlimit: int | float = 1,
     field: str = defaults.AUTO_FIELD,
     keysep: str = "-",
@@ -266,7 +266,7 @@ def duplicates(
         keysep=keysep,
         keysuffix=keysuffix,
     )
-    for a1, a2 in dedup(load(data1), load(data2), lowerlimit, upperlimit):
+    for a1, a2 in dedup(load(data1), load(data2), min_score, upperlimit):
         if inv:
             a1, a2 = a2, a1
         if a1 not in data[field]:

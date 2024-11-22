@@ -38,7 +38,7 @@ def aoty(
     write.aoty(
         path=path,
         text_path=text_path,
-        lowerlimit=min_score,
+        min_score=min_score,
         types=types,
         include_url=include_url,
         include_tracks=include_tracks,
@@ -76,7 +76,7 @@ def prog(
     write.prog(
         path=path,
         text_path=text_path,
-        lowerlimit=min_score,
+        min_score=min_score,
         text=text,
         verbose=verbose,
         debug=debug,
@@ -124,7 +124,7 @@ def merge(
     if re_download == "all" or re_download == "aoty":
         write.aoty(
             path=aoty_path,
-            lowerlimit=aoty_min_score,
+            min_score=aoty_min_score,
             text=False,
             verbose=verbose,
             debug=debug,
@@ -133,7 +133,7 @@ def merge(
     if re_download == "all" or re_download == "prog":
         write.prog(
             path=prog_path,
-            lowerlimit=prog_min_score,
+            min_score=prog_min_score,
             text=False,
             verbose=verbose,
             debug=debug,

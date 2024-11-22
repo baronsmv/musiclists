@@ -43,7 +43,7 @@ def until(
     function,
     type1: list | tuple,
     type2: list | tuple | int,
-    lowerlimit: int | float,
+    min_score: int | float,
     include_url: bool = defaults.INCLUDE_URL,
     include_tracks: bool = defaults.INCLUDE_TRACKS,
     verbose: bool = defaults.VERBOSE,
@@ -63,7 +63,7 @@ def until(
                 debug=debug
             ):
                 score = get.score(album)
-                if score and score < lowerlimit:
+                if score and score < min_score:
                     foundLimit = True
                     break
                 else:
@@ -74,7 +74,7 @@ def insert_track(
     track: dict[str, str | int | list],
     tracks: list[dict[str, str | int | list]],
     disc: str | int | None = None,
-):
+) -> None:
     if isinstance(track["number"], str):
         track["number"] = int(track["number"])
     if isinstance(disc, str) and disc.isnumeric():
@@ -85,7 +85,7 @@ def insert_track(
     track.clear()
 
 
-def add_track_subtitle(track: dict[str, str | int | list], subtitle):
+def add_track_subtitle(track: dict[str, str | int | list], subtitle) -> None:
     if "subtitle" not in track:
         track["subtitle"] = list()
     if isinstance(track["subtitle"], list):
@@ -194,7 +194,7 @@ def aoty(
         yield {get.id((artist, year, title)): album}
 
 
-def proggenres(
+def prog_genres(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator:
@@ -204,7 +204,7 @@ def proggenres(
         yield lines.group().split("=")[-1]
 
 
-def proggenre(
+def prog_genre(
     pageNumber: int,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -225,7 +225,7 @@ def progarchives(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator:
-    genre = proggenre(pagenumber)
+    genre = prog_genre(pagenumber)
     if verbose:
         print(f"- Downloading {genre}, page {pagenumber}, type {albumType}...")
     basePage = "progarchives.com/top-prog-albums.asp"
