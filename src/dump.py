@@ -131,28 +131,25 @@ def aoty(
     for data in search.lines(r"\d\. ", result, end=r"\d ratings"):
         base = 0
         lines = data.group().splitlines()
-        try:
-            line = lines[base + 0].strip().split(". ", 1)
-            if include_url or include_tracks:
-                url = get.url(result_w_list, r"[^\d]" + line[0] + r"\. ")
-            if include_tracks:
-                tracks = aoty_tracks(url, verbose=verbose, debug=debug)
-            position = int(line[0])
-            artist, title = line[1].replace("/", "_").split(" - ", 1)
-            if not isdate(lines[base + 3].strip()):
-                base = base - 1
-            year = int(lines[base + 3][-4:])
-            if "USER SCORE" in lines[base + 4]:
-                base = base - 1
-                genre = ["Unknown"]
-            else:
-                genre = lines[base + 4].strip().split(", ")
-            score = int(lines[base + 6].strip())
-            ratings = int(
-                lines[base + 7].strip().split(" ")[0].replace(",", "")
-            )
-        except Exception as err:
-            error("", lines, err)
+        line = lines[base + 0].strip().split(". ", 1)
+        if include_url or include_tracks:
+            url = get.url(result_w_list, r"[^\d]" + line[0] + r"\. ")
+        if include_tracks:
+            tracks = aoty_tracks(url, verbose=verbose, debug=debug)
+        position = int(line[0])
+        artist, title = line[1].replace("/", "_").split(" - ", 1)
+        if not isdate(lines[base + 3].strip()):
+            base = base - 1
+        year = int(lines[base + 3][-4:])
+        if "USER SCORE" in lines[base + 4]:
+            base = base - 1
+            genre = ["Unknown"]
+        else:
+            genre = lines[base + 4].strip().split(", ")
+        score = int(lines[base + 6].strip())
+        ratings = int(
+            lines[base + 7].strip().split(" ")[0].replace(",", "")
+        )
         album = {
             "artist": artist,
             "title": title,
