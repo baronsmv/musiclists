@@ -65,7 +65,7 @@ def aoty_tracks(
     url: str,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
-) -> tuple[list[dict[str, str | int]], str]:
+) -> list[dict[str, str | int]]:
     result = page(url, no_list=True)
     for data in search.lines(
         r"^Track List",
@@ -77,31 +77,25 @@ def aoty_tracks(
     tracks = list()  # type: list[dict[str, str | int]]
     t = dict()  # type: dict[str, str | int]
     disc = None
-    print(data)
     for d in data[2:]:
         if not d:
             continue
         d = str(d)
-        if debug:
-            print(d)
         if bool(re.search(r"[ ]{3}Total Length: ", d)):
-            length = d.replace("Total Length: ", "").replace(" hour, ", ":")
-            length = length.replace(" minutes", "").strip()
-            print(length)
-            return tracks, length
+            return tracks
         elif "rating" in t:
+            if disc:
+                t["disc"] = disc
             tracks.append(t.copy())
             t.clear()
         if bool(re.search(r"^[ ]{3}Disc \d{1,}", d)):
             disc = d.replace("Disc ", "").strip()
         elif "number" not in t and bool(re.search(r"^[ ]{3}\d{1,} ", d)):
-            t["number"] = (disc + "-" if disc else "") + d.split(" ", 1)[0]
-            t["number"] = str(t["number"]).strip()
-            t["title"] = d.split(" ", 1)[1].strip()
+            t["number"], t["title"] = d.strip().split(" ", 1)
         elif "number" not in t and bool(re.search(r"^[ ]{3,4}\d{1,}\. ", d)):
-            t["number"] = (disc + "-" if disc else "") + d.split(". ", 1)[0]
-            t["number"] = str(t["number"]).strip()
-            t["title"] = d.split(". ", 1)[1].strip()
+            t["number"], t["title"] = d.strip().split(". ", 1)
+            if disc:
+                t["disc"] = disc
             tracks.append(t.copy())
             t.clear()
         elif "duration" not in t and bool(
@@ -114,21 +108,16 @@ def aoty_tracks(
             t["rating"] = int(d.strip())
         elif bool(re.search(r"^[ ]{4} \d{1,}", d)):
             t["title"] = str(t["title"]) + "\n" + d
-        elif "number" in t and "duration" not in t:
-            tracks.append(t.copy())
-            t.clear()
-            t["number"] = (disc + "-" if disc else "") + d.split(" ", 1)[0]
-            t["number"] = str(t["number"]).strip()
-            t["title"] = d.split(" ", 1)[1].strip()
         else:
             disc = d.strip()
-    return tracks, "Unknown"
+    return tracks
 
 
 def aoty(
     albumType: str,
     pageNumber: int,
-    download_tracks: bool = True,
+    include_url: bool = True,
+    include_tracks: bool = True,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator:
@@ -137,16 +126,17 @@ def aoty(
     basePage = "albumoftheyear.org/ratings/user-highest-rated"
     pg = f"{basePage}/{albumType}/all/{pageNumber}/"
     result = page(pg, no_list=True)
-    if download_tracks:
+    if include_tracks:
         result_w_list = page(pg)
     for data in search.lines(r"\d\. ", result, end=r"\d ratings"):
         base = 0
         lines = data.group().splitlines()
         try:
             line = lines[base + 0].strip().split(". ", 1)
-            if download_tracks:
+            if include_url or include_tracks:
                 url = get.url(result_w_list, r"[^\d]" + line[0] + r"\. ")
-                tracks, length = aoty_tracks(url, verbose=verbose, debug=debug)
+            if include_tracks:
+                tracks = aoty_tracks(url, verbose=verbose, debug=debug)
             position = int(line[0])
             artist, title = line[1].replace("/", "_").split(" - ", 1)
             if not isdate(lines[base + 3].strip()):
@@ -163,19 +153,22 @@ def aoty(
             )
         except Exception as err:
             error("", lines, err)
-        yield {
-            get.id((artist, year, title)): {
-                "artist": artist,
-                "title": title,
-                "year": year,
-                "genre": genre,
-                "score": score,
-                "ratings": ratings,
-                "type": albumType,
-                "position": position,
-                "page": pageNumber,
-            }
+        album = {
+            "artist": artist,
+            "title": title,
+            "year": year,
+            "genre": genre,
+            "score": score,
+            "ratings": ratings,
+            "type": albumType,
+            "position": position,
+            "page": pageNumber,
         }
+        if include_url:
+            album["url"] = url
+        if include_tracks:
+            album["tracks"] = tracks
+        yield {get.id((artist, year, title)): album}
 
 
 def proggenres(
