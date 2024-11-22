@@ -77,14 +77,11 @@ def aoty_tracks(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> list[dict[str, str | int | list]]:
-    result = page(url, no_list=True)
-    for data in search.lines(
-        r"^Track List",
-        result,
-        end=r"^[ ]{3}(Total Length: |User Lists$)",
-        after=1,
-    ):
+    result = page(url, source=True)
+    for data in search.lines(r"Track List", result):
         data = data.group().splitlines()
+    print(data)
+    exit()
     tracks = list()  # type: list[dict[str, str | int | list]]
     t = dict()  # type: dict[str, str | int | list]
     disc = None
