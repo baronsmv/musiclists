@@ -65,12 +65,16 @@ def aoty_tracks(
 ) -> tuple[list[dict[str, str | int]], str]:
     result = page(url, no_list=True)
     for data in search.lines(
-        r"^Track List", result, end="Total Length: ", after=1
+        r"^Track List",
+        result,
+        end=r"^[ ]{3}(Total Length: |User Lists$)",
+        after=1,
     ):
         data = data.group().splitlines()
     tracks = list()  # type: list[dict[str, str | int]]
     t = dict()  # type: dict[str, str | int]
     disc = None
+    print(data)
     for d in data[2:]:
         if not d:
             continue
@@ -80,6 +84,7 @@ def aoty_tracks(
         if bool(re.search(r"[ ]{3}Total Length: ", d)):
             length = d.replace("Total Length: ", "").replace(" hour, ", ":")
             length = length.replace(" minutes", "").strip()
+            print(length)
             return tracks, length
         elif "rating" in t:
             tracks.append(t.copy())
@@ -90,6 +95,12 @@ def aoty_tracks(
             t["number"] = (disc + "-" if disc else "") + d.split(" ", 1)[0]
             t["number"] = str(t["number"]).strip()
             t["title"] = d.split(" ", 1)[1].strip()
+        elif "number" not in t and bool(re.search(r"^[ ]{3,4}\d{1,}\. ", d)):
+            t["number"] = (disc + "-" if disc else "") + d.split(". ", 1)[0]
+            t["number"] = str(t["number"]).strip()
+            t["title"] = d.split(". ", 1)[1].strip()
+            tracks.append(t.copy())
+            t.clear()
         elif "duration" not in t and bool(
             re.search(r"^[ ]{3}\d{1,}:\d{1,}$", d)
         ):
@@ -100,11 +111,15 @@ def aoty_tracks(
             t["rating"] = int(d.strip())
         elif bool(re.search(r"^[ ]{4} \d{1,}", d)):
             t["title"] = str(t["title"]) + "\n" + d
+        elif "number" in t and "duration" not in t:
+            tracks.append(t.copy())
+            t.clear()
+            t["number"] = (disc + "-" if disc else "") + d.split(" ", 1)[0]
+            t["number"] = str(t["number"]).strip()
+            t["title"] = d.split(" ", 1)[1].strip()
         else:
             disc = d.strip()
-    print("ERROR: EOF without length.")
-    exit(1)
-    return tracks, length
+    return tracks, "Unknown"
 
 
 def aoty(
@@ -133,7 +148,7 @@ def aoty(
                     result_w_list,
                 ):
                     url_id = m.group("url_id")
-                    count = count + 1
+                    count += 1
                 if count != 1:
                     print(f"ERROR en URL_ID({count}): {line[0]}. {line[1]}")
                     exit(1)
@@ -143,7 +158,7 @@ def aoty(
                     result_w_list,
                 ):
                     url = m.group("url")
-                    count = count + 1
+                    count += 1
                 if count != 1:
                     print(f"ERROR en URL({count}): {line[0]}. {line[1]}")
                     exit(1)
