@@ -18,6 +18,7 @@ def page(
     webpage: str,
     no_list: bool = False,
     list_only: bool = False,
+    encoding: str = "latin9",
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> str:
@@ -28,6 +29,7 @@ def page(
         return run(
             splitsh(bashCommand),
             stdout=PIPE,
+            encoding=encoding,
             check=True,
             text=True,
         ).stdout
