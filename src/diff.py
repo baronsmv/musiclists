@@ -12,7 +12,7 @@ from src import search
 def diff(
     data1: Path,
     data2: Path,
-    dedupdir: Path = defaults.DEDUP_DIR,
+    dedup_path: Path = defaults.DEDUP_DIR,
     field: str = defaults.VERIFIED_FIELD,
     dedup: bool = defaults.DEDUP,
     verbose: bool = defaults.VERBOSE,
@@ -36,7 +36,7 @@ def diff(
             print(f"Starting diff process between {data1} and {data2}...")
         keys = load(data2).keys()
         filePath, data, inv = search.dedup(
-            data1=data1, data2=data2, dedupdir=dedupdir
+            data1=data1, data2=data2, dedup_path=dedup_path
         )
         if not data:
             print(f"Duplicate file {filePath} not found.")

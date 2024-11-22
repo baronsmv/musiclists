@@ -32,15 +32,15 @@ def lines(
 def dedup(
     data1: Path,
     data2: Path,
-    dedupdir: Path,
+    dedup_path: Path,
     field: str = defaults.AUTO_FIELD,
-    keysep: str = defaults.KEY_SEP,
-    keysuffix: str = defaults.SUFFIX,
+    key_sep: str = defaults.KEY_SEP,
+    key_suf: str = defaults.SUFFIX,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> tuple[Path, dict[str, dict[str, str | list]], bool]:
-    key = Path(dedupdir / f"{data1.stem}{keysep}{data2.stem}.{keysuffix}")
-    invKey = Path(dedupdir / f"{data2.stem}{keysep}{data1.stem}.{keysuffix}")
+    key = Path(dedup_path / f"{data1.stem}{key_sep}{data2.stem}.{key_suf}")
+    invKey = Path(dedup_path / f"{data2.stem}{key_sep}{data1.stem}.{key_suf}")
     inv = False
     if key.exists():
         filePath = key

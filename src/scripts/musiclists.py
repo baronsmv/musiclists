@@ -142,9 +142,9 @@ def merge(
     write.all(
         path=path,
         text_path=text_path,
-        aotypath=aoty_path,
-        progpath=prog_path,
-        dedupdir=dedup_path,
+        aoty_path=aoty_path,
+        prog_path=prog_path,
+        dedup_path=dedup_path,
         dedup=dedup,
         text=text,
         verbose=verbose,
@@ -175,8 +175,8 @@ def dirs(
     additional debugging information if `debug` is turned on.
     """
     write.dirs(
-        musicdir=source_path,
-        dirspath=path,
+        source=source_path,
+        path=path,
         text_path=text_path,
         text=text,
         verbose=verbose,
@@ -227,7 +227,7 @@ def wanted(
         data2=dirs_path,
         name="wanted",
         dedup=dedup,
-        dedupdir=dedup_path,
+        dedup_path=dedup_path,
         text=text,
         verbose=verbose,
         debug=debug,
@@ -277,7 +277,7 @@ def leftover(
         data2=merge_path,
         name="left",
         dedup=dedup,
-        dedupdir=dedup_path,
+        dedup_path=dedup_path,
         text=text,
         verbose=verbose,
         debug=debug,

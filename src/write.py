@@ -153,7 +153,7 @@ def prog(
 ):
     if verbose:
         print("Generating list of genres...")
-    genres = tuple(i for i in dump.prog_genres())
+    genres = tuple(i for i in dump.proggenres())
     name_types = list()
     for i, t in enumerate(defaults.PROG_TYPES):
         if "all" in types or t in types:
@@ -175,8 +175,8 @@ def prog(
 
 
 def dirs(
-    musicdir: Path,
-    dirspath: Path,
+    source: Path,
+    path: Path,
     text_path: Path | None = None,
     text: bool = defaults.TEXT,
     verbose: bool = defaults.VERBOSE,
@@ -184,8 +184,8 @@ def dirs(
 ):
     data = dict()
     if verbose:
-        print(f"Registering music from '{musicdir.name}'")
-    for d in dump.dirs(musicdir):
+        print(f"Registering music from '{source.name}'")
+    for d in dump.dirs(source):
         artist = d.parent.name.strip()
         if d.name[-5:-1].isdigit():
             year = d.name[-5:-1]
@@ -202,7 +202,7 @@ def dirs(
         }
         data.update(album)
     to_path(
-        path=dirspath,
+        path=path,
         data=data,
         text_path=text_path,
         text=text,
@@ -213,9 +213,9 @@ def dirs(
 
 def all(
     path: Path,
-    aotypath: Path,
-    progpath: Path,
-    dedupdir: Path,
+    aoty_path: Path,
+    prog_path: Path,
+    dedup_path: Path,
     text_path: Path | None = None,
     dedup: bool = True,
     text: bool = defaults.TEXT,
@@ -228,13 +228,13 @@ def all(
         path=path,
         data=dict(
             diff(
-                data1=Path(aotypath),
-                data2=Path(progpath),
-                dedupdir=dedupdir,
+                data1=Path(aoty_path),
+                data2=Path(prog_path),
+                dedup_path=dedup_path,
                 dedup=dedup,
             ),
         )
-        | load(Path(progpath)),
+        | load(Path(prog_path)),
         text_path=text_path,
         text=text,
         verbose=verbose,
@@ -245,13 +245,13 @@ def all(
 def duplicates(
     data1: Path,
     data2: Path,
-    dedupdir: Path,
+    dedup_path: Path,
     text_path: Path | None = None,
-    min_score: int | float = 0.6,
-    upperlimit: int | float = 1,
+    minimum: int | float = 0.6,
+    maximum: int | float = 1,
     field: str = defaults.AUTO_FIELD,
-    keysep: str = "-",
-    keysuffix: str = defaults.SUFFIX,
+    key_sep: str = "-",
+    key_suf: str = defaults.SUFFIX,
     text: bool = defaults.TEXT,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -261,12 +261,12 @@ def duplicates(
     path, data, inv = search.dedup(
         data1=data1,
         data2=data2,
-        dedupdir=dedupdir,
+        dedup_path=dedup_path,
         field=field,
-        keysep=keysep,
-        keysuffix=keysuffix,
+        key_sep=key_sep,
+        key_suf=key_suf,
     )
-    for a1, a2 in dedup(load(data1), load(data2), min_score, upperlimit):
+    for a1, a2 in dedup(load(data1), load(data2), minimum, maximum):
         if inv:
             a1, a2 = a2, a1
         if a1 not in data[field]:
@@ -293,7 +293,7 @@ def differences(
     data1: Path,
     data2: Path,
     name: str,
-    dedupdir: Path,
+    dedup_path: Path,
     text_path: Path | None = None,
     suffix: str = defaults.SUFFIX,
     dedup: bool = True,
@@ -305,7 +305,7 @@ def differences(
         print(f"Writting to {path}:")
     data = dict()
     for a1, a2 in diff(
-        data1=data1, data2=data2, dedupdir=dedupdir, dedup=dedup
+        data1=data1, data2=data2, dedup_path=dedup_path, dedup=dedup
     ):
         data[a1] = a2
     to_path(
