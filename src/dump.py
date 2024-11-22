@@ -142,26 +142,7 @@ def aoty(
         try:
             line = lines[base + 0].strip().split(". ", 1)
             if download_tracks:
-                count = 0
-                for m in search.lines(
-                    r"[^\d]" + line[0] + r"\. \[(?P<url_id>\d{1,})\]",
-                    result_w_list,
-                ):
-                    url_id = m.group("url_id")
-                    count += 1
-                if count != 1:
-                    print(f"ERROR en URL_ID({count}): {line[0]}. {line[1]}")
-                    exit(1)
-                count = 0
-                for m in search.lines(
-                    r"[^\d]" + url_id + r"\. (?P<url>http.*)",
-                    result_w_list,
-                ):
-                    url = m.group("url")
-                    count += 1
-                if count != 1:
-                    print(f"ERROR en URL({count}): {line[0]}. {line[1]}")
-                    exit(1)
+                url = get.url(result_w_list, r"[^\d]" + line[0] + r"\. ")
                 tracks, length = aoty_tracks(url, verbose=verbose, debug=debug)
             position = int(line[0])
             artist, title = line[1].replace("/", "_").split(" - ", 1)

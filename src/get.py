@@ -5,6 +5,7 @@ import re
 from unicodedata import normalize
 
 from src.defaults import defaults
+from src import search
 
 
 def get(
@@ -109,3 +110,27 @@ def level(
         return lvl
     else:
         return level(child.parent, parent, lvl + 1)
+
+
+def url(
+    webpage: str,
+    pattern_before: str = str(),
+    pattern_after: str = str(),
+) -> str:
+    count = 0
+    for m in search.lines(
+        pattern_before + r"\[(?P<url_id>\d{1,})\]" + pattern_after, webpage
+    ):
+        url_id = m.group("url_id")
+        count += 1
+    if count != 1:
+        print(f"ERROR en URL_ID({count}): {pattern_before}, {pattern_after}")
+        exit(1)
+    count = 0
+    for m in search.lines(r"[^\d]" + url_id + r"\. (?P<url>http.*)", webpage):
+        url = m.group("url")
+        count += 1
+    if count != 1:
+        print(f"ERROR en URL({count}): {pattern_before}, {pattern_after}")
+        exit(1)
+    return url
