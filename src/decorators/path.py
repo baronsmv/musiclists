@@ -3,7 +3,7 @@
 import click
 from pathlib import Path
 
-from src.defaults import defaults as default
+from src.defaults import defaults
 
 EXISTING_DIR = click.Path(
     exists=True,
@@ -45,7 +45,7 @@ def PATH(
     default_text_path: Path,
     letter: str | None = None,
     option: str | None = None,
-    text: bool = False,
+    text: bool = defaults.TEXT,
     read: bool = False,
     help_message: str | None = None,
     no_name_option: bool = False,
@@ -60,7 +60,7 @@ def PATH(
     direction = "loaded from" if read else "saved"
     help_message = help_message if help_message else HELP(
         name=name,
-        suffix=default.TEXT_SUFFIX if text else default.SUFFIX,
+        suffix=defaults.TEXT_SUFFIX if text else defaults.SUFFIX,
         direction=direction,
         extra="if `text` is enabled" if text else None,
     )
@@ -94,7 +94,7 @@ destination = click.argument(
 dedup = click.option(
     "--dedup-path",
     type=NEW_DIR,
-    default=default.DEDUP_DIR,
+    default=defaults.DEDUP_DIR,
     show_default=True,
     help="Directory of deduplicates files.",
 )
@@ -102,11 +102,11 @@ dedup = click.option(
 
 def aoty(
     name: str = "AOTY",
-    default_path: Path = default.AOTY_PATH,
-    default_text_path: Path = default.AOTY_TEXT_PATH,
+    default_path: Path = defaults.AOTY_PATH,
+    default_text_path: Path = defaults.AOTY_TEXT_PATH,
     option: str | None = None,
     letter: str | None = None,
-    text: bool = False,
+    text: bool = defaults.TEXT,
     read: bool = False,
     help_message: str | None = None,
     no_name_option: bool = False,
@@ -126,11 +126,11 @@ def aoty(
 
 def prog(
     name: str = "Progarchives",
-    default_path: Path = default.PROG_PATH,
-    default_text_path: Path = default.PROG_TEXT_PATH,
+    default_path: Path = defaults.PROG_PATH,
+    default_text_path: Path = defaults.PROG_TEXT_PATH,
     option: str | None = None,
     letter: str | None = None,
-    text: bool = False,
+    text: bool = defaults.TEXT,
     read: bool = False,
     help_message: str | None = None,
     no_name_option: bool = False,
@@ -150,11 +150,11 @@ def prog(
 
 def merge(
     name: str = "merge",
-    default_path: Path = default.MERGE_PATH,
-    default_text_path: Path = default.MERGE_TEXT_PATH,
+    default_path: Path = defaults.MERGE_PATH,
+    default_text_path: Path = defaults.MERGE_TEXT_PATH,
     option: str | None = "merge",
     letter: str | None = None,
-    text: bool = False,
+    text: bool = defaults.TEXT,
     read: bool = False,
     help_message: str | None = None,
     no_name_option: bool = False,
@@ -174,11 +174,11 @@ def merge(
 
 def dirs(
     name: str = "directories",
-    default_path: Path = default.DIRS_PATH,
-    default_text_path: Path = default.DIRS_TEXT_PATH,
+    default_path: Path = defaults.DIRS_PATH,
+    default_text_path: Path = defaults.DIRS_TEXT_PATH,
     option: str | None = "dirs",
     letter: str | None = None,
-    text: bool = False,
+    text: bool = defaults.TEXT,
     read: bool = False,
     help_message: str | None = None,
     no_name_option: bool = False,
@@ -198,11 +198,11 @@ def dirs(
 
 def wanted(
     name: str = "wanted",
-    default_path: Path = default.WANTED_PATH,
-    default_text_path: Path = default.WANTED_TEXT_PATH,
+    default_path: Path = defaults.WANTED_PATH,
+    default_text_path: Path = defaults.WANTED_TEXT_PATH,
     option: str | None = "wanted",
     letter: str | None = None,
-    text: bool = False,
+    text: bool = defaults.TEXT,
     read: bool = False,
     help_message: str | None = None,
     no_name_option: bool = False,
@@ -222,11 +222,11 @@ def wanted(
 
 def leftover(
     name: str = "leftover",
-    default_path: Path = default.LEFTOVER_PATH,
-    default_text_path=default.LEFTOVER_TEXT_PATH,
+    default_path: Path = defaults.LEFTOVER_PATH,
+    default_text_path=defaults.LEFTOVER_TEXT_PATH,
     option: str | None = "leftover",
     letter: str | None = None,
-    text: bool = False,
+    text: bool = defaults.TEXT,
     read: bool = False,
     help_message: str | None = None,
     no_name_option: bool = False,

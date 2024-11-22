@@ -44,6 +44,8 @@ def until(
     type1: list | tuple,
     type2: list | tuple | int,
     lowerlimit: int | float,
+    include_url: bool = defaults.INCLUDE_URL,
+    include_tracks: bool = defaults.INCLUDE_TRACKS,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator:
@@ -52,7 +54,14 @@ def until(
         iterType = count(type2) if isinstance(type2, int) else iter(type2)
         while not foundLimit:
             b = next(iterType)
-            for album in function(a, b, verbose=verbose, debug=debug):
+            for album in function(
+                a,
+                b,
+                include_url=include_url,
+                include_tracks=include_tracks,
+                verbose=verbose,
+                debug=debug
+            ):
                 score = get.score(album)
                 if score and score < lowerlimit:
                     foundLimit = True
@@ -90,10 +99,14 @@ def aoty_tracks(
             t.clear()
         if bool(re.search(r"^[ ]{3}Disc \d{1,}", d)):
             disc = d.replace("Disc ", "").strip()
+            if disc.isnumeric():
+                disc = int(disc)
         elif "number" not in t and bool(re.search(r"^[ ]{3}\d{1,} ", d)):
             t["number"], t["title"] = d.strip().split(" ", 1)
+            t["number"] = int(t["number"])
         elif "number" not in t and bool(re.search(r"^[ ]{3,4}\d{1,}\. ", d)):
             t["number"], t["title"] = d.strip().split(". ", 1)
+            t["number"] = int(t["number"])
             if disc:
                 t["disc"] = disc
             tracks.append(t.copy())
@@ -104,10 +117,14 @@ def aoty_tracks(
             t["duration"] = d.strip()
         elif "featuring" not in t and bool(re.search(r"^[ ]{3}feat. ", d)):
             t["featuring"] = d.replace("feat. ", "").strip()
+        elif "featuring" not in t and bool(re.search(r"^[ ]{3}with ", d)):
+            t["featuring"] = d.replace("with ", "").strip()
         elif "rating" not in t and bool(re.search(r"^[ ]{3}\d{1,}$", d)):
             t["rating"] = int(d.strip())
         elif bool(re.search(r"^[ ]{4} \d{1,}", d)):
-            t["title"] = str(t["title"]) + "\n" + d
+            t["title"] = str(t["title"]) + "\n" + d.strip()
+        elif bool(re.search(r"^[ ]{5}\* ", d)):
+            t["title"] = str(t["title"]) + "\n" + d.replace("* ", "").strip()
         else:
             disc = d.strip()
     return tracks
@@ -116,8 +133,8 @@ def aoty_tracks(
 def aoty(
     albumType: str,
     pageNumber: int,
-    include_url: bool = True,
-    include_tracks: bool = True,
+    include_url: bool = defaults.INCLUDE_URL,
+    include_tracks: bool = defaults.INCLUDE_TRACKS,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator:
@@ -126,7 +143,7 @@ def aoty(
     basePage = "albumoftheyear.org/ratings/user-highest-rated"
     pg = f"{basePage}/{albumType}/all/{pageNumber}/"
     result = page(pg, no_list=True)
-    if include_tracks:
+    if include_url or include_tracks:
         result_w_list = page(pg)
     for data in search.lines(r"\d\. ", result, end=r"\d ratings"):
         base = 0

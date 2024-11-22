@@ -38,7 +38,7 @@ def to_path(
     path: Path,
     data: dict | set,
     text_path: Path | None = None,
-    text: bool = False,
+    text: bool = defaults.TEXT,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
@@ -58,7 +58,9 @@ def albums(
     lowerlimit: int | float,
     text_path: Path | None = None,
     name: str | None = None,
-    text: bool = False,
+    include_url: bool = defaults.INCLUDE_URL,
+    include_tracks: bool = defaults.INCLUDE_TRACKS,
+    text: bool = defaults.TEXT,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
@@ -83,6 +85,8 @@ def albums(
         type1=type1,
         type2=type2,
         lowerlimit=lowerlimit,
+        include_url=include_url,
+        include_tracks=include_tracks,
         verbose=verbose,
         debug=debug,
     )
@@ -111,23 +115,25 @@ def albums(
 def aoty(
     path: Path,
     text_path: Path | None = None,
-    types: tuple = (
-        "LP", "EP", "Mixtape", "Compilation", "Live", "Soundtrack"
-    ),
+    types: tuple = defaults.AOTY_TYPES,
     start_page: int = 1,
     lowerlimit: int = defaults.AOTY_MIN_SCORE,
-    text: bool = False,
+    include_url: bool = defaults.INCLUDE_URL,
+    include_tracks: bool = defaults.INCLUDE_TRACKS,
+    text: bool = defaults.TEXT,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
     albums(
         path=path,
         function=dump.aoty,
-        type1=types,
+        type1=defaults.AOTY_TYPES if "all" in types else types,
         type2=start_page,
         lowerlimit=lowerlimit,
         text_path=text_path,
         name="AOTY",
+        include_url=include_url,
+        include_tracks=include_tracks,
         text=text,
         verbose=verbose,
         debug=debug,
@@ -137,22 +143,31 @@ def aoty(
 def prog(
     path: Path,
     text_path: Path | None = None,
+    types: tuple = defaults.PROG_TYPES,
     lowerlimit: float = defaults.PROG_MIN_SCORE,
-    text: bool = False,
+    include_url: bool = defaults.INCLUDE_URL,
+    include_tracks: bool = defaults.INCLUDE_TRACKS,
+    text: bool = defaults.TEXT,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
     if verbose:
         print("Generating list of genres...")
     genres = tuple(i for i in dump.proggenres())
+    name_types = list()
+    for i, t in enumerate(defaults.PROG_TYPES):
+        if "all" in types or t in types:
+            name_types.append(i)
     albums(
         path=path,
         function=dump.progarchives,
         type1=genres,
-        type2=(1),
+        type2=name_types,
         lowerlimit=lowerlimit,
         text_path=text_path,
         name="Progarchives",
+        include_url=include_url,
+        include_tracks=include_tracks,
         text=text,
         verbose=verbose,
         debug=debug,
@@ -163,7 +178,7 @@ def dirs(
     musicdir: Path,
     dirspath: Path,
     text_path: Path | None = None,
-    text: bool = False,
+    text: bool = defaults.TEXT,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
@@ -203,7 +218,7 @@ def all(
     dedupdir: Path,
     text_path: Path | None = None,
     dedup: bool = True,
-    text: bool = False,
+    text: bool = defaults.TEXT,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
@@ -237,7 +252,7 @@ def duplicates(
     field: str = defaults.AUTO_FIELD,
     keysep: str = "-",
     keysuffix: str = defaults.SUFFIX,
-    text: bool = False,
+    text: bool = defaults.TEXT,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> None:

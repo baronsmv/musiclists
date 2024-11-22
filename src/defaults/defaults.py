@@ -3,10 +3,14 @@ from pathlib import Path
 PROG_NAME = "MusicLists"
 VERSION = "0.1"
 
-DL_CHOICES = ("all", "aoty", "prog", "none")
-
 HEADERS_COLOR = "yellow"
 OPTIONS_COLOR = "green"
+
+DL_CHOICES = ("all", "aoty", "prog", "none")
+AOTY_TYPES = ("LP", "EP", "Mixtape", "Compilation", "Live", "Soundtrack")
+PROG_TYPES = (
+    "Studio", "DVD", "Boxset,Compilation", "Live", "Singles,EPs,FanClub,Promo"
+)
 
 VERBOSE = False
 DEBUG = False
@@ -14,6 +18,9 @@ DEBUG = False
 TEXT = False
 DEDUP = True
 ONLY_HIGHEST_MATCH = True
+
+INCLUDE_URL = False
+INCLUDE_TRACKS = False
 
 AOTY_MAX_SCORE = 100
 AOTY_MIN_SCORE = 83

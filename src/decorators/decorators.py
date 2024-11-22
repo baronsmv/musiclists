@@ -5,7 +5,7 @@ from click_help_colors import HelpColorsCommand, version_option
 from functools import wraps
 from time import time
 
-from src.decorators import groups, path, score
+from src.decorators import groups, path, score, types
 from src.defaults import defaults
 
 
@@ -74,10 +74,29 @@ re_download = click.option(
     "-r",
     "--re-download",
     type=click.Choice(defaults.DL_CHOICES, case_sensitive=False),
+    multiple=True,
     show_choices=True,
-    default=defaults.DL_CHOICES[0],
+    default=(defaults.DL_CHOICES[0],),
     show_default=True,
     help="Re-download lists before merge.",
+)
+include_url = click.option(
+    "-U",
+    "--include-url",
+    is_flag=True,
+    type=click.BOOL,
+    default=defaults.INCLUDE_URL,
+    show_default=True,
+    help="Download URL of each album. It takes slightly more time.",
+)
+include_tracks = click.option(
+    "-T",
+    "--include-tracks",
+    is_flag=True,
+    type=click.BOOL,
+    default=defaults.INCLUDE_TRACKS,
+    show_default=True,
+    help="Download tracks of each album (experimental). It takes more time.",
 )
 
 
@@ -105,10 +124,13 @@ def aoty(func):
     return command(
         func,
         (
+            types.aoty(no_name_option=True),
             score.aoty(letter="m", no_name_option=True),
+            include_url,
+            include_tracks,
             path.aoty(letter="p", no_name_option=True),
             text,
-            path.aoty(text=True, no_name_option=True),
+            path.aoty(letter="P", text=True, no_name_option=True),
         ),
         groups.download,
     )
@@ -118,10 +140,13 @@ def prog(func):
     return command(
         func,
         (
+            types.prog(no_name_option=True),
             score.prog(letter="m", no_name_option=True),
+            include_url,
+            include_tracks,
             path.prog(letter="p", no_name_option=True),
             text,
-            path.prog(text=True, no_name_option=True),
+            path.prog(letter="P", text=True, no_name_option=True),
         ),
         groups.download,
     )
@@ -139,9 +164,13 @@ def merge(func):
             dedup,
             path.merge(letter="p", no_name_option=True),
             text,
-            path.merge(text=True, no_name_option=True),
+            path.merge(letter="P", text=True, no_name_option=True),
+            types.aoty(),
             score.aoty(),
+            types.prog(),
             score.prog(),
+            include_url,
+            include_tracks,
             path.aoty(),
             path.prog(),
         ),
@@ -160,7 +189,7 @@ def wanted(func):
         (
             path.wanted(letter="p", no_name_option=True),
             text,
-            path.wanted(text=True, no_name_option=True),
+            path.wanted(letter="P", text=True, no_name_option=True),
             dedup,
             path.merge(read=True),
             path.dirs(read=True),
@@ -175,7 +204,7 @@ def leftover(func):
         (
             path.leftover(letter="p", no_name_option=True),
             text,
-            path.leftover(text=True, no_name_option=True),
+            path.leftover(letter="P", text=True, no_name_option=True),
             dedup,
             path.dirs(read=True),
             path.merge(read=True),
