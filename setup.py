@@ -6,8 +6,11 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     include_package_data=True,
     install_requires=(
+        "bs4",
         "click",
         "click_help_colors",
+        "lxml",
+        "pandas",
         "pathlib",
         "python-dateutil",
         "pypi-json",

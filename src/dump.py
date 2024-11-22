@@ -18,11 +18,13 @@ def page(
     webpage: str,
     no_list: bool = False,
     list_only: bool = False,
+    source: bool = False,
     encoding: str = "utf-8",
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> str:
     bashCommand = "lynx -dump -width=1000"
+    bashCommand += "-source" if source else ""
     bashCommand += " -nolist" if no_list else " -listonly" if list_only else ""
     bashCommand += f" {webpage}"
     try:
@@ -70,31 +72,6 @@ def until(
                     yield album
 
 
-def insert_track(
-    track: dict[str, str | int | list],
-    tracks: list[dict[str, str | int | list]],
-    disc: str | int | None = None,
-) -> None:
-    if isinstance(track["track"], str):
-        track["track"] = int(track["track"])
-    if isinstance(disc, str) and disc.isnumeric():
-        disc = int(disc)
-    if disc:
-        track["disc"] = disc
-    tracks.append(track.copy())
-    track.clear()
-
-
-def add_track_subtitle(track: dict[str, str | int | list], subtitle) -> None:
-    subtitle = re.sub(r"^\* ", "", subtitle.strip())
-    if "subtitle" not in track:
-        track["subtitle"] = subtitle
-    elif isinstance(track["subtitle"], str):
-        track["subtitle"] = [track["subtitle"], subtitle]
-    elif isinstance(track["subtitle"], list):
-        track["subtitle"].append(subtitle)
-
-
 def aoty_tracks(
     url: str,
     verbose: bool = defaults.VERBOSE,
@@ -111,40 +88,6 @@ def aoty_tracks(
     tracks = list()  # type: list[dict[str, str | int | list]]
     t = dict()  # type: dict[str, str | int | list]
     disc = None
-    for d in data[2:-1]:
-        if not d:
-            continue
-        d = str(d)
-        if bool(re.search(r"^[ ]{3}Disc \d{1,}", d)):
-            disc = d.replace("Disc ", "").strip()
-        elif "track" not in t and bool(re.search(r"^[ ]{3}\d{1,} ", d)):
-            t["track"], t["title"] = d.strip().split(" ", 1)
-        elif "track" not in t and bool(re.search(r"^[ ]{3,4}\d{1,}\. ", d)):
-            t["track"], t["title"] = d.strip().split(". ", 1)
-            insert_track(t, tracks, disc)
-        elif "length" not in t and bool(
-            re.search(r"^[ ]{3}\d{1,}:\d{1,}$", d)
-        ):
-            t["length"] = d.strip()
-        elif "featuring" not in t and bool(
-            re.search(r"^[ ]{3}((feat.)|(with)) ", d)
-        ):
-            t["featuring"] = d.strip().split(" ", 1)[1]
-        elif "score" not in t and bool(re.search(r"^[ ]{3}\d{1,}$", d)):
-            t["score"] = int(d.strip())
-            insert_track(t, tracks, disc)
-        elif bool(
-            re.search(r"(^[ ]{5})|(([Bb]onus)|([Hh]idden) [Tt]rack)", d)
-        ):
-            add_track_subtitle(t, d)
-        elif "length" not in t and bool(re.search(r"^[ ]{3}\d{1,} ", d)):
-            insert_track(t, tracks, disc)
-            t["track"], t["title"] = d.strip().split(" ", 1)
-        else:
-            disc = d.strip()
-    if t:
-        insert_track(t, tracks, disc)
-    return tracks
 
 
 def aoty(
