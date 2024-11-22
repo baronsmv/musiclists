@@ -111,6 +111,10 @@ def albums(
 def aoty(
     path: Path,
     text_path: Path | None = None,
+    types: tuple = (
+        "LP", "EP", "Mixtape", "Compilation", "Live", "Soundtrack"
+    ),
+    start_page: int = 1,
     lowerlimit: int = defaults.AOTY_MIN_SCORE,
     text: bool = False,
     verbose: bool = defaults.VERBOSE,
@@ -119,15 +123,8 @@ def aoty(
     albums(
         path=path,
         function=dump.aoty,
-        type1=(
-            "LP",
-            "EP",
-            "Mixtape",
-            "Compilation",
-            "Live",
-            "Soundtrack",
-        ),
-        type2=1,
+        type1=types,
+        type2=start_page,
         lowerlimit=lowerlimit,
         text_path=text_path,
         name="AOTY",
