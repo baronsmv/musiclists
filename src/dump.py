@@ -75,8 +75,8 @@ def insert_track(
     tracks: list[dict[str, str | int | list]],
     disc: str | int | None = None,
 ) -> None:
-    if isinstance(track["number"], str):
-        track["number"] = int(track["number"])
+    if isinstance(track["track"], str):
+        track["track"] = int(track["track"])
     if isinstance(disc, str) and disc.isnumeric():
         disc = int(disc)
     if disc:
@@ -86,10 +86,13 @@ def insert_track(
 
 
 def add_track_subtitle(track: dict[str, str | int | list], subtitle) -> None:
+    subtitle = re.sub(r"^\* ", "", subtitle.strip())
     if "subtitle" not in track:
-        track["subtitle"] = list()
-    if isinstance(track["subtitle"], list):
-        track["subtitle"].append(subtitle.strip())
+        track["subtitle"] = subtitle
+    elif isinstance(track["subtitle"], str):
+        track["subtitle"] = [track["subtitle"], subtitle]
+    elif isinstance(track["subtitle"], list):
+        track["subtitle"].append(subtitle)
 
 
 def aoty_tracks(
@@ -114,28 +117,33 @@ def aoty_tracks(
         d = str(d)
         if bool(re.search(r"^[ ]{3}Disc \d{1,}", d)):
             disc = d.replace("Disc ", "").strip()
-        elif "number" not in t and bool(re.search(r"^[ ]{3}\d{1,} ", d)):
-            t["number"], t["title"] = d.strip().split(" ", 1)
-        elif "number" not in t and bool(re.search(r"^[ ]{3,4}\d{1,}\. ", d)):
-            t["number"], t["title"] = d.strip().split(". ", 1)
+        elif "track" not in t and bool(re.search(r"^[ ]{3}\d{1,} ", d)):
+            t["track"], t["title"] = d.strip().split(" ", 1)
+        elif "track" not in t and bool(re.search(r"^[ ]{3,4}\d{1,}\. ", d)):
+            t["track"], t["title"] = d.strip().split(". ", 1)
             insert_track(t, tracks, disc)
-        elif "duration" not in t and bool(
+        elif "length" not in t and bool(
             re.search(r"^[ ]{3}\d{1,}:\d{1,}$", d)
         ):
-            t["duration"] = d.strip()
-        elif "featuring" not in t and bool(re.search(r"^[ ]{3}feat. ", d)):
-            t["featuring"] = d.replace("feat. ", "").strip()
-        elif "featuring" not in t and bool(re.search(r"^[ ]{3}with ", d)):
-            t["featuring"] = d.replace("with ", "").strip()
-        elif "rating" not in t and bool(re.search(r"^[ ]{3}\d{1,}$", d)):
-            t["rating"] = int(d.strip())
+            t["length"] = d.strip()
+        elif "featuring" not in t and bool(
+            re.search(r"^[ ]{3}((feat.)|(with)) ", d)
+        ):
+            t["featuring"] = d.strip().split(" ", 1)[1]
+        elif "score" not in t and bool(re.search(r"^[ ]{3}\d{1,}$", d)):
+            t["score"] = int(d.strip())
             insert_track(t, tracks, disc)
-        elif bool(re.search(r"^[ ]{4} \d{1,}", d)):
+        elif bool(
+            re.search(r"(^[ ]{5})|(([Bb]onus)|([Hh]idden) [Tt]rack)", d)
+        ):
             add_track_subtitle(t, d)
-        elif bool(re.search(r"^[ ]{5}\* ", d)):
-            add_track_subtitle(t, d.replace("* ", ""))
+        elif "length" not in t and bool(re.search(r"^[ ]{3}\d{1,} ", d)):
+            insert_track(t, tracks, disc)
+            t["track"], t["title"] = d.strip().split(" ", 1)
         else:
             disc = d.strip()
+    if t:
+        insert_track(t, tracks, disc)
     return tracks
 
 
