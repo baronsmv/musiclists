@@ -47,6 +47,15 @@ aoty_album = {
             "tag": "span",
         },
     },
+    "cover_url": {
+        "tag": "div",
+        "class": "albumTopBox cover",
+        "type": "str",
+        "subtag": {
+            "tag": "img",
+        },
+        "key": "src",
+    },
     "critic_score": {
         "tag": "div",
         "class": "albumCriticScore",
@@ -83,7 +92,44 @@ aoty_album = {
     "year": {
         "tag": "div",
         "class": "detailRow",
-    }
+        "type": "int",
+        "subtag": {
+            "tag": "a",
+            "number": -1,
+        },
+    },
+    "labels": {
+        "tag": "div",
+        "class": "detailRow",
+        "number": 2,
+        "type": "list",
+        "expand": "a",
+        "expand_url": "label",
+    },
+    "genres": {
+        "tag": "div",
+        "class": "detailRow",
+        "number": 3,
+        "type": "list",
+        "expand": "a",
+        "expand_url": "genre",
+    },
+    "producers": {
+        "tag": "div",
+        "class": "detailRow",
+        "number": 4,
+        "type": "list",
+        "expand": "a",
+        "expand_url": "producer",
+    },
+    "writers": {
+        "tag": "div",
+        "class": "detailRow",
+        "number": 5,
+        "type": "list",
+        "expand": "a",
+        "expand_url": "writer",
+    },
 }
 aoty_tracklist = {
     "disc": {
@@ -128,7 +174,8 @@ aoty_tracklist = {
         "tag": "div",
         "class": "featuredArtists",
         "type": "list",
-        "expand": "a"
+        "expand": "a",
+        "expand_url": "featured_artist",
     },
     "score": {
         "tag": "td",

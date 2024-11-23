@@ -80,24 +80,6 @@ re_download = click.option(
     show_default=True,
     help="Re-download lists before merge.",
 )
-include_url = click.option(
-    "-U",
-    "--include-url",
-    is_flag=True,
-    type=click.BOOL,
-    default=defaults.INCLUDE_URL,
-    show_default=True,
-    help="Download URL of each album. It takes slightly more time.",
-)
-include_tracks = click.option(
-    "-T",
-    "--include-tracks",
-    is_flag=True,
-    type=click.BOOL,
-    default=defaults.INCLUDE_TRACKS,
-    show_default=True,
-    help="Download tracks of each album (experimental). It takes more time.",
-)
 
 
 def add(func, decs: tuple):
@@ -126,8 +108,6 @@ def aoty(func):
         (
             types.aoty(no_name_option=True),
             score.aoty(letter="m", no_name_option=True),
-            include_url,
-            include_tracks,
             path.aoty(letter="p", no_name_option=True),
             text,
             path.aoty(letter="P", text=True, no_name_option=True),
@@ -142,8 +122,6 @@ def prog(func):
         (
             types.prog(no_name_option=True),
             score.prog(letter="m", no_name_option=True),
-            include_url,
-            include_tracks,
             path.prog(letter="p", no_name_option=True),
             text,
             path.prog(letter="P", text=True, no_name_option=True),
@@ -169,8 +147,6 @@ def merge(func):
             score.aoty(),
             types.prog(),
             score.prog(),
-            include_url,
-            include_tracks,
             path.aoty(),
             path.prog(),
         ),

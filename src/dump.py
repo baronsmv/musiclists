@@ -46,8 +46,6 @@ def until(
     type1: list | tuple,
     type2: list | tuple | int,
     min_score: int | float,
-    include_url: bool = defaults.INCLUDE_URL,
-    include_tracks: bool = defaults.INCLUDE_TRACKS,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator:
@@ -59,8 +57,6 @@ def until(
             for album in function(
                 a,
                 b,
-                include_url=include_url,
-                include_tracks=include_tracks,
                 verbose=verbose,
                 debug=debug,
             ):
@@ -75,8 +71,6 @@ def until(
 def aoty(
     albumType: str,
     pageNumber: int,
-    include_url: bool = defaults.INCLUDE_URL,
-    include_tracks: bool = defaults.INCLUDE_TRACKS,
     base_page: str = "https://www.albumoftheyear.org",
     ratings_subpage: str = "ratings/user-highest-rated",
     list_tags: dict = html_tags.aoty_albumlist,
@@ -91,12 +85,13 @@ def aoty(
     for data in albums_list.find_all(class_="albumListRow"):
         album = dict()  # type: dict[str, str | int | list]
         get.tag(element=data, data_struct=album, tags=list_tags)
-        album_data = get.table(
-            url=base_page + str(album["album_url"]), id="centerContent"
-        )
+        album_url = base_page + str(album["album_url"])
+        if debug:
+            print(album_url)
+        album_data = get.table(url=album_url, id="centerContent")
         get.tag(element=album_data, data_struct=album, tags=album_tags)
-        print(album)
-        exit()
+        yield {get.id(album): album.copy()}
+        album.clear()
 
 
 def prog_genres(

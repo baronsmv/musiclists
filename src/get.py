@@ -16,13 +16,14 @@ def get(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
-    if not data.get(key):
+    print(data, key)
+    if data.get(key):
+        return data.get(key)
+    else:
         if key in tuple(data.values())[0]:
             return tuple(data.values())[0][key]
         else:
             return str()
-    else:
-        return data.get(key)
 
 
 def artist(
@@ -54,7 +55,7 @@ def score(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> int | float:
-    return get(data, "score")
+    return get(data, "user_score")
 
 
 def id(
@@ -152,22 +153,39 @@ def table(
     return soup.find(id=id, recursive=True)
 
 
+def find_tag(element, values):
+    if "tag" in values:
+        if "class" in values:
+            d = element.find_all(
+                values["tag"], class_=values["class"], recursive=True
+            )
+        else:
+            d = element.find_all(values["tag"])
+        i = values["number"] if "number" in values else 0
+        if len(d) > i:
+            return d[i]
+        else:
+            return None
+    else:
+        return element
+
+
 def tag(element, data_struct: dict, tags: dict) -> None:
     for k, v in tags.items():
-        if "tag" in v and "class" in v:
-            d = element.find(v["tag"], class_=v["class"], recursive=True)
-        elif "key" in v:
-            d = element.get(v["key"])
+        d = find_tag(element=element, values=v)
         if d and "subtag" in v:
-            subtag = v["subtag"]
-            d = d.find_all(subtag["tag"])[
-                subtag["number"] if subtag["number"] else 0
-            ]
+            d = find_tag(element=d, values=v["subtag"])
+        if d and "key" in v:
+            d = d.get(v["key"])
         if d and "contains" in v and isinstance(v["contains"], dict):
             tag(element=d, data_struct=data_struct, tags=dict(v["contains"]))
         if d and "expand" in v:
-            if "type" in v and v["type"] == "list":
-                d = list(d.find_all(v["expand"]))
+            if "expand_url" in v:
+                d = list(
+                    {v["expand_url"]: e.string, "url": e.get("href")}
+                    for e in d.find_all(v["expand"])
+                    if e.get("href") != "#"
+                )
             else:
                 d = list(e.string for e in d.find_all(v["expand"]))
         if d and "type" in v or "replace" in v:
@@ -179,7 +197,7 @@ def tag(element, data_struct: dict, tags: dict) -> None:
             if "replace" in v and isinstance(v["replace"], dict):
                 for kr, vr in v["replace"].items():
                     d = d.replace(kr, vr)
-            if v["type"] == "int":
+            if v["type"] == "int" and d.isnumeric():
                 d = int(d)
         if d:
             data_struct[k] = d
@@ -211,14 +229,6 @@ def aoty_tracks(
         track = dict()  # type: dict[str, str | int | list]
         tag(element=t, data_struct=track, tags=tags)
         if track:
-            if (
-                "featuring" in track
-                and isinstance(track["featuring"], list)
-            ):
-                track["featuring"] = [
-                    {"artist": tags.text, "url": tags.get("href")}
-                    for tags in track["featuring"]
-                ]
             if "disc" in track:
                 disc = str(track["disc"])
             elif disc:

@@ -11,8 +11,6 @@ from src.copy import copy as cp
 def aoty(
     types: tuple,
     min_score: int,
-    include_url: bool,
-    include_tracks: bool,
     path: Path,
     text_path: Path,
     text: bool,
@@ -40,8 +38,6 @@ def aoty(
         text_path=text_path,
         min_score=min_score,
         types=types,
-        include_url=include_url,
-        include_tracks=include_tracks,
         text=text,
         verbose=verbose,
         debug=debug,
