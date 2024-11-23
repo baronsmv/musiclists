@@ -159,7 +159,10 @@ def tag(element, data_struct: dict, tags: dict) -> None:
         elif "key" in v:
             d = element.get(v["key"])
         if d and "subtag" in v:
-            d = d.find(v["subtag"])
+            subtag = v["subtag"]
+            d = d.find_all(subtag["tag"])[
+                subtag["number"] if subtag["number"] else 0
+            ]
         if d and "contains" in v and isinstance(v["contains"], dict):
             tag(element=d, data_struct=data_struct, tags=dict(v["contains"]))
         if d and "expand" in v:
