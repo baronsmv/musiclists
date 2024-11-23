@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-AOTY = {
+aoty = {
     "disc": {
         "tag": "div",
         "class": "discNumber",

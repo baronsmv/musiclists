@@ -188,7 +188,7 @@ def aoty_tracks(
     user_agent: str = "Mozilla/5.0",
     encoding: str = "utf-8",
     parser: str = "html.parser",
-    tags: dict = html_tags.AOTY,
+    tags: dict = html_tags.aoty,
     base_page: str = "https://www.albumoftheyear.org",
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -202,14 +202,6 @@ def aoty_tracks(
         encoding=encoding,
         parser=parser
     )
-    if (
-        tracklist.find("ol", recursive=True)
-        and not tracklist.find("trackTitle", recursive=True)
-    ):
-        return [
-            {"title": li.string} for li in
-            tracklist.find("ol", recursive=True).find_all("li")
-        ]
     tracks = list()  # type: list[dict[str, str | int | list]]
     disc = str()
     for t in tracklist.find_all("tr"):
@@ -230,4 +222,13 @@ def aoty_tracks(
                 track["disc"] = disc
             tracks.append(track.copy())
             track.clear()
-    return tracks
+    if tracks:
+        return tracks
+    elif tracklist.find("ol", recursive=True).find("li"):
+        return [
+            {"title": li.string} for li in
+            tracklist.find("ol", recursive=True).find_all("li")
+        ]
+    else:
+        print(f"ERROR: Didn't find any tracks for {url}")
+        exit(1)
