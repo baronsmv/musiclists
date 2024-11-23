@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
-from bs4 import BeautifulSoup
 from collections.abc import Iterator
 from pathlib import Path
 import re
-from urllib.request import Request, urlopen
 from itertools import count
 from subprocess import run, PIPE
 from shlex import split as splitsh
@@ -74,52 +72,6 @@ def until(
                     yield album
 
 
-def aoty_tracks(
-    url: str,
-    user_agent: str = "Mozilla/5.0",
-    encoding: str = "utf-8",
-    list_id: str = "tracklist",
-    base_page: str = "https://www.albumoftheyear.org",
-    verbose: bool = defaults.VERBOSE,
-    debug: bool = defaults.DEBUG,
-) -> list[dict[str, str | int | list]]:
-    req = Request(url=url, headers={"User-Agent": user_agent})
-    with urlopen(req) as response:
-        html = response.read().decode(encoding)
-    soup = BeautifulSoup(html, "html.parser")
-    table = soup.find(id=list_id, recursive=True)
-    tracks = list()  # type: list[dict[str, str | int | list]]
-    for t in table.find_all("tr"):  # type: ignore
-        track = dict()
-        for k, v in {
-            "track": "trackNumber",
-            "title": "trackTitle",
-            "length": "length",
-            "featuring": "featuredArtists",
-            "score": "trackRating",
-        }.items():
-            data = t.find(("td", "div"), class_=v)
-            if data:
-                if k == "title":
-                    data = data.find("a")
-                    track[k] = data.string
-                    track["url"] = base_page + data.get("href")
-                elif k == "score":
-                    data = data.find("span")
-                    track[k] = int(data.text)
-                    track["ratings"] = data.get("title").split()[0]
-                elif k == "featuring":
-                    track[k] = [
-                        {"artist": d.text, "url": d.get("href")}
-                        for d in data.find_all("a")
-                    ]
-                else:
-                    track[k] = data.string
-        if track:
-            tracks.append(track)
-    return tracks
-
-
 def aoty(
     albumType: str,
     pageNumber: int,
@@ -142,7 +94,11 @@ def aoty(
         if include_url or include_tracks:
             url = get.url(result_w_list, r"[^\d]" + line[0] + r"\. ")
         if include_tracks:
-            tracks = aoty_tracks(url, verbose=verbose, debug=debug)
+            tracks = get.aoty_tracks(
+                url,
+                verbose=verbose,
+                debug=debug
+            )
         position = int(line[0])
         artist, title = line[1].replace("/", "_").split(" - ", 1)
         if not isdate(lines[base + 3].strip()):

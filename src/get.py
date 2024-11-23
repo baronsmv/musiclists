@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+from bs4 import BeautifulSoup
 from pathlib import Path
 import re
 from unicodedata import normalize
+from urllib.request import Request, urlopen
 
 from src.defaults import defaults
 from src import search
@@ -134,3 +136,65 @@ def url(
         print(f"ERROR en URL({count}): {pattern_before}, {pattern_after}")
         exit(1)
     return url
+
+
+def table(
+    url: str,
+    id: str,
+    user_agent: str = "Mozilla/5.0",
+    encoding: str = "utf-8",
+    parser: str = "html.parser",
+):
+    req = Request(url=url, headers={"User-Agent": user_agent})
+    with urlopen(req) as response:
+        html = response.read().decode(encoding)
+    soup = BeautifulSoup(html, parser)
+    return soup.find(id=id, recursive=True)
+
+
+def aoty_tracks(
+    url: str,
+    id: str = "tracklist",
+    user_agent: str = "Mozilla/5.0",
+    encoding: str = "utf-8",
+    parser: str = "html.parser",
+    base_page: str = "https://www.albumoftheyear.org",
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+) -> list[dict[str, str | int | list]]:
+    tracks = list()
+    for t in table(
+        url=url,
+        id=id,
+        user_agent=user_agent,
+        encoding=encoding,
+        parser=parser
+    ).find_all("tr"):
+        track = dict()
+        for k, v in {
+            "track": "trackNumber",
+            "title": "trackTitle",
+            "length": "length",
+            "featuring": "featuredArtists",
+            "score": "trackRating",
+        }.items():
+            data = t.find(("td", "div"), class_=v)
+            if data:
+                if k == "title":
+                    data = data.find("a")
+                    track[k] = data.string
+                    track["url"] = base_page + data.get("href")
+                elif k == "score":
+                    data = data.find("span")
+                    track[k] = int(data.text)
+                    track["ratings"] = data.get("title").split()[0]
+                elif k == "featuring":
+                    track[k] = [
+                        {"artist": d.text, "url": d.get("href")}
+                        for d in data.find_all("a")
+                    ]
+                else:
+                    track[k] = data.string
+        if track:
+            tracks.append(track)
+    return tracks
