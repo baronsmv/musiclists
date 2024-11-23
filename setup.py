@@ -9,6 +9,7 @@ setuptools.setup(
         "bs4",
         "click",
         "click_help_colors",
+        "html5lib",
         "lxml",
         "pandas",
         "pathlib",

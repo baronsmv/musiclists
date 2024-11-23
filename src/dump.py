@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+from bs4 import BeautifulSoup
 from collections.abc import Iterator
 from pathlib import Path
 import re
+from urllib.request import Request, urlopen
 from itertools import count
 from subprocess import run, PIPE
 from shlex import split as splitsh
@@ -24,7 +26,7 @@ def page(
     debug: bool = defaults.DEBUG,
 ) -> str:
     bashCommand = "lynx -dump -width=1000"
-    bashCommand += "-source" if source else ""
+    bashCommand += " -source" if source else ""
     bashCommand += " -nolist" if no_list else " -listonly" if list_only else ""
     bashCommand += f" {webpage}"
     try:
@@ -62,7 +64,7 @@ def until(
                 include_url=include_url,
                 include_tracks=include_tracks,
                 verbose=verbose,
-                debug=debug
+                debug=debug,
             ):
                 score = get.score(album)
                 if score and score < min_score:
@@ -74,17 +76,48 @@ def until(
 
 def aoty_tracks(
     url: str,
+    user_agent: str = "Mozilla/5.0",
+    encoding: str = "utf-8",
+    list_id: str = "tracklist",
+    base_page: str = "https://www.albumoftheyear.org",
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> list[dict[str, str | int | list]]:
-    result = page(url, source=True)
-    for data in search.lines(r"Track List", result):
-        data = data.group().splitlines()
-    print(data)
-    exit()
+    req = Request(url=url, headers={"User-Agent": user_agent})
+    with urlopen(req) as response:
+        html = response.read().decode(encoding)
+    soup = BeautifulSoup(html, "html.parser")
+    table = soup.find(id=list_id, recursive=True)
     tracks = list()  # type: list[dict[str, str | int | list]]
-    t = dict()  # type: dict[str, str | int | list]
-    disc = None
+    for t in table.find_all("tr"):  # type: ignore
+        track = dict()
+        for k, v in {
+            "track": "trackNumber",
+            "title": "trackTitle",
+            "length": "length",
+            "featuring": "featuredArtists",
+            "score": "trackRating",
+        }.items():
+            data = t.find(("td", "div"), class_=v)
+            if data:
+                if k == "title":
+                    data = data.find("a")
+                    track[k] = data.string
+                    track["url"] = base_page + data.get("href")
+                elif k == "score":
+                    data = data.find("span")
+                    track[k] = int(data.text)
+                    track["ratings"] = data.get("title").split()[0]
+                elif k == "featuring":
+                    track[k] = [
+                        {"artist": d.text, "url": d.get("href")}
+                        for d in data.find_all("a")
+                    ]
+                else:
+                    track[k] = data.string
+        if track:
+            tracks.append(track)
+    return tracks
 
 
 def aoty(
@@ -121,9 +154,7 @@ def aoty(
         else:
             genre = lines[base + 4].strip().split(", ")
         score = int(lines[base + 6].strip())
-        ratings = int(
-            lines[base + 7].strip().split(" ")[0].replace(",", "")
-        )
+        ratings = int(lines[base + 7].strip().split(" ")[0].replace(",", ""))
         album = {
             "artist": artist,
             "title": title,
