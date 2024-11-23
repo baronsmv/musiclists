@@ -1,6 +1,71 @@
 #!/usr/bin/env python3
 
-aoty = {
+aoty_albumlist = {
+    "position": {
+        "tag": "span",
+        "class": "albumListRank",
+        "subtag": "span",
+        "type": "int",
+    },
+    "title": {
+        "tag": "h2",
+        "class": "albumListTitle",
+        "type": "str",
+        "subtag": "a",
+        "contains": {
+            "album_url": {
+                "key": "href",
+                "type": "str",
+            },
+        },
+    }
+}
+aoty_album = {
+    "artist": {
+        "tag": "div",
+        "class": "artist",
+        "type": "str",
+        "subtag": "a",
+        "contains": {
+            "artist_url": {
+                "key": "href",
+                "type": "str",
+            },
+        },
+    },
+    "title": {
+        "tag": "div",
+        "class": "albumTitle",
+        "type": "str",
+        "subtag": "span",
+    },
+    "critic_score": {
+        "tag": "div",
+        "class": "albumCriticScore",
+        "type": "int",
+        "subtag": "a",
+    },
+    "critic_reviews": {
+        "tag": "div",
+        "class": "text numReviews",
+        "type": "int",
+        "subtag": "span",
+    },
+    "user_score": {
+        "tag": "div",
+        "class": "albumUserScore",
+        "type": "int",
+        "subtag": "a",
+    },
+    "user_reviews": {
+        "tag": "div",
+        "class": "albumUserScoreBox",
+        "type": "int",
+        "subtag": "strong",
+        "replace": {",": ""},
+    },
+}
+aoty_tracklist = {
     "disc": {
         "tag": "div",
         "class": "discNumber",

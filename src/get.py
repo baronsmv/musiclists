@@ -152,16 +152,16 @@ def table(
     return soup.find(id=id, recursive=True)
 
 
-def tag(element, track: dict, tags: dict) -> None:
+def tag(element, data_struct: dict, tags: dict) -> None:
     for k, v in tags.items():
         if "tag" in v and "class" in v:
-            d = element.find(v["tag"], class_=v["class"])
+            d = element.find(v["tag"], class_=v["class"], recursive=True)
         elif "key" in v:
             d = element.get(v["key"])
         if d and "subtag" in v:
             d = d.find(v["subtag"])
         if d and "contains" in v and isinstance(v["contains"], dict):
-            tag(element=d, track=track, tags=dict(v["contains"]))
+            tag(element=d, data_struct=data_struct, tags=dict(v["contains"]))
         if d and "expand" in v:
             if "type" in v and v["type"] == "list":
                 d = list(d.find_all(v["expand"]))
@@ -179,7 +179,7 @@ def tag(element, track: dict, tags: dict) -> None:
             if v["type"] == "int":
                 d = int(d)
         if d:
-            track[k] = d
+            data_struct[k] = d
 
 
 def aoty_tracks(
@@ -188,7 +188,7 @@ def aoty_tracks(
     user_agent: str = "Mozilla/5.0",
     encoding: str = "utf-8",
     parser: str = "html.parser",
-    tags: dict = html_tags.aoty,
+    tags: dict = html_tags.aoty_tracklist,
     base_page: str = "https://www.albumoftheyear.org",
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -206,7 +206,7 @@ def aoty_tracks(
     disc = str()
     for t in tracklist.find_all("tr"):
         track = dict()  # type: dict[str, str | int | list]
-        tag(element=t, track=track, tags=tags)
+        tag(element=t, data_struct=track, tags=tags)
         if track:
             if (
                 "featuring" in track

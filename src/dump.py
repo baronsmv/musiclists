@@ -7,7 +7,7 @@ from itertools import count
 from subprocess import run, PIPE
 from shlex import split as splitsh
 
-from src.defaults import defaults
+from src.defaults import defaults, html_tags
 from src import get
 from src.error import pr as error
 from src.verify import containsdirs, isdate
@@ -77,56 +77,26 @@ def aoty(
     pageNumber: int,
     include_url: bool = defaults.INCLUDE_URL,
     include_tracks: bool = defaults.INCLUDE_TRACKS,
+    base_page: str = "https://www.albumoftheyear.org",
+    ratings_subpage: str = "ratings/user-highest-rated",
+    list_tags: dict = html_tags.aoty_albumlist,
+    album_tags: dict = html_tags.aoty_album,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
-) -> Iterator:
+):
     if verbose:
         print(f"- Downloading {albumType}, page {pageNumber}...")
-    basePage = "albumoftheyear.org/ratings/user-highest-rated"
-    pg = f"{basePage}/{albumType}/all/{pageNumber}/"
-    result = page(pg, no_list=True)
-    if include_url or include_tracks:
-        result_w_list = page(pg)
-    for data in search.lines(r"\d\. ", result, end=r"\d ratings"):
-        base = 0
-        lines = data.group().splitlines()
-        line = lines[base + 0].strip().split(". ", 1)
-        if include_url or include_tracks:
-            url = get.url(result_w_list, r"[^\d]" + line[0] + r"\. ")
-        if include_tracks:
-            tracks = get.aoty_tracks(
-                url,
-                verbose=verbose,
-                debug=debug
-            )
-        position = int(line[0])
-        artist, title = line[1].replace("/", "_").split(" - ", 1)
-        if not isdate(lines[base + 3].strip()):
-            base = base - 1
-        year = int(lines[base + 3][-4:])
-        if "USER SCORE" in lines[base + 4]:
-            base = base - 1
-            genre = ["Unknown"]
-        else:
-            genre = lines[base + 4].strip().split(", ")
-        score = int(lines[base + 6].strip())
-        ratings = int(lines[base + 7].strip().split(" ")[0].replace(",", ""))
-        album = {
-            "artist": artist,
-            "title": title,
-            "year": year,
-            "genre": genre,
-            "score": score,
-            "ratings": ratings,
-            "type": albumType,
-            "position": position,
-            "page": pageNumber,
-        }
-        if include_url:
-            album["url"] = url
-        if include_tracks:
-            album["tracks"] = tracks
-        yield {get.id((artist, year, title)): album}
+    pg = f"{base_page}/{ratings_subpage}/{albumType}/all/{pageNumber}/"
+    albums_list = get.table(url=pg, id="centerContent")
+    for data in albums_list.find_all(class_="albumListRow"):
+        album = dict()  # type: dict[str, str | int | list]
+        get.tag(element=data, data_struct=album, tags=list_tags)
+        album_data = get.table(
+            url=base_page + str(album["album_url"]), id="centerContent"
+        )
+        get.tag(element=album_data, data_struct=album, tags=album_tags)
+        print(album)
+        exit()
 
 
 def prog_genres(
