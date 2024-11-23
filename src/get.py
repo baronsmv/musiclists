@@ -6,7 +6,7 @@ import re
 from unicodedata import normalize
 from urllib.request import Request, urlopen
 
-from src.defaults import defaults
+from src.defaults import defaults, html_tags
 from src import search
 
 
@@ -152,49 +152,82 @@ def table(
     return soup.find(id=id, recursive=True)
 
 
+def tag(element, track: dict, tags: dict) -> None:
+    for k, v in tags.items():
+        if "tag" in v and "class" in v:
+            d = element.find(v["tag"], class_=v["class"])
+        elif "key" in v:
+            d = element.get(v["key"])
+        if d and "subtag" in v:
+            d = d.find(v["subtag"])
+        if d and "contains" in v and isinstance(v["contains"], dict):
+            tag(element=d, track=track, tags=dict(v["contains"]))
+        if d and "expand" in v:
+            if "type" in v and v["type"] == "list":
+                d = list(d.find_all(v["expand"]))
+            else:
+                d = list(e.string for e in d.find_all(v["expand"]))
+        if d and "type" in v or "replace" in v:
+            if not isinstance(d, str) and (
+                v["type"] == "str"
+                or v["type"] == "int"
+            ):
+                d = d.string
+            if "replace" in v and isinstance(v["replace"], dict):
+                for kr, vr in v["replace"].items():
+                    d = d.replace(kr, vr)
+            if v["type"] == "int":
+                d = int(d)
+        if d:
+            track[k] = d
+
+
 def aoty_tracks(
     url: str,
     id: str = "tracklist",
     user_agent: str = "Mozilla/5.0",
     encoding: str = "utf-8",
     parser: str = "html.parser",
+    tags: dict = html_tags.AOTY,
     base_page: str = "https://www.albumoftheyear.org",
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> list[dict[str, str | int | list]]:
-    tracks = list()
-    for t in table(
+    if debug:
+        print(url)
+    tracklist = table(
         url=url,
         id=id,
         user_agent=user_agent,
         encoding=encoding,
         parser=parser
-    ).find_all("tr"):
-        track = dict()
-        for k, v in {
-            "track": "trackNumber",
-            "title": "trackTitle",
-            "length": "length",
-            "featuring": "featuredArtists",
-            "score": "trackRating",
-        }.items():
-            data = t.find(("td", "div"), class_=v)
-            if data:
-                if k == "title":
-                    data = data.find("a")
-                    track[k] = data.string
-                    track["url"] = base_page + data.get("href")
-                elif k == "score":
-                    data = data.find("span")
-                    track[k] = int(data.text)
-                    track["ratings"] = data.get("title").split()[0]
-                elif k == "featuring":
-                    track[k] = [
-                        {"artist": d.text, "url": d.get("href")}
-                        for d in data.find_all("a")
-                    ]
-                else:
-                    track[k] = data.string
+    )
+    if (
+        tracklist.find("ol", recursive=True)
+        and not tracklist.find("trackTitle", recursive=True)
+    ):
+        return [
+            {"title": li.string} for li in
+            tracklist.find("ol", recursive=True).find_all("li")
+        ]
+    tracks = list()  # type: list[dict[str, str | int | list]]
+    disc = str()
+    for t in tracklist.find_all("tr"):
+        track = dict()  # type: dict[str, str | int | list]
+        tag(element=t, track=track, tags=tags)
         if track:
-            tracks.append(track)
+            if (
+                "featuring" in track
+                and isinstance(track["featuring"], list)
+            ):
+                track["featuring"] = [
+                    {"artist": tags.text, "url": tags.get("href")}
+                    for tags in track["featuring"]
+                ]
+            if "disc" in track:
+                disc = str(track["disc"])
+            elif disc:
+                track["disc"] = disc
+            tracks.append(track.copy())
+            track.clear()
     return tracks
