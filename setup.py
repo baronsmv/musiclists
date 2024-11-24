@@ -9,12 +9,10 @@ setuptools.setup(
         "bs4",
         "click",
         "click_help_colors",
-        "html5lib",
-        "lxml",
         "pandas",
         "pathlib",
+        "pyarrow",
         "python-dateutil",
-        "pypi-json",
     ),
     entry_points={
         "console_scripts": [

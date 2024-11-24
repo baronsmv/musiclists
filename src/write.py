@@ -1,53 +1,18 @@
 #!/usr/bin/env python3
 
 import multiprocessing.dummy as mp
-import json
+from pandas import DataFrame
 from pathlib import Path
-from pprint import pprint
+from textwrap import dedent
 
 from src.diff import diff
 from src.dedup import dedup
 from src.defaults import defaults
 from src import dump
 from src import get
+from src.html_tags import aoty as aoty_tags
 from src.load import frompath as load
 from src import search
-
-
-def to_text(
-    path: Path,
-    text_path: Path | None = None,
-    suffix: str = "txt",
-    sep: str = " - ",
-    sorted: bool = True,
-    verbose: bool = defaults.VERBOSE,
-    debug: bool = defaults.DEBUG,
-):
-    if not text_path:
-        return
-    if verbose:
-        print(f"Saving {defaults.TEXT_SUFFIX} list to {text_path}...")
-    lines = [get.path(d, sep=sep) + "\n" for d in load(path).values()]
-    if sorted:
-        lines.sort()
-    with open(text_path, "w", encoding="utf-8") as f:
-        f.writelines(lines)
-
-
-def to_path(
-    path: Path,
-    data: dict | set,
-    text_path: Path | None = None,
-    text: bool = defaults.TEXT,
-    verbose: bool = defaults.VERBOSE,
-    debug: bool = defaults.DEBUG,
-):
-    if verbose:
-        print(f"Saving {defaults.SUFFIX} list to {path}...")
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-    if text:
-        to_text(path=path, text_path=text_path, verbose=verbose, debug=debug)
 
 
 def albums(
@@ -63,21 +28,18 @@ def albums(
     debug: bool = defaults.DEBUG,
 ):
     if verbose:
-        print("Process started:")
-        print(f"- {defaults.SUFFIX.upper()} output: {path.absolute()}")
-        if text and text_path:
-            print(f"- TXT output: {text_path}")
-        print("- Types: ", end="")
-        pprint(type1)
-        print("- Types: ", end="")
-        pprint(type2)
-        print(f"- Lower limit: {min_score}")
-        print()
+        print(dedent(
+            f"""
+            Download process started:
+            - Types: {type1}
+            - Types: {type2}
+            - Minimum score: {min_score}
+            """))
         if name:
             print(f"Downloading lists from {name}:")
         else:
             print("Downloading lists:")
-    data = dict()
+    data = list()  # type: list[dict[str, str | int | float | list]]
     until = dump.until(
         function=function,
         type1=type1,
@@ -86,26 +48,16 @@ def albums(
         verbose=verbose,
         debug=debug,
     )
-    multithread = False
+    multithread = True
     if multithread:
         with mp.Pool(4) as executor:
-            executor.map(data.update, until)
+            executor.map(data.append, until)
     else:
         for album in until:
-            if (get.id(album)) in data:
-                print(f"Elemento repetido:\n{album}")
-                exit(1)
-            data.update(album)
-    to_path(
-        path=path,
-        data=data,
-        text_path=text_path,
-        text=text,
-        verbose=verbose,
-        debug=debug,
-    )
+            data.append(album)
+    DataFrame(data).to_feather(path)
     if verbose:
-        print("Process completed.")
+        print(f"{len(data)} albums registered.")
 
 
 def aoty(
@@ -143,15 +95,15 @@ def prog(
 ):
     if verbose:
         print("Generating list of genres...")
-    genres = tuple(i for i in dump.proggenres())
+    genres = get.prog_genres()
     name_types = list()
-    for i, t in enumerate(defaults.PROG_TYPES):
+    for i, t in enumerate(defaults.PROG_TYPES, start=1):
         if "all" in types or t in types:
             name_types.append(i)
     albums(
         path=path,
         function=dump.progarchives,
-        type1=genres,
+        type1=((k, v) for k, v in genres.items()),
         type2=name_types,
         min_score=min_score,
         text_path=text_path,

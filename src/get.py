@@ -3,102 +3,32 @@
 from bs4 import BeautifulSoup
 from pathlib import Path
 import re
-from unicodedata import normalize
 from urllib.request import Request, urlopen
 
-from src.defaults import defaults, html_tags
+from src.defaults import defaults
+from src.html_tags import aoty as aoty_tags
 from src import search
 
 
-def get(
-    data: dict,
-    key: str,
-    verbose: bool = defaults.VERBOSE,
-    debug: bool = defaults.DEBUG,
-):
-    print(data, key)
-    if data.get(key):
-        return data.get(key)
-    else:
-        if key in tuple(data.values())[0]:
-            return tuple(data.values())[0][key]
-        else:
-            return str()
-
-
-def artist(
-    data: dict,
-    verbose: bool = defaults.VERBOSE,
-    debug: bool = defaults.DEBUG,
-) -> str:
-    return get(data, "artist")
-
-
-def title(
-    data: dict,
-    verbose: bool = defaults.VERBOSE,
-    debug: bool = defaults.DEBUG,
-) -> str:
-    return get(data, "title")
-
-
-def year(
-    data: dict,
-    verbose: bool = defaults.VERBOSE,
-    debug: bool = defaults.DEBUG,
-) -> int:
-    return get(data, "year")
-
-
-def score(
-    data: dict,
-    verbose: bool = defaults.VERBOSE,
-    debug: bool = defaults.DEBUG,
-) -> int | float:
-    return get(data, "user_score")
-
-
-def id(
-    data: list | tuple | dict[str, str | int | list] | str,
-    length: int = 14,
-    sep: str = "",
-    verbose: bool = defaults.VERBOSE,
-    debug: bool = defaults.DEBUG,
-) -> str:
-    if isinstance(data, str):
-        res = re.search(
-            r"(?P<artist>^.*)\/(?P<title>.*) \((?P<year>.*)\)", data
-        )
-        return id(tuple(res.group(p) for p in ("artist", "year", "title")))
-    elif isinstance(data, dict):
-        return id((artist(data), year(data), title(data)))
-    dataStr = str()
-    sepL = len(sep)
-    for d in data:
-        if not d:
-            continue
-        d = str(d)
-        for pattern in (r"[Tt]he ", r" EP", r".*: "):
-            d = re.sub(pattern, "", d)
-        d = str(normalize("NFKD", d).encode("ascii", "ignore"))[2:]
-        d = re.sub(r"[^0-9a-zA-Z]+", "", d)
-        d = d[:length].lower()
-        dataStr += sep + d
-    return dataStr[sepL:]
-
-
 def path(
-    data: dict[str, str | list | int | float],
+    data: dict,
     sep: str = "/",
     includeyear: bool = True,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> str:
     return (
-        artist(data)
+        data.get("artist", "")
         + sep
-        + title(data)
-        + (f" ({year(data)})" if includeyear else "")
+        + data.get("title", "")
+        + (
+            "("
+            + str(data.get("year", ""))
+            + ")"
+            if includeyear
+            and data.get("year")
+            else ""
+        )
     )
 
 
@@ -115,42 +45,35 @@ def level(
         return level(child.parent, parent, lvl + 1)
 
 
-def url(
-    webpage: str,
-    pattern_before: str = str(),
-    pattern_after: str = str(),
-) -> str:
-    count = 0
-    for m in search.lines(
-        pattern_before + r"\[(?P<url_id>\d{1,})\]" + pattern_after, webpage
-    ):
-        url_id = m.group("url_id")
-        count += 1
-    if count != 1:
-        print(f"ERROR en URL_ID({count}): {pattern_before}, {pattern_after}")
-        exit(1)
-    count = 0
-    for m in search.lines(r"[^\d]" + url_id + r"\. (?P<url>http.*)", webpage):
-        url = m.group("url")
-        count += 1
-    if count != 1:
-        print(f"ERROR en URL({count}): {pattern_before}, {pattern_after}")
-        exit(1)
-    return url
-
-
 def table(
     url: str,
-    id: str,
+    tag: str | None = None,
+    id: str | None = None,
+    number: int = 0,
     user_agent: str = "Mozilla/5.0",
     encoding: str = "utf-8",
     parser: str = "html.parser",
+    recursive: bool = True,
 ):
     req = Request(url=url, headers={"User-Agent": user_agent})
     with urlopen(req) as response:
         html = response.read().decode(encoding)
     soup = BeautifulSoup(html, parser)
-    return soup.find(id=id, recursive=True)
+    if soup:
+        table = (
+            soup.find_all(tag, id=id, recursive=recursive)
+            if tag and id
+            else soup.find_all(tag, recursive=recursive)
+            if tag
+            else soup.find_all(id=id, recursive=recursive)
+            if id
+            else None
+        )
+    return (
+        table[number]
+        if table and len(table) > abs(number + 1 if number < 0 else number)
+        else None
+    )
 
 
 def find_tag(element, values):
@@ -162,7 +85,7 @@ def find_tag(element, values):
         else:
             d = element.find_all(values["tag"])
         i = values["number"] if "number" in values else 0
-        if len(d) > i:
+        if len(d) > abs(i + 1 if i < 0 else i):
             return d[i]
         else:
             return None
@@ -178,27 +101,36 @@ def tag(element, data_struct: dict, tags: dict) -> None:
         if d and "key" in v:
             d = d.get(v["key"])
         if d and "contains" in v and isinstance(v["contains"], dict):
+            data_struct[k] = None
             tag(element=d, data_struct=data_struct, tags=dict(v["contains"]))
         if d and "expand" in v:
             if "expand_url" in v:
                 d = list(
-                    {v["expand_url"]: e.string, "url": e.get("href")}
+                    {v["expand_url"]: e.get_text(), "url": e.get("href")}
                     for e in d.find_all(v["expand"])
                     if e.get("href") != "#"
                 )
             else:
-                d = list(e.string for e in d.find_all(v["expand"]))
-        if d and "type" in v or "replace" in v:
+                d = list(e.get_text() for e in d.find_all(v["expand"]))
+        if d and ("type" in v or "replace" in v or "match" in v):
             if not isinstance(d, str) and (
-                v["type"] == "str"
-                or v["type"] == "int"
+                any(v["type"] == t for t in ("str", "int", "float"))
             ):
-                d = d.string
+                d = d.get_text().strip()
+            if "match" in v:
+                d = re.search(v["match"], d)
+                d = d.group() if d else None
             if "replace" in v and isinstance(v["replace"], dict):
                 for kr, vr in v["replace"].items():
                     d = d.replace(kr, vr)
-            if v["type"] == "int" and d.isnumeric():
-                d = int(d)
+            if any(v["type"] == t for t in ("int", "float")):
+                d = (
+                    int(d)
+                    if v["type"] == "int" and d.isdigit()
+                    else float(d)
+                    if v["type"] == "float" and d.replace(".", "", 1).isdigit()
+                    else None
+                )
         if d:
             data_struct[k] = d
 
@@ -209,7 +141,7 @@ def aoty_tracks(
     user_agent: str = "Mozilla/5.0",
     encoding: str = "utf-8",
     parser: str = "html.parser",
-    tags: dict = html_tags.aoty_tracklist,
+    tags: dict = aoty_tags.tracklist,
     base_page: str = "https://www.albumoftheyear.org",
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -245,3 +177,16 @@ def aoty_tracks(
     else:
         print(f"ERROR: Didn't find any tracks for {url}")
         exit(1)
+
+
+def prog_genres(
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+):
+    prog_page = "https://www.progarchives.com"
+    prog_table = table(url=prog_page, id="navGenre", encoding="latin1")
+    return {
+        g.string: int(g.get("href").split("=")[-1])
+        for g in prog_table.find_all("a", recursive=True)
+        if g.get("href")
+    }

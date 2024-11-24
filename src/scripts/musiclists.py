@@ -46,6 +46,7 @@ def aoty(
 
 @de.prog
 def prog(
+    types: tuple,
     min_score: float,
     path: Path,
     text_path: Path,
@@ -73,6 +74,7 @@ def prog(
         path=path,
         text_path=text_path,
         min_score=min_score,
+        types=types,
         text=text,
         verbose=verbose,
         debug=debug,

@@ -4,41 +4,13 @@ from collections.abc import Iterator
 from pathlib import Path
 import re
 from itertools import count
-from subprocess import run, PIPE
-from shlex import split as splitsh
 
-from src.defaults import defaults, html_tags
+from src.defaults import defaults
 from src import get
+from src.html_tags import aoty as aoty_tags, prog as prog_tags
 from src.error import pr as error
 from src.verify import containsdirs, isdate
 from src import search
-
-
-def page(
-    webpage: str,
-    no_list: bool = False,
-    list_only: bool = False,
-    source: bool = False,
-    encoding: str = "utf-8",
-    verbose: bool = defaults.VERBOSE,
-    debug: bool = defaults.DEBUG,
-) -> str:
-    bashCommand = "lynx -dump -width=1000"
-    bashCommand += " -source" if source else ""
-    bashCommand += " -nolist" if no_list else " -listonly" if list_only else ""
-    bashCommand += f" {webpage}"
-    try:
-        return run(
-            splitsh(bashCommand),
-            stdout=PIPE,
-            encoding=encoding,
-            errors="backslashreplace",
-            check=True,
-            text=True,
-        ).stdout
-    except Exception as err:
-        error("webpage", [bashCommand], err)
-    return str()
 
 
 def until(
@@ -48,7 +20,7 @@ def until(
     min_score: int | float,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
-) -> Iterator:
+) -> Iterator[dict[str, str | int | float | list]]:
     for a in type1:
         foundLimit = False
         iterType = count(type2) if isinstance(type2, int) else iter(type2)
@@ -60,114 +32,85 @@ def until(
                 verbose=verbose,
                 debug=debug,
             ):
-                score = get.score(album)
+                score = album.get("user_score")
                 if score and score < min_score:
                     foundLimit = True
                     break
+                elif not score:
+                    print(f"ERROR: Score not found: {album}")
+                    exit(1)
                 else:
                     yield album
 
 
 def aoty(
-    albumType: str,
-    pageNumber: int,
+    album_type: str,
+    page_number: int,
     base_page: str = "https://www.albumoftheyear.org",
     ratings_subpage: str = "ratings/user-highest-rated",
-    list_tags: dict = html_tags.aoty_albumlist,
-    album_tags: dict = html_tags.aoty_album,
+    list_tags: dict = aoty_tags.albumlist,
+    album_tags: dict = aoty_tags.album,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
-):
+) -> Iterator[dict[str, str | int | float | list]]:
     if verbose:
-        print(f"- Downloading {albumType}, page {pageNumber}...")
-    pg = f"{base_page}/{ratings_subpage}/{albumType}/all/{pageNumber}/"
-    albums_list = get.table(url=pg, id="centerContent")
+        print(f"- Downloading {album_type}, page {page_number}...")
+    url = f"{base_page}/{ratings_subpage}/{album_type}/all/{page_number}/"
+    albums_list = get.table(url=url, id="centerContent")
     for data in albums_list.find_all(class_="albumListRow"):
-        album = dict()  # type: dict[str, str | int | list]
+        album = dict()  # type: dict[str, str | int | float | list]
+        album["type"] = album_type
+        album["page_number"] = page_number
         get.tag(element=data, data_struct=album, tags=list_tags)
         album_url = base_page + str(album["album_url"])
         if debug:
             print(album_url)
         album_data = get.table(url=album_url, id="centerContent")
         get.tag(element=album_data, data_struct=album, tags=album_tags)
-        yield {get.id(album): album.copy()}
+        album["tracks"] = get.aoty_tracks(album_url)
+        if debug:
+            print(album, end="\n\n")
+        yield album.copy()
         album.clear()
 
 
-def prog_genres(
-    verbose: bool = defaults.VERBOSE,
-    debug: bool = defaults.DEBUG,
-) -> Iterator:
-    pg = "https://www.progarchives.com/"
-    data = page(pg, list_only=True)
-    for lines in search.lines(r"subgenre\.asp\?style=", data):
-        yield lines.group().split("=")[-1]
-
-
-def prog_genre(
-    pageNumber: int,
-    verbose: bool = defaults.VERBOSE,
-    debug: bool = defaults.DEBUG,
-) -> str:
-    pg = "https://www.progarchives.com/subgenre.asp"
-    result = page(f"{pg}?style={pageNumber}", no_list=True)
-    genre = re.search(".*Top Albums.*", result)
-    if genre:
-        return genre.group().replace(" Top Albums", "").strip()
-    else:
-        error("prog genre", [f"{pg}?style={pageNumber}"])
-        return str()
-
-
 def progarchives(
-    pagenumber: int,
-    albumType: int,
+    genre: tuple,
+    album_type: int,
+    base_page: str = "https://www.progarchives.com/top-prog-albums.asp",
+    list_tags: dict = prog_tags.albumlist,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator:
-    genre = prog_genre(pagenumber)
     if verbose:
-        print(f"- Downloading {genre}, page {pagenumber}, type {albumType}...")
-    basePage = "progarchives.com/top-prog-albums.asp"
-    pg = (
-        basePage
-        + f"?ssubgenres={pagenumber}"
-        + f"&salbumtypes={albumType}"
+        print(
+            f"- Downloading {genre[0]}, page {genre[1]}, type {album_type}..."
+        )
+    url = (
+        base_page
+        + f"?ssubgenres={genre[1]}"
+        + f"&salbumtypes={album_type}"
         + "&smaxresults=250#list"
     )
-    result = page(pg, no_list=True)
-    for data in search.lines("QWR = ", result, before=2, after=3):
-        try:
-            lines = data.group().splitlines()
-            position = int(lines[0].split("[", 1)[0])
-            rating, ratings = (
-                lines[1].replace(" ratings", "", 1).strip().split(" | ", 1)
-            )
-            rating = float(rating)
-            ratings = int(ratings)
-            score = float(lines[2].split(" = ")[1])
-            title = lines[3].replace("/", "_").strip()
-            artist = lines[4].replace(genre, "", 1).replace("/", "_").strip()
-            releaseType, year = (
-                lines[5].replace(" Shop", "", 1).strip().split(", ", 1)
-            )
-            year = int(year)
-        except Exception as err:
-            error("", lines, err)
-        yield {
-            get.id((artist, year, title)): {
-                "artist": artist,
-                "title": title,
-                "year": year,
-                "genre": genre,
-                "score": score,
-                "rating": rating,
-                "ratings": ratings,
-                "type": releaseType,
-                "position": position,
-                "page": pagenumber,
-            }
-        }
+    albums_list = get.table(url=url, tag="table", number=1, encoding="latin1")
+    for data in albums_list.find_all("tr"):
+        print(data)
+        album = dict()  # type: dict[str, str | int | float | list]
+        album["type"] = album_type
+        album["genre"] = genre[0]
+        get.tag(element=data, data_struct=album, tags=list_tags)
+        print(album)
+        exit()
+        album_url = base_page + str(album["album_url"])
+        if debug:
+            print(album_url)
+        album_data = get.table(url=album_url, id="centerContent")
+        get.tag(element=album_data, data_struct=album, tags=album_tags)
+        album["tracks"] = get.aoty_tracks(album_url)
+        if debug:
+            print(album, end="\n\n")
+        yield album.copy()
+        album.clear()
 
 
 def dirs(

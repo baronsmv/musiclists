@@ -1,21 +1,37 @@
 #!/usr/bin/env python3
 
-aoty_albumlist = {
+albumlist = {
     "position": {
-        "tag": "span",
-        "class": "albumListRank",
+        "tag": "td",
         "subtag": {
-            "tag": "span",
+            "tag": "strong",
         },
         "type": "int",
     },
-    "title": {
-        "tag": "h2",
-        "class": "albumListTitle",
+    "cover_url": {
+        "tag": "img",
         "type": "str",
-        "subtag": {
-            "tag": "a",
-        },
+        "key": "src",
+    },
+    "average_rating": {
+        "tag": "span",
+        "type": "float",
+    },
+    "ratings": {
+        "tag": "span",
+        "type": "int",
+        "number": 1,
+    },
+    "qwr": {
+        "tag": "div",
+        "type": "float",
+        "number": 1,
+        "replace": {"QWR = ": ""},
+    },
+    "title": {
+        "tag": "a",
+        "number": 0,
+        "type": "str",
         "contains": {
             "album_url": {
                 "key": "href",
@@ -23,15 +39,10 @@ aoty_albumlist = {
             },
         },
     },
-}
-aoty_album = {
     "artist": {
-        "tag": "div",
-        "class": "artist",
+        "tag": "a",
+        "number": 1,
         "type": "str",
-        "subtag": {
-            "tag": "a",
-        },
         "contains": {
             "artist_url": {
                 "key": "href",
@@ -39,6 +50,14 @@ aoty_album = {
             },
         },
     },
+    "year": {
+        "tag": "br",
+        "number": 1,
+        "type": "str",
+        "match": r"\d{4}"
+    },
+}
+album = {
     "title": {
         "tag": "div",
         "class": "albumTitle",
@@ -55,6 +74,20 @@ aoty_album = {
             "tag": "img",
         },
         "key": "src",
+    },
+    "artist": {
+        "tag": "div",
+        "class": "artist",
+        "type": "str",
+        "subtag": {
+            "tag": "a",
+        },
+        "contains": {
+            "artist_url": {
+                "key": "href",
+                "type": "str",
+            },
+        },
     },
     "critic_score": {
         "tag": "div",
@@ -98,13 +131,20 @@ aoty_album = {
             "number": -1,
         },
     },
-    "labels": {
+    "month": {
         "tag": "div",
         "class": "detailRow",
-        "number": 2,
-        "type": "list",
-        "expand": "a",
-        "expand_url": "label",
+        "type": "str",
+        "subtag": {
+            "tag": "a",
+            "number": -2,
+        },
+    },
+    "day": {
+        "tag": "div",
+        "class": "detailRow",
+        "type": "str",
+        "match": r"(\d+)",
     },
     "genres": {
         "tag": "div",
@@ -113,6 +153,14 @@ aoty_album = {
         "type": "list",
         "expand": "a",
         "expand_url": "genre",
+    },
+    "labels": {
+        "tag": "div",
+        "class": "detailRow",
+        "number": 2,
+        "type": "list",
+        "expand": "a",
+        "expand_url": "label",
     },
     "producers": {
         "tag": "div",
@@ -131,7 +179,7 @@ aoty_album = {
         "expand_url": "writer",
     },
 }
-aoty_tracklist = {
+tracklist = {
     "disc": {
         "tag": "div",
         "class": "discNumber",
@@ -175,7 +223,7 @@ aoty_tracklist = {
         "class": "featuredArtists",
         "type": "list",
         "expand": "a",
-        "expand_url": "featured_artist",
+        "expand_url": "artist",
     },
     "score": {
         "tag": "td",
