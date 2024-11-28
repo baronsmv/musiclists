@@ -7,11 +7,8 @@ from src.defaults import defaults
 
 def HELP(name: str, maximum: bool = False):
     return f"""
-        The {"maximum" if maximum else "minimum"} score threshold for {name}
-        albums to be included in the list.
-        The process will {"begin" if maximum else "stop"} once an album with a
-        score {"equal to" if maximum else "lower than"} this threshold is
-        encountered.
+        {"Maximum" if maximum else "Minimum"} score threshold for including
+        {name} albums in the list.
         """
 
 
@@ -30,7 +27,7 @@ def SCORE(
     else:
         option = (option if option else name[:4]).lower() + "-"
     option = "--" + option + ("max" if maximum else "min") + "-score"
-    help_message = help_message if help_message else HELP(name)
+    help_message = help_message if help_message else HELP(name, maximum)
     if letter:
         return click.option(
             "-" + letter,

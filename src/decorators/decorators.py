@@ -35,6 +35,15 @@ version = version_option(
     prog_name=defaults.PROG_NAME,
     message_color="green",
 )
+quiet = click.option(
+    "-q",
+    "--quiet",
+    is_flag=True,
+    type=click.BOOL,
+    default=defaults.QUIET,
+    show_default=True,
+    help="Suppress messages. Only errors will be shown.",
+)
 verbose = click.option(
     "-v",
     "--verbose",
@@ -52,14 +61,14 @@ debug = click.option(
     show_default=True,
     help="Enable debug-level logging for troubleshooting.",
 )
-text = click.option(
-    "-t",
-    "--text",
+no_tracklist = click.option(
+    "-n",
+    "--no-tracklist",
     is_flag=True,
     type=click.BOOL,
-    default=defaults.TEXT,
+    default=defaults.NO_TRACKLIST,
     show_default=True,
-    help="Output the list as a text file as well.",
+    help="Omit tracklist and total length data, slightly speeding up the process.",
 )
 deduplic = click.option(
     "-d",
@@ -96,6 +105,7 @@ def command(func, decs: tuple, supercomm=None):
             version,
             debug,
             verbose,
+            quiet,
             subcomm(supercomm) if supercomm else comm,
         )
         + decs,
@@ -106,11 +116,11 @@ def aoty(func):
     return command(
         func,
         (
-            types.aoty(no_name_option=True),
+            types.aoty(letter="t", no_name_option=True),
             score.aoty(letter="m", no_name_option=True),
+            score.aoty(letter="M", maximum=True, no_name_option=True),
+            no_tracklist,
             path.aoty(letter="p", no_name_option=True),
-            text,
-            path.aoty(letter="P", text=True, no_name_option=True),
         ),
         groups.download,
     )
@@ -120,11 +130,11 @@ def prog(func):
     return command(
         func,
         (
-            types.prog(no_name_option=True),
+            types.prog(letter="t", no_name_option=True),
             score.prog(letter="m", no_name_option=True),
+            score.prog(letter="M", maximum=True, no_name_option=True),
+            no_tracklist,
             path.prog(letter="p", no_name_option=True),
-            text,
-            path.prog(letter="P", text=True, no_name_option=True),
         ),
         groups.download,
     )
@@ -141,8 +151,6 @@ def merge(func):
             re_download,
             dedup,
             path.merge(letter="p", no_name_option=True),
-            text,
-            path.merge(letter="P", text=True, no_name_option=True),
             types.aoty(),
             score.aoty(),
             types.prog(),
@@ -155,7 +163,10 @@ def merge(func):
 
 def dirs(func):
     return command(
-        func, (path.source, path.dirs(letter="p"), text, path.dirs(text=True))
+        func, (
+            path.source,
+            path.dirs(letter="p", no_name_option=True),
+        ),
     )
 
 
@@ -164,8 +175,6 @@ def wanted(func):
         func,
         (
             path.wanted(letter="p", no_name_option=True),
-            text,
-            path.wanted(letter="P", text=True, no_name_option=True),
             dedup,
             path.merge(read=True),
             path.dirs(read=True),
@@ -179,8 +188,6 @@ def leftover(func):
         func,
         (
             path.leftover(letter="p", no_name_option=True),
-            text,
-            path.leftover(letter="P", text=True, no_name_option=True),
             dedup,
             path.dirs(read=True),
             path.merge(read=True),
@@ -191,5 +198,9 @@ def leftover(func):
 
 def copy(func):
     return command(
-        func, (path.source, path.destination, path.wanted(read=True))
+        func, (
+            path.source,
+            path.destination,
+            path.wanted(read=True)
+        )
     )

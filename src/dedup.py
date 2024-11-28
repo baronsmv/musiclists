@@ -13,6 +13,7 @@ def dedup(
     minimum: int | float = 0.6,
     maximum: int | float = 1,
     only_highest_match: bool = defaults.ONLY_HIGHEST_MATCH,
+    quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.VERBOSE,
 ) -> Iterator[dict[str, str]]:

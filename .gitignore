@@ -1,5 +1,7 @@
+.ropeproject/
 .venv/
 dedup/
 lists/
 **/*.egg-info/
+**/*.kate-swp
 **/__pycache__/

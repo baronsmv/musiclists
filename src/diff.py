@@ -15,6 +15,7 @@ def diff(
     dedup_path: Path = defaults.DEDUP_DIR,
     field: str = defaults.VERIFIED_FIELD,
     dedup: bool = defaults.DEDUP,
+    quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator[tuple[str, dict]]:
@@ -22,17 +23,17 @@ def diff(
         print("ERROR: Neither of list files exists, exiting...")
         exit(1)
     elif not data1.exists():
-        if verbose:
+        if not quiet:
             print(f"File {data1} doesn't exist, yielding {data2}...")
         for key, value in load(data2).values():
             yield key, value
     elif not data2.exists():
-        if verbose:
+        if not quiet:
             print(f"File {data2} doesn't exist, yielding {data1}...")
         for key, value in load(data1).values():
             yield key, value
     else:
-        if verbose:
+        if not quiet:
             print(f"Starting diff process between {data1} and {data2}...")
         keys = load(data2).keys()
         filePath, data, inv = search.dedup(

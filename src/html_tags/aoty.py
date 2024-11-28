@@ -80,7 +80,7 @@ album = {
             "tag": "a",
         },
     },
-    "user_reviews": {
+    "user_ratings": {
         "tag": "div",
         "class": "albumUserScoreBox",
         "type": "int",

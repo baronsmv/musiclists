@@ -9,14 +9,15 @@ setuptools.setup(
         "bs4",
         "click",
         "click_help_colors",
-        "pandas",
+        "polars",
         "pathlib",
-        "pyarrow",
+        "pyexiftool",
         "python-dateutil",
     ),
     entry_points={
         "console_scripts": [
             "musiclists = src.scripts.musiclists:cli",
+            "unittest = src.tests.test_data:main",
         ],
     },
 )

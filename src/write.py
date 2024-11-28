@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
+from datetime import timedelta
 import multiprocessing.dummy as mp
-from pandas import DataFrame
+from polars import DataFrame
 from pathlib import Path
+from exiftool import ExifToolHelper
 from textwrap import dedent
 
 from src.diff import diff
@@ -10,7 +12,6 @@ from src.dedup import dedup
 from src.defaults import defaults
 from src import dump
 from src import get
-from src.html_tags import aoty as aoty_tags
 from src.load import frompath as load
 from src import search
 
@@ -20,10 +21,13 @@ def albums(
     function,
     type1,
     type2,
+    score_key: str,
     min_score: int | float,
-    text_path: Path | None = None,
+    max_score: int | float,
+    highest_score: int | float = 100,
     name: str | None = None,
-    text: bool = defaults.TEXT,
+    no_tracklist: bool = defaults.NO_TRACKLIST,
+    quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
@@ -34,39 +38,49 @@ def albums(
             - Types: {type1}
             - Types: {type2}
             - Minimum score: {min_score}
+            - Maximum score: {max_score}
             """))
+    if not quiet:
         if name:
             print(f"Downloading lists from {name}:")
         else:
             print("Downloading lists:")
-    data = list()  # type: list[dict[str, str | int | float | list]]
+    data = list(
+    )  # type: list[dict[str, str | int | float | list | dict | timedelta]]
     until = dump.until(
         function=function,
         type1=type1,
         type2=type2,
+        score_key=score_key,
         min_score=min_score,
+        max_score=max_score,
+        highest_score=highest_score,
+        no_tracklist=no_tracklist,
+        quiet=quiet,
         verbose=verbose,
         debug=debug,
     )
-    multithread = True
+    multithread = False
     if multithread:
         with mp.Pool(4) as executor:
             executor.map(data.append, until)
     else:
         for album in until:
             data.append(album)
-    DataFrame(data).to_feather(path)
-    if verbose:
-        print(f"{len(data)} albums registered.")
+    df = DataFrame(data)
+    df.serialize(path)
+    if not quiet:
+        print(f"\n{len(data)} albums registered.")
 
 
 def aoty(
     path: Path,
-    text_path: Path | None = None,
     types: tuple = defaults.AOTY_TYPES,
     start_page: int = 1,
     min_score: int = defaults.AOTY_MIN_SCORE,
-    text: bool = defaults.TEXT,
+    max_score: int = defaults.AOTY_MAX_SCORE,
+    no_tracklist: bool = defaults.NO_TRACKLIST,
+    quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
@@ -75,10 +89,12 @@ def aoty(
         function=dump.aoty,
         type1=defaults.AOTY_TYPES if "all" in types else types,
         type2=start_page,
+        score_key="user_score",
         min_score=min_score,
-        text_path=text_path,
+        max_score=max_score,
         name="AOTY",
-        text=text,
+        no_tracklist=no_tracklist,
+        quiet=quiet,
         verbose=verbose,
         debug=debug,
     )
@@ -86,14 +102,15 @@ def aoty(
 
 def prog(
     path: Path,
-    text_path: Path | None = None,
     types: tuple = defaults.PROG_TYPES,
     min_score: float = defaults.PROG_MIN_SCORE,
-    text: bool = defaults.TEXT,
+    max_score: float = defaults.PROG_MAX_SCORE,
+    no_tracklist: bool = defaults.NO_TRACKLIST,
+    quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
-    if verbose:
+    if not quiet:
         print("Generating list of genres...")
     genres = get.prog_genres()
     name_types = list()
@@ -103,12 +120,15 @@ def prog(
     albums(
         path=path,
         function=dump.progarchives,
-        type1=((k, v) for k, v in genres.items()),
+        type1=(tuple((k, v) for k, v in genres.items())),
         type2=name_types,
+        score_key="qwr",
         min_score=min_score,
-        text_path=text_path,
+        max_score=max_score,
+        highest_score=5,
         name="Progarchives",
-        text=text,
+        no_tracklist=no_tracklist,
+        quiet=quiet,
         verbose=verbose,
         debug=debug,
     )
@@ -117,38 +137,64 @@ def prog(
 def dirs(
     source: Path,
     path: Path,
-    text_path: Path | None = None,
-    text: bool = defaults.TEXT,
+    use_exiftool: bool = True,
+    quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
-    data = dict()
-    if verbose:
+    if not quiet:
         print(f"Registering music from '{source.name}'")
-    for d in dump.dirs(source):
-        artist = d.parent.name.strip()
-        if d.name[-5:-1].isdigit():
-            year = d.name[-5:-1]
-            title = d.name[:-7].strip()
-        else:
-            year = None
-            title = d.name.replace(" ()", "").strip()
-        album = {
-            get.id((artist, year, title)): {
-                "artist": artist,
-                "title": title,
-                "year": year,
-            }
+    album = dict()
+    if use_exiftool:
+        album_tags = {
+            "album": "Album",
+            "artist": "Albumartist",
+            "total_tracks": "Totaltracks",
+            "total_discs": "Totaldiscs",
+            "directory": "Directory",
+            "original_year": "Originalyear",
+            "label": "Label",
+            "catalog_number": "Catalognumber",
         }
-        data.update(album)
-    to_path(
-        path=path,
-        data=data,
-        text_path=text_path,
-        text=text,
-        verbose=verbose,
-        debug=debug,
-    )
+        track_tags = {
+            "disc_number": "Discnumber",
+            "track_number": "TrackNumber",
+            "title": "Title",
+            "artist": "Artist",
+            "file_size": "FileSize",
+            "file_type": "FileType",
+        }
+        suffixes = ("*.opus", "*.mp3", "*.m4a", "*.flac")
+        with ExifToolHelper(common_args=None) as et:
+            for d in dump.dirs(source):
+                track_files = tuple(d.glob(s) for s in suffixes)
+                metadata = et.get_metadata(track_files[0])[0]
+                for k, v in album_tags.items():
+                    album[k] = metadata[v]
+                album["tracks"] = [
+                    {
+                        k: et.get_metadata(t)[0][v]
+                        for k, v in track_tags.items()
+                    }
+                    for t in track_files
+                ]
+                print(album)
+                exit()
+    else:
+        data = list()
+        album = dict()
+        for d in dump.dirs(source):
+            album["artist"] = d.parent.name.strip()
+            if d.name[-5:-1].isdigit():
+                album["year"] = d.name[-5:-1]
+                album["title"] = d.name[:-7].strip()
+            else:
+                album["title"] = d.name.replace(" ()", "").strip()
+        album["id"] = get.id(album)
+        data.append(album.copy())
+    DataFrame(data).serialize(path)
+    if not quiet:
+        print(f"\n{len(data)} albums registered.")
 
 
 def all(
@@ -158,11 +204,12 @@ def all(
     dedup_path: Path,
     text_path: Path | None = None,
     dedup: bool = True,
-    text: bool = defaults.TEXT,
+    quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
-    if verbose:
+    """
+    if not quiet:
         print("Merging lists...")
     to_path(
         path=path,
@@ -177,9 +224,11 @@ def all(
         | load(Path(prog_path)),
         text_path=text_path,
         text=text,
+        quiet=quiet,
         verbose=verbose,
         debug=debug,
     )
+    """
 
 
 def duplicates(
@@ -192,11 +241,11 @@ def duplicates(
     field: str = defaults.AUTO_FIELD,
     key_sep: str = "-",
     key_suf: str = defaults.SUFFIX,
-    text: bool = defaults.TEXT,
+    quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> None:
-    if verbose:
+    if not quiet:
         print("Deduplicating lists...")
     path, data, inv = search.dedup(
         data1=data1,
@@ -223,6 +272,7 @@ def duplicates(
         data=data,
         text_path=text_path,
         text=text,
+        quiet=quiet,
         verbose=verbose,
         debug=debug,
     )
@@ -238,10 +288,11 @@ def differences(
     suffix: str = defaults.SUFFIX,
     dedup: bool = True,
     text: bool = True,
+    quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> None:
-    if verbose:
+    if not quiet:
         print(f"Writting to {path}:")
     data = dict()
     for a1, a2 in diff(
@@ -253,6 +304,7 @@ def differences(
         data=data,
         text_path=text_path,
         text=text,
+        quiet=quiet,
         verbose=verbose,
         debug=debug,
     )

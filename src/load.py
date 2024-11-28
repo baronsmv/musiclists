@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
-import json
+from polars import DataFrame
 from pathlib import Path
 
 from src.defaults import defaults
 
 
-def frompath(
+def from_path(
     path: Path,
+    quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
-) -> dict:
-    if verbose:
+) -> DataFrame:
+    if not quiet:
         print(f"Loading list from {path}...")
-    with open(path, "r", encoding="utf-8") as f:
-        return json.load(f)
+    return DataFrame.deserialize(path)

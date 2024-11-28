@@ -14,6 +14,7 @@ def lines(
     end: str | None = None,
     before: int = 0,
     after: int = 0,
+    quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator:
@@ -36,6 +37,7 @@ def dedup(
     field: str = defaults.AUTO_FIELD,
     key_sep: str = defaults.KEY_SEP,
     key_suf: str = defaults.SUFFIX,
+    quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> tuple[Path, dict[str, dict[str, str | list]], bool]:

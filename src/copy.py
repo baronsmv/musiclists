@@ -12,6 +12,7 @@ def copy(
     data: Path,
     source: Path,
     destination: Path,
+    quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> None:
@@ -38,7 +39,7 @@ def copy(
         Enable debug-level logging for troubleshooting, showing additional
         information for debugging purposes.
     """
-    if verbose:
+    if not quiet:
         print(f"""
               Moving directories registered in {data.name}
               Origin: {source}
@@ -46,10 +47,10 @@ def copy(
               """)
     for d in load(data):
         path = get.path(d)  # Formatting `d` to its string path equivalent.
-        if verbose:
+        if not quiet:
             print(f"Moving {path}.")
         fromPath = Path(source / path)
         toPath = Path(destination / path)
         cp(fromPath, toPath)
-    if verbose:
+    if not quiet:
         print("Process completed.")
