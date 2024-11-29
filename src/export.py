@@ -59,7 +59,6 @@ def tracks(
         "title": "Album",
         "year": "Year",
     },
-    normalize: tuple | list | None = ("track_title", "artist", "title"),
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
