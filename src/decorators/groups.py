@@ -23,7 +23,7 @@ def cli() -> None:
         - Download lists of the top albums from multiple platforms such as
             AOTY.org and Progarchives.com.
 
-        - Merge these lists into a single JSON file for further analysis.
+        - Merge these lists into a single one for further analysis.
 
         - Provide utilities for filtering, sorting, and processing the album
             data.
@@ -54,8 +54,24 @@ def download() -> None:
 
 
 @sub_group
-def identify() -> None:
+def find() -> None:
     """
-    Identify
+    Find
+    """
+    pass
+
+
+@sub_group
+def operations() -> None:
+    """
+    Operations
+    """
+    pass
+
+
+@sub_group
+def output() -> None:
+    """
+    Output
     """
     pass

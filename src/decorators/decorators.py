@@ -5,7 +5,7 @@ from click_help_colors import HelpColorsCommand, version_option
 from functools import wraps
 from time import time
 
-from src.decorators import groups, path, score, types
+from src.decorators import groups, path, number, types
 from src.defaults import defaults
 
 
@@ -80,13 +80,22 @@ deduplic = click.option(
     help="Deduplicate the output based on its deduplicates file.",
 )
 data_source = click.option(
-    "-s",
-    "--source",
+    "-d",
+    "--data-source",
     type=click.Choice(defaults.DATA_CHOICES.keys(), case_sensitive=False),
     show_choices=True,
     default=tuple(defaults.DL_CHOICES.keys())[0],
     show_default=True,
     help="Re-download lists before merge.",
+)
+markdown = click.option(
+    "-m",
+    "--markdown/--no-markdown",
+    is_flag=True,
+    type=click.BOOL,
+    default=True,
+    show_default=True,
+    help="Output as MarkDown.",
 )
 
 
@@ -116,8 +125,8 @@ def aoty(func):
         func,
         (
             types.aoty(letter="t", no_name_option=True),
-            score.aoty(letter="m", no_name_option=True),
-            score.aoty(letter="M", maximum=True, no_name_option=True),
+            number.aoty(letter="s", no_name_option=True),
+            number.aoty(letter="S", maximum=True, no_name_option=True),
             no_tracklist,
         ),
         groups.download,
@@ -129,8 +138,8 @@ def prog(func):
         func,
         (
             types.prog(letter="t", no_name_option=True),
-            score.prog(letter="m", no_name_option=True),
-            score.prog(letter="M", maximum=True, no_name_option=True),
+            number.prog(letter="s", no_name_option=True),
+            number.prog(letter="S", maximum=True, no_name_option=True),
             no_tracklist,
         ),
         groups.download,
@@ -147,15 +156,40 @@ def merge(func):
         (
             dedup,
         ),
+        groups.operations,
     )
 
 
-def json(func):
+def albums(func):
     return command(
         func,
         (
             data_source,
+            markdown,
+            number.albums(letter="s", no_name_option=True, integer=False),
+            number.albums(
+                letter="S", no_name_option=True, integer=False, maximum=True
+            ),
+            number.ratings(letter="r"),
+            number.ratings(letter="R", maximum=True),
         ),
+        groups.output,
+    )
+
+
+def tracks(func):
+    return command(
+        func,
+        (
+            markdown,
+            number.tracks(letter="s", no_name_option=True),
+            number.tracks(letter="S", no_name_option=True, maximum=True),
+            number.albums(letter="a"),
+            number.albums(letter="A", maximum=True),
+            number.ratings(letter="r"),
+            number.ratings(letter="R", maximum=True),
+        ),
+        groups.output,
     )
 
 
@@ -165,6 +199,7 @@ def dirs(func):
             path.source,
             path.dirs(letter="p", no_name_option=True),
         ),
+        groups.find,
     )
 
 
@@ -177,7 +212,7 @@ def wanted(func):
             path.merge(read=True),
             path.dirs(read=True),
         ),
-        groups.identify
+        groups.find,
     )
 
 
@@ -190,7 +225,7 @@ def leftover(func):
             path.dirs(read=True),
             path.merge(read=True),
         ),
-        groups.identify
+        groups.find,
     )
 
 
@@ -200,5 +235,6 @@ def copy(func):
             path.source,
             path.destination,
             path.wanted(read=True)
-        )
+        ),
+        groups.operations,
     )

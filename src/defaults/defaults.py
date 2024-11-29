@@ -27,6 +27,13 @@ AOTY_MIN_SCORE = 83
 PROG_MAX_SCORE = 5.0
 PROG_MIN_SCORE = 3.95
 
+ALBUM_MAX_SCORE = None
+ALBUM_MIN_SCORE = None
+TRACK_MAX_SCORE = None
+TRACK_MIN_SCORE = None
+MAX_RATINGS = None
+MIN_RATINGS = None
+
 KEY_LENGTH = 14
 KEY_SEP = "-"
 
@@ -42,12 +49,12 @@ CURRENT_DIR = Path(__file__).parent
 SRC_DIR = CURRENT_DIR.parent
 ROOT_DIR = SRC_DIR.parent
 DATA_DIR = Path(ROOT_DIR / "data")
-EXPORT_DIR = Path(ROOT_DIR / "export")
-DEDUP_DIR = Path(ROOT_DIR / "dedup")
+OUTPUT_DIR = Path(ROOT_DIR / "output")
+DEDUP_DIR = Path(DATA_DIR / "dedup")
 DIRS = (
     DATA_DIR,
     DEDUP_DIR,
-    EXPORT_DIR,
+    OUTPUT_DIR,
 )  # type: tuple[Path, ...]
 for d in DIRS:
     d.mkdir(exist_ok=True)
@@ -60,7 +67,7 @@ def PATH(
 ) -> Path:
     return Path(
         (
-            EXPORT_DIR if export else DATA_DIR
+            OUTPUT_DIR if export else DATA_DIR
         ) / (name + ("." + suffix if suffix else ""))
     )
 

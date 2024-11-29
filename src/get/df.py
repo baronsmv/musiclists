@@ -5,13 +5,17 @@ import polars as pl
 
 def contextualize(
     df: pl.DataFrame,
-    num_filter: dict[str, tuple[int | float, int | float]] | None,
+    num_filter: dict[str, tuple[int | None, int | None]] | None,
     sort_by: dict[str, bool] | None,
     select: dict | tuple | list | None,
 ) -> pl.DataFrame:
     if num_filter:
         df = df.filter(
-            (pl.col(k) >= v[0]) & (pl.col(k) <= v[1])
+            (
+                pl.col(k).is_between(
+                    v[0] if v[0] else 0, v[1] if v[1] else 1000000000
+                )
+            )
             for k, v in num_filter.items()
         )
     if sort_by:

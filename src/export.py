@@ -10,8 +10,8 @@ from src.defaults import defaults
 
 def as_text(
     df: pl.DataFrame,
-    path: Path,
-    as_md: bool = True,
+    field: str,
+    markdown: bool = True,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -19,18 +19,25 @@ def as_text(
     with pl.Config(
         fmt_str_lengths=30,
         tbl_cell_numeric_alignment="RIGHT",
-        tbl_formatting="MARKDOWN" if as_md else "NOTHING",
+        tbl_formatting="MARKDOWN" if markdown else "NOTHING",
         tbl_hide_dataframe_shape=True,
         tbl_hide_column_data_types=True,
         tbl_rows=1000000000,
     ):
-        with open(path, "w", encoding="utf-8") as f:
+        with open(
+            defaults.PATH(
+                field, suffix="md" if markdown else "txt",
+                export=True,
+            ),
+            "w",
+            encoding="utf-8",
+        ) as f:
             f.write(str(df))
 
 
 def albums(
     field: str,
-    num_filter: dict[str, tuple[int | float, int | float]] | None = {
+    num_filter: dict[str, tuple[int | None, int | None]] | None = {
         "user_score": (95, 100),
     },
     sort_by: dict[str, bool] | None = {
@@ -40,29 +47,27 @@ def albums(
     },
     select: dict | tuple | list | None = {
         "user_score": "SC",
+        "user_ratings": "Rts.",
         "artist": "Artist",
         "title": "Album",
         "year": "Year",
     },
-    as_md: bool = True,
+    markdown: bool = True,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
     df = load(defaults.DATA_CHOICES[field])
     df = get_df.contextualize(df, num_filter, sort_by, select)
-    as_text(
-        df,
-        defaults.PATH(field, suffix="md" if as_md else "txt", export=True),
-        as_md
-    )
+    as_text(df, field + "_albums", markdown)
 
 
 def tracks(
     field: str = "aoty",
-    num_filter: dict[str, tuple[int | float, int | float]] | None = {
-        "track_score": (95, 100),
-        "user_score": (0, 100),
+    num_filter: dict[str, tuple[int | None, int | None]] | None = {
+        "track_score": (90, None),
+        "track_ratings": (10, None),
+        "user_score": (None, None),
     },
     sort_by: dict[str, bool] | None = {
         "artist": False,
@@ -78,7 +83,7 @@ def tracks(
         "title": "Album",
         "year": "Year",
     },
-    as_md: bool = True,
+    markdown: bool = True,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -86,8 +91,4 @@ def tracks(
     df = load(defaults.DATA_CHOICES[field])
     df = get_df.tracks(df)
     df = get_df.contextualize(df, num_filter, sort_by, select)
-    as_text(
-        df,
-        defaults.PATH(field, suffix="md" if as_md else "txt", export=True),
-        as_md
-    )
+    as_text(df, field + "_tracks", markdown)

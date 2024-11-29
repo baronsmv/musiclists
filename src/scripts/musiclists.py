@@ -111,15 +111,49 @@ def merge(
     )
 
 
-@de.json
-def json(
-    source,
+@de.albums
+def albums(
+    data_source,
+    markdown: bool,
+    min_score: int | float,
+    max_score: int | float,
+    min_ratings: int,
+    max_ratings: int,
+    quiet: bool,
+    verbose: bool,
+    debug: bool,
+):
+    export.albums(
+        field=data_source,
+        num_filter={
+            "user_score": (min_score, max_score),
+            "user_ratings": (min_ratings, max_ratings),
+        },
+        markdown=markdown,
+    )
+
+
+@de.tracks
+def tracks(
+    markdown: bool,
+    min_score: int,
+    max_score: int,
+    min_album_score: int,
+    max_album_score: int,
+    min_ratings: int,
+    max_ratings: int,
     quiet: bool,
     verbose: bool,
     debug: bool,
 ):
     export.tracks(
-        field=source
+        field="aoty",
+        num_filter={
+            "track_score": (min_score, max_score),
+            "track_ratings": (min_ratings, max_ratings),
+            "user_score": (min_album_score, max_album_score),
+        },
+        markdown=markdown,
     )
 
 
@@ -131,7 +165,7 @@ def dirs(
     debug: bool,
 ):
     """
-    Read album data from a directory and write it to a `polars` file.
+    Find album data from a directory.
 
     This function scans the `source_path` directory, where albums are stored,
     and extracts their artist, name and year. The album data is then written
@@ -160,7 +194,7 @@ def wanted(
     debug: bool,
 ):
     """
-    Identify the wanted but missing albums.
+    Find the wanted but missing albums.
 
     This function takes two lists of albums:
 
@@ -205,7 +239,7 @@ def leftover(
     debug: bool,
 ):
     """
-    Identify the owned but unwanted albums.
+    Find the owned but unwanted albums.
 
     This function takes two lists of albums:
 
