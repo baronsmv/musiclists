@@ -6,7 +6,7 @@ from pathlib import Path
 from src.defaults import defaults
 
 
-def from_path(
+def df(
     path: Path,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
