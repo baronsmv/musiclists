@@ -47,10 +47,11 @@ album = {
         "class": "artist",
         "type": "str",
         "subtag": {
-            "tag": "a",
+            "tag": "span",
         },
         "contains": {
             "artist_url": {
+                "tag": "a",
                 "key": "href",
                 "type": "str",
             },
@@ -149,17 +150,17 @@ album = {
     },
 }
 tracklist = {
-    "disc": {
+    "track_disc": {
         "tag": "div",
         "class": "discNumber",
         "type": "str",
     },
-    "track": {
+    "track_number": {
         "tag": "td",
         "class": "trackNumber",
         "type": "int",
     },
-    "title": {
+    "track_title": {
         "tag": "td",
         "class": "trackTitle",
         "type": "str",
@@ -167,7 +168,7 @@ tracklist = {
             "tag": "a",
         },
         "contains": {
-            "url": {
+            "track_url": {
                 "key": "href",
                 "type": "str",
             },
@@ -182,7 +183,7 @@ tracklist = {
         "type": "list_str",
         "expand": "li",
     },
-    "length": {
+    "track_length": {
         "tag": "div",
         "class": "length",
         "type": "str",
@@ -194,7 +195,7 @@ tracklist = {
         "expand": "a",
         "expand_url": "artist",
     },
-    "score": {
+    "track_score": {
         "tag": "td",
         "class": "trackRating",
         "subtag": {
@@ -202,7 +203,7 @@ tracklist = {
         },
         "type": "int",
         "contains": {
-            "ratings": {
+            "track_ratings": {
                 "key": "title",
                 "replace": {
                     " Ratings": "",

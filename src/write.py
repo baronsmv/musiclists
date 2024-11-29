@@ -11,12 +11,12 @@ from src.diff import diff
 from src.dedup import dedup
 from src.defaults import defaults
 from src import dump
-from src import get
-from src.load import frompath as load
+from src.get import data as get_data, album as get_album
+from src.load import from_path as load
 from src import search
 
 
-def albums(
+def __albums__(
     path: Path,
     function,
     type1,
@@ -74,7 +74,7 @@ def albums(
 
 
 def aoty(
-    path: Path,
+    path: Path = defaults.AOTY_PATH,
     types: tuple = defaults.AOTY_TYPES,
     start_page: int = 1,
     min_score: int = defaults.AOTY_MIN_SCORE,
@@ -84,7 +84,7 @@ def aoty(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
-    albums(
+    __albums__(
         path=path,
         function=dump.aoty,
         type1=defaults.AOTY_TYPES if "all" in types else types,
@@ -101,7 +101,7 @@ def aoty(
 
 
 def prog(
-    path: Path,
+    path: Path = defaults.PROG_PATH,
     types: tuple = defaults.PROG_TYPES,
     min_score: float = defaults.PROG_MIN_SCORE,
     max_score: float = defaults.PROG_MAX_SCORE,
@@ -112,12 +112,12 @@ def prog(
 ):
     if not quiet:
         print("Generating list of genres...")
-    genres = get.prog_genres()
+    genres = get_data.prog_genres()
     name_types = list()
     for i, t in enumerate(defaults.PROG_TYPES, start=1):
         if "all" in types or t in types:
             name_types.append(i)
-    albums(
+    __albums__(
         path=path,
         function=dump.progarchives,
         type1=(tuple((k, v) for k, v in genres.items())),
@@ -190,7 +190,7 @@ def dirs(
                 album["title"] = d.name[:-7].strip()
             else:
                 album["title"] = d.name.replace(" ()", "").strip()
-        album["id"] = get.id(album)
+        album["id"] = get_album.id(album)
         data.append(album.copy())
     DataFrame(data).serialize(path)
     if not quiet:
@@ -240,7 +240,7 @@ def duplicates(
     maximum: int | float = 1,
     field: str = defaults.AUTO_FIELD,
     key_sep: str = "-",
-    key_suf: str = defaults.SUFFIX,
+    key_suf: str = defaults.DATA_SUFFIX,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -285,7 +285,7 @@ def differences(
     name: str,
     dedup_path: Path,
     text_path: Path | None = None,
-    suffix: str = defaults.SUFFIX,
+    suffix: str = defaults.DATA_SUFFIX,
     dedup: bool = True,
     text: bool = True,
     quiet: bool = defaults.QUIET,

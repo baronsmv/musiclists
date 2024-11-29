@@ -13,7 +13,6 @@ def aoty(
     min_score: int,
     max_score: int,
     no_tracklist: bool,
-    path: Path,
     quiet: bool,
     verbose: bool,
     debug: bool,
@@ -22,8 +21,7 @@ def aoty(
     Download a list of top albums from AlbumOfTheYear.org (AOTY).
 
     This function downloads albums data whose scores (based on user ratings)
-    meet the criteria set by `min_score`, and saves them in the specified
-    `path` in `polars` format.
+    meet the criteria set by `min_score`.
 
     The albums are downloaded in order of their score, and the process will
     stop as soon as an album with a score lower than `min_score` is found.
@@ -36,7 +34,6 @@ def aoty(
         max_score=max_score,
         types=types,
         no_tracklist=no_tracklist,
-        path=path,
         quiet=quiet,
         verbose=verbose,
         debug=debug,
@@ -49,7 +46,6 @@ def prog(
     min_score: float,
     max_score: float,
     no_tracklist: bool,
-    path: Path,
     quiet: bool,
     verbose: bool,
     debug: bool,
@@ -58,8 +54,7 @@ def prog(
     Download a list of top albums from ProgArchives.com.
 
     This function downloads albums data whose scores (based on user ratings)
-    meet the criteria set by `min_score`, and saves them in the specified
-    `path` in `polars` format.
+    meet the criteria set by `min_score`.
 
     The albums are downloaded in order of their score, and the process will
     stop as soon as an album with a score lower than `min_score` is found.
@@ -72,7 +67,6 @@ def prog(
         max_score=max_score,
         types=types,
         no_tracklist=no_tracklist,
-        path=path,
         quiet=quiet,
         verbose=verbose,
         debug=debug,
@@ -111,7 +105,6 @@ def merge(
     write.all(
         dedup=dedup,
         dedup_path=dedup_path,
-        path=path,
         quiet=quiet,
         verbose=verbose,
         debug=debug,
@@ -121,14 +114,18 @@ def merge(
 @de.json
 def json(
     source,
+    quiet: bool,
+    verbose: bool,
+    debug: bool,
 ):
-    export.json()
+    export.tracks(
+        field=source
+    )
 
 
 @de.dirs
 def dirs(
     source_path: Path,
-    path: Path,
     quiet: bool,
     verbose: bool,
     debug: bool,
@@ -145,7 +142,6 @@ def dirs(
     """
     write.dirs(
         source=source_path,
-        path=path,
         quiet=quiet,
         verbose=verbose,
         debug=debug,

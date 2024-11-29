@@ -5,7 +5,7 @@ from shutil import copy as cp
 
 from src import get
 from src.defaults import defaults
-from src.load import frompath as load
+from src.load import from_path as load
 
 
 def copy(
@@ -49,8 +49,8 @@ def copy(
         path = get.path(d)  # Formatting `d` to its string path equivalent.
         if not quiet:
             print(f"Moving {path}.")
-        fromPath = Path(source / path)
+        from_path = Path(source / path)
         toPath = Path(destination / path)
-        cp(fromPath, toPath)
+        cp(from_path, toPath)
     if not quiet:
         print("Process completed.")

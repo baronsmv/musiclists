@@ -58,7 +58,7 @@ def PATH(
     direction = "loaded from" if read else "stored"
     help_message = help_message if help_message else HELP(
         name=name,
-        suffix=defaults.SUFFIX,
+        suffix=defaults.DATA_SUFFIX,
         direction=direction,
         extra=None,
     )

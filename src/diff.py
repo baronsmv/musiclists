@@ -5,7 +5,7 @@ from pathlib import Path
 
 from src.defaults import defaults
 from src import get
-from src.load import frompath as load
+from src.load import from_path as load
 from src import search
 
 

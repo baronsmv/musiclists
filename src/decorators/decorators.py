@@ -79,13 +79,12 @@ deduplic = click.option(
     show_default=True,
     help="Deduplicate the output based on its deduplicates file.",
 )
-re_download = click.option(
-    "-r",
-    "--re-download",
-    type=click.Choice(defaults.DL_CHOICES, case_sensitive=False),
-    multiple=True,
+data_source = click.option(
+    "-s",
+    "--source",
+    type=click.Choice(defaults.DATA_CHOICES.keys(), case_sensitive=False),
     show_choices=True,
-    default=(defaults.DL_CHOICES[0],),
+    default=tuple(defaults.DL_CHOICES.keys())[0],
     show_default=True,
     help="Re-download lists before merge.",
 )
@@ -120,7 +119,6 @@ def aoty(func):
             score.aoty(letter="m", no_name_option=True),
             score.aoty(letter="M", maximum=True, no_name_option=True),
             no_tracklist,
-            path.aoty(letter="p", no_name_option=True),
         ),
         groups.download,
     )
@@ -134,7 +132,6 @@ def prog(func):
             score.prog(letter="m", no_name_option=True),
             score.prog(letter="M", maximum=True, no_name_option=True),
             no_tracklist,
-            path.prog(letter="p", no_name_option=True),
         ),
         groups.download,
     )
@@ -148,15 +145,16 @@ def merge(func):
     return command(
         func,
         (
-            re_download,
             dedup,
-            path.merge(letter="p", no_name_option=True),
-            types.aoty(),
-            score.aoty(),
-            types.prog(),
-            score.prog(),
-            path.aoty(),
-            path.prog(),
+        ),
+    )
+
+
+def json(func):
+    return command(
+        func,
+        (
+            data_source,
         ),
     )
 

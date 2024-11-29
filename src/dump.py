@@ -6,7 +6,7 @@ from pathlib import Path
 from itertools import count
 
 from src.defaults import defaults
-from src import get
+from src.get import data as get_data, album as get_album, files as get_files
 from src.html_tags import aoty as aoty_tags, prog as prog_tags
 from src.verify import containsdirs
 
@@ -54,9 +54,9 @@ def until(
                                 else f"{score}"
                             )
                             + ": "
-                            + get.path(album, sep=" - ")
+                            + get_album.path(album, sep=" - ")
                         )
-                    album["id"] = get.id(album)
+                    album["id"] = get_album.id(album)
                     yield album
 
 
@@ -74,22 +74,29 @@ def aoty(
 ) -> Iterator[dict[str, str | int | float | list | dict | timedelta]]:
     if not quiet:
         print(f"- Downloading {album_type}, page {page_number}...")
-    album = dict(
+    album = (
+        dict()
     )  # type: dict[str, str | int | float | list | dict | timedelta]
     url = f"{base_page}/{ratings_subpage}/{album_type}/all/{page_number}/"
-    albums_list = get.table(url=url, id="centerContent")
+    albums_list = get_data.table(url=url, id="centerContent")
     for data in albums_list.find_all(class_="albumListRow"):
+        album["id"] = str()
+        album["internal_id"] = -1
         album["type"] = album_type
         album["page_number"] = page_number
-        get.tag(element=data, data_struct=album, tags=list_tags)
+        get_data.tag(element=data, data_struct=album, tags=list_tags)
         album_url = base_page + str(album["album_url"])
         album["internal_id"] = int(
             album_url.split("album/", 1)[-1].split("-", 1)[0]
         )
-        album_data = get.table(url=album_url, id="centerContent")
-        get.tag(element=album_data, data_struct=album, tags=album_tags)
+        album_data = get_data.table(url=album_url, id="centerContent")
+        get_data.tag(element=album_data, data_struct=album, tags=album_tags)
         if not no_tracklist:
-            album["tracks"], album["total_length"] = get.aoty_tracks(album_url)
+            album["tracks"], album["total_length"] = get_data.aoty_tracks(
+                album_url
+            )
+            if not album["total_length"]:
+                del album["total_length"]
         yield album.copy()
         album.clear()
 
@@ -109,7 +116,8 @@ def progarchives(
         print(
             f"- Downloading {genre[0]}, page {genre[1]}, type {album_type}..."
         )
-    album = dict(
+    album = (
+        dict()
     )  # type: dict[str, str | int | float | list | dict | timedelta]
     url = (
         base_page
@@ -118,18 +126,25 @@ def progarchives(
         + f"&salbumtypes={album_type}"
         + "&smaxresults=250#list"
     )
-    albums_list = get.table(url=url, tag="table", number=1, encoding="latin1")
+    albums_list = get_data.table(
+        url=url, tag="table", number=1, encoding="latin1"
+    )
     for data in albums_list.find_all("tr"):
+        album["id"] = str()
         album["type"] = album_type
         album["genre"] = genre[0]
-        get.tag(element=data, data_struct=album, tags=list_tags)
+        get_data.tag(element=data, data_struct=album, tags=list_tags)
         album_url = base_page + str(album["album_url"])
         album["internal_id"] = int(album_url.split("?id=")[-1])
-        album_data = get.table(url=album_url, tag="td", encoding="latin1")
-        get.tag(element=album_data, data_struct=album, tags=album_tags)
-        album["score_distribution"] = get.prog_distribution_score(album_url)
+        album_data = get_data.table(url=album_url, tag="td", encoding="latin1")
+        get_data.tag(element=album_data, data_struct=album, tags=album_tags)
+        album["score_distribution"] = get_data.prog_distribution_score(
+            album_url
+        )
         if not no_tracklist:
-            album["tracks"], album["total_length"] = get.prog_tracks(album_url)
+            album["tracks"], album["total_length"] = get_data.prog_tracks(
+                album_url
+            )
         yield album.copy()
         album.clear()
 
@@ -146,6 +161,6 @@ def dirs(
         if (
             d.is_dir()
             and not containsdirs(d)
-            and min_level <= get.level(d, path) <= max_level
+            and min_level <= get_files.level(d, path) <= max_level
         ):
             yield d

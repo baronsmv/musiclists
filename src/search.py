@@ -5,7 +5,7 @@ from pathlib import Path
 import re
 
 from src.defaults import defaults
-from src.load import frompath as load
+from src.load import from_path as load
 
 
 def lines(
@@ -36,7 +36,7 @@ def dedup(
     dedup_path: Path,
     field: str = defaults.AUTO_FIELD,
     key_sep: str = defaults.KEY_SEP,
-    key_suf: str = defaults.SUFFIX,
+    key_suf: str = defaults.DATA_SUFFIX,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
