@@ -1,4 +1,4 @@
-|  ts |   tr |  tn | track_title          | artist               | title                | year |
+|  SC | Rts. | No. | Track Title          | Artist               | Album                | Year |
 |-----|------|-----|----------------------|----------------------|----------------------|------|
 | 100 |   24 |   9 | DAAYY DREVVMM        | $B K R 4 Y           | Twerkn 10 Cellph0ne$ | 2012 |
 |     |      |     |                      | (BL4CKKR4Y)          |                      |      |

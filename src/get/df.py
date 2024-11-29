@@ -7,8 +7,7 @@ def contextualize(
     df: pl.DataFrame,
     num_filter: dict[str, tuple[int | float, int | float]] | None,
     sort_by: dict[str, bool] | None,
-    select: tuple | list | None,
-    rename: dict | None,
+    select: dict | tuple | list | None,
 ) -> pl.DataFrame:
     if num_filter:
         df = df.filter(
@@ -18,9 +17,11 @@ def contextualize(
     if sort_by:
         df = df.sort(sort_by.keys(), descending=tuple(sort_by.values()))
     if select:
-        df = df.select(select)
-    if rename:
-        df = df.rename(rename)
+        if isinstance(select, dict):
+            df = df.select(select.keys())
+            df = df.rename(select)
+        else:
+            df = df.select(select)
     return df
 
 

@@ -50,19 +50,14 @@ def tracks(
         "title": False,
         "track_score": True,
     },
-    select: tuple | list | None = (
-        "track_score",
-        "track_ratings",
-        "track_number",
-        "track_title",
-        "artist",
-        "title",
-        "year",
-    ),
-    rename: dict | None = {
-        "track_score": "ts",
-        "track_ratings": "tr",
-        "track_number": "tn",
+    select: dict | tuple | list | None = {
+        "track_score": "SC",
+        "track_ratings": "Rts.",
+        "track_number": "No.",
+        "track_title": "Track Title",
+        "artist": "Artist",
+        "title": "Album",
+        "year": "Year",
     },
     normalize: tuple | list | None = ("track_title", "artist", "title"),
     quiet: bool = defaults.QUIET,
@@ -71,5 +66,5 @@ def tracks(
 ):
     df = load(defaults.DATA_CHOICES[field])
     df = get_df.tracks(df)
-    df = get_df.contextualize(df, num_filter, sort_by, select, rename)
+    df = get_df.contextualize(df, num_filter, sort_by, select)
     as_text(df, defaults.PATH(field, suffix="txt", export=True))
