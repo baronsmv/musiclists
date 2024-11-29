@@ -1,7 +1,7 @@
 .idea/
 .ropeproject/
 .venv/
-data/*
+data
 output/*
 **/*.egg-info/
 **/*.kate-swp
