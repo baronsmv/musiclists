@@ -8,11 +8,11 @@ from exiftool import ExifToolHelper
 from textwrap import dedent
 
 from src.diff import diff
-from src.dedup import dedup
+from src.dedup import dedup as deduplicate
 from src.defaults import defaults
 from src import dump
 from src.get import data as get_data, album as get_album
-from src.load import from_path as load
+from src import load
 from src import search
 
 
@@ -142,6 +142,7 @@ def dirs(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
+    """
     if not quiet:
         print(f"Registering music from '{source.name}'")
     album = dict()
@@ -195,6 +196,7 @@ def dirs(
     DataFrame(data).serialize(path)
     if not quiet:
         print(f"\n{len(data)} albums registered.")
+    """
 
 
 def all(
@@ -245,6 +247,7 @@ def duplicates(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> None:
+    """
     if not quiet:
         print("Deduplicating lists...")
     path, data, inv = search.dedup(
@@ -276,6 +279,7 @@ def duplicates(
         verbose=verbose,
         debug=debug,
     )
+    """
 
 
 def differences(
@@ -292,6 +296,7 @@ def differences(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> None:
+    """
     if not quiet:
         print(f"Writting to {path}:")
     data = dict()
@@ -308,3 +313,4 @@ def differences(
         verbose=verbose,
         debug=debug,
     )
+    """

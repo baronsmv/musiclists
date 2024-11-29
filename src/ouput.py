@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import polars as pl
-
 from src.defaults import defaults
 from src.get import df as get_df
 from src import load

@@ -3,7 +3,7 @@
 from pathlib import Path
 
 import src.decorators.decorators as de
-from src import write, export
+from src import write, output
 from src.copy import copy as cp
 
 
@@ -123,7 +123,7 @@ def albums(
     verbose: bool,
     debug: bool,
 ):
-    export.albums(
+    output.albums(
         field=data_source,
         num_filter={
             "user_score": (min_score, max_score),
@@ -146,7 +146,7 @@ def tracks(
     verbose: bool,
     debug: bool,
 ):
-    export.tracks(
+    output.tracks(
         field="aoty",
         num_filter={
             "track_score": (min_score, max_score),

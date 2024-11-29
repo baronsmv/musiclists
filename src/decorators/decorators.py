@@ -16,6 +16,7 @@ def count_time(func):
         result = func(*args, **kwargs)
         print(f"Program concluded in {round(time() - start, 2)} seconds.")
         return result
+
     return wrapper
 
 
@@ -109,14 +110,14 @@ def command(func, decs: tuple, supercomm=None):
     return add(
         func,
         (
-            count_time,
             version,
             debug,
             verbose,
             quiet,
             subcomm(supercomm) if supercomm else comm,
         )
-        + decs,
+        + decs
+        + count_time,
     )
 
 
@@ -153,9 +154,7 @@ def dedup(func):
 def merge(func):
     return command(
         func,
-        (
-            dedup,
-        ),
+        (dedup,),
         groups.operations,
     )
 
@@ -195,7 +194,8 @@ def tracks(func):
 
 def dirs(func):
     return command(
-        func, (
+        func,
+        (
             path.source,
             path.dirs(letter="p", no_name_option=True),
         ),
@@ -231,10 +231,7 @@ def leftover(func):
 
 def copy(func):
     return command(
-        func, (
-            path.source,
-            path.destination,
-            path.wanted(read=True)
-        ),
+        func,
+        (path.source, path.destination, path.wanted(read=True)),
         groups.operations,
     )
