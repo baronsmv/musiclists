@@ -1,5 +1,5 @@
 */
-!src/**/**
+!src
 **/*.egg-info/
 **/*.kate-swp
 **/__pycache__/
