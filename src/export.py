@@ -77,7 +77,6 @@ def tracks(
         "artist": "Artist",
         "title": "Album",
         "year": "Year",
-        "user_score": "A-SC"
     },
     as_md: bool = True,
     quiet: bool = defaults.QUIET,
