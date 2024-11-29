@@ -1,8 +1,5 @@
-.idea/
-.ropeproject/
-.venv/
-data
-output/*
+*/
+!src/
 **/*.egg-info/
 **/*.kate-swp
 **/__pycache__/
