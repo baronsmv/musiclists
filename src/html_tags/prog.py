@@ -41,11 +41,11 @@ albumlist = {
         "type": "str",
         "match": r"\d{4}"
     },
-    "qwr": {
+    "user_score": {
         "tag": "div",
-        "type": "float",
         "number": 1,
         "replace": {"QWR = ": ""},
+        "type": "float",
     },
     "average_rating": {
         "tag": "span",

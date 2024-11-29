@@ -122,7 +122,7 @@ def prog(
         function=dump.progarchives,
         type1=(tuple((k, v) for k, v in genres.items())),
         type2=name_types,
-        score_key="qwr",
+        score_key="user_score",
         min_score=min_score,
         max_score=max_score,
         highest_score=5,
