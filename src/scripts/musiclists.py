@@ -3,8 +3,7 @@
 from pathlib import Path
 
 import src.decorators.decorators as de
-from src import write, output
-from src.compare import diff
+from src import write, output, compare
 from src.copy import copy as cp
 
 
@@ -82,7 +81,7 @@ def similars(
     verbose: bool,
     debug: bool,
 ):
-    diff(
+    compare.similarities(
         data_1,
         data_2,
         quiet=quiet,
