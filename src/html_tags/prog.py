@@ -11,31 +11,36 @@ album_list = {
     "title": {
         "tag": "a",
         "number": 0,
-        "type": "str",
         "contains": {
             "album_url": {
                 "key": "href",
                 "type": "str",
             },
         },
+        "type": "str",
     },
     "cover_url": {
         "tag": "img",
-        "type": "str",
         "key": "src",
+        "type": "str",
     },
     "artist": {
         "tag": "a",
         "number": 1,
-        "type": "str",
         "contains": {
             "artist_url": {
                 "key": "href",
                 "type": "str",
             },
         },
+        "type": "str",
     },
-    "year": {"tag": "br", "number": 1, "type": "str", "match": r"\d{4}"},
+    "year": {
+        "tag": "br",
+        "number": 1,
+        "match": r"\d{4}",
+        "type": "int",
+    },
     "user_score": {
         "tag": "div",
         "number": 1,

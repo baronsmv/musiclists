@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-albumlist = {
+album_list = {
     "position": {
         "tag": "span",
         "class": "albumListRank",
@@ -12,7 +12,6 @@ albumlist = {
     "title": {
         "tag": "h2",
         "class": "albumListTitle",
-        "type": "str",
         "subtag": {
             "tag": "a",
         },
@@ -22,30 +21,30 @@ albumlist = {
                 "type": "str",
             },
         },
+        "type": "str",
     },
 }
 album = {
     "title": {
         "tag": "div",
         "class": "albumTitle",
-        "type": "str",
         "subtag": {
             "tag": "span",
         },
+        "type": "str",
     },
     "cover_url": {
         "tag": "div",
         "class": "albumTopBox cover",
-        "type": "str",
         "subtag": {
             "tag": "img",
         },
         "key": "src",
+        "type": "str",
     },
     "artist": {
         "tag": "div",
         "class": "artist",
-        "type": "str",
         "subtag": {
             "tag": "span",
         },
@@ -56,97 +55,96 @@ album = {
                 "type": "str",
             },
         },
+        "type": "str",
     },
     "critic_score": {
         "tag": "div",
         "class": "albumCriticScore",
-        "type": "int",
         "subtag": {
             "tag": "a",
         },
+        "type": "int",
     },
     "critic_reviews": {
         "tag": "div",
         "class": "text numReviews",
-        "type": "int",
         "subtag": {
             "tag": "span",
         },
+        "type": "int",
     },
     "user_score": {
         "tag": "div",
         "class": "albumUserScore",
-        "type": "int",
         "subtag": {
             "tag": "a",
         },
+        "type": "int",
     },
     "user_ratings": {
         "tag": "div",
         "class": "albumUserScoreBox",
-        "type": "int",
         "subtag": {
             "tag": "strong",
         },
-        "replace": {
-            ",": ""
-        },
+        "replace": {",": ""},
+        "type": "int",
     },
     "year": {
         "tag": "div",
         "class": "detailRow",
-        "type": "int",
         "subtag": {
             "tag": "a",
             "number": -1,
         },
+        "type": "int",
     },
     "month": {
         "tag": "div",
         "class": "detailRow",
-        "type": "str",
         "subtag": {
             "tag": "a",
             "number": -2,
         },
+        "type": "str",
     },
     "day": {
         "tag": "div",
         "class": "detailRow",
-        "type": "str",
         "match": r"(\d+)",
+        "type": "str",
     },
     "genres": {
         "tag": "div",
         "class": "detailRow",
         "number": 3,
-        "type": "list",
         "expand": "a",
         "expand_url": "genre",
+        "type": "list",
     },
     "labels": {
         "tag": "div",
         "class": "detailRow",
         "number": 2,
-        "type": "list",
         "expand": "a",
         "expand_url": "label",
+        "type": "list",
     },
     "producers": {
         "tag": "div",
         "class": "detailRow",
         "number": 4,
-        "type": "list",
         "expand": "a",
         "expand_url": "producer",
+        "type": "list",
     },
     "writers": {
         "tag": "div",
         "class": "detailRow",
         "number": 5,
-        "type": "list",
         "expand": "a",
         "expand_url": "writer",
+        "type": "list",
     },
 }
 tracklist = {
@@ -163,7 +161,6 @@ tracklist = {
     "track_title": {
         "tag": "td",
         "class": "trackTitle",
-        "type": "str",
         "subtag": {
             "tag": "a",
         },
@@ -173,15 +170,16 @@ tracklist = {
                 "type": "str",
             },
         },
+        "type": "str",
     },
-    "subtracks": {
+    "sub_tracks": {
         "tag": "div",
         "class": "trackNotes",
         "subtag": {
             "tag": "ul",
         },
-        "type": "list_str",
         "expand": "li",
+        "type": "list_str",
     },
     "track_length": {
         "tag": "div",
@@ -191,9 +189,9 @@ tracklist = {
     "featuring": {
         "tag": "div",
         "class": "featuredArtists",
-        "type": "list",
         "expand": "a",
         "expand_url": "artist",
+        "type": "list",
     },
     "track_score": {
         "tag": "td",
@@ -201,7 +199,6 @@ tracklist = {
         "subtag": {
             "tag": "span",
         },
-        "type": "int",
         "contains": {
             "track_ratings": {
                 "key": "title",
@@ -210,6 +207,7 @@ tracklist = {
                 },
                 "type": "int",
             }
-        }
+        },
+        "type": "int",
     },
 }

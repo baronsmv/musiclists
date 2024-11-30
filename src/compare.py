@@ -8,14 +8,14 @@ from src.defaults import defaults
 from src.get.album import path
 
 
-def diff(
+def __diff__(
     data_1: str,
     data_2: str,
-    columns: list | tuple = ("title", "artist", "year"),
-    minimum: int | float = 0.6,
-    maximum: int | float = 1,
-    only_highest_match: bool = defaults.ONLY_HIGHEST_MATCH,
-    num_diff: float = 0.05,
+    columns: list | tuple,
+    minimum: int | float,
+    maximum: int | float,
+    only_highest_match: bool,
+    num_diff: float,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -26,10 +26,12 @@ def diff(
     highest_match = dict()
     for d1 in load.df(data_1).rows(named=True):
         for d2 in load.df(data_2).rows(named=True):
+            # print(tuple((d1[col], d2[col]) for col in columns))
+            # exit()
             sim = median(
                 (
                     SequenceMatcher(None, d1[col], d2[col]).ratio()
-                    if isinstance(d1[col], str)
+                    if isinstance(d1[col], str) or isinstance(d2[col], str)
                     else 1 - (abs(d1[col] - d2[col]) * num_diff)
                 )
                 for col in columns
@@ -55,3 +57,30 @@ def diff(
                 )
             highest_ratio = 0.0
             highest_match.clear()
+
+
+def diff(
+    data_1: str,
+    data_2: str,
+    columns: list | tuple = ("title", "artist", "year"),
+    minimum: int | float = 0.6,
+    maximum: int | float = 1,
+    only_highest_match: bool = defaults.ONLY_HIGHEST_MATCH,
+    num_diff: float = 0.05,
+    quiet: bool = defaults.QUIET,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+):
+    for d in __diff__(
+        data_1=data_1,
+        data_2=data_2,
+        columns=columns,
+        minimum=minimum,
+        maximum=maximum,
+        only_highest_match=only_highest_match,
+        num_diff=num_diff,
+        quiet=quiet,
+        verbose=verbose,
+        debug=debug,
+    ):
+        print(d)

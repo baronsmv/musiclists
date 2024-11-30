@@ -65,7 +65,7 @@ def aoty(
     page_number: int,
     base_page: str = "https://www.albumoftheyear.org",
     ratings_subpage: str = "ratings/user-highest-rated",
-    list_tags: dict = aoty_tags.albumlist,
+    list_tags: dict = aoty_tags.album_list,
     album_tags: dict = aoty_tags.album,
     no_tracklist: bool = defaults.NO_TRACKLIST,
     quiet: bool = defaults.QUIET,
