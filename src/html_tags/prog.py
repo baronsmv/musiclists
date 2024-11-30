@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-albumlist = {
+album_list = {
     "position": {
         "tag": "td",
         "subtag": {
@@ -35,12 +35,7 @@ albumlist = {
             },
         },
     },
-    "year": {
-        "tag": "br",
-        "number": 1,
-        "type": "str",
-        "match": r"\d{4}"
-    },
+    "year": {"tag": "br", "number": 1, "type": "str", "match": r"\d{4}"},
     "user_score": {
         "tag": "div",
         "number": 1,
@@ -65,5 +60,5 @@ album = {
     },
     "score_distribution": {
         "tag": "blockquote",
-    }
+    },
 }

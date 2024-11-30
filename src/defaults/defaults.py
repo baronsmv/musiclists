@@ -60,32 +60,12 @@ for d in DIRS:
     d.mkdir(exist_ok=True)
 
 
-def PATH(
-    name: str,
-    suffix: str | None = DATA_SUFFIX,
-    export: bool = False,
-) -> Path:
-    return Path(
-        (
-            OUTPUT_DIR if export else DATA_DIR
-        ) / (name + ("." + suffix if suffix else ""))
-    )
-
-
-AOTY_PATH = PATH("aoty")
-PROG_PATH = PATH("prog")
-MERGE_PATH = PATH("merge")
-DIRS_PATH = PATH("dirs")
-WANTED_PATH = PATH("wanted")
-LEFTOVER_PATH = PATH("leftover")
-
-
 DL_CHOICES = {
-    "aoty": AOTY_PATH,
-    "prog": PROG_PATH,
+    "aoty": Path(DATA_DIR / f"aoty.{DATA_SUFFIX}"),
+    "prog": Path(DATA_DIR / f"prog.{DATA_SUFFIX}"),
 }  # type: dict[str, Path]
 
-MERGE_CHOICE = {"all": MERGE_PATH}
+MERGE_CHOICE = {"all": Path(DATA_DIR / f"merge.{DATA_SUFFIX}")}
 
 DATA_CHOICES = {
     k: v

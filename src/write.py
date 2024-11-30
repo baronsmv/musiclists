@@ -1,23 +1,17 @@
 #!/usr/bin/env python3
 
-from datetime import timedelta
 import multiprocessing.dummy as mp
-from polars import DataFrame
+from datetime import timedelta
 from pathlib import Path
-from exiftool import ExifToolHelper
 from textwrap import dedent
 
-from src.diff import diff
-from src.dedup import dedup as deduplicate
+from src import dump, save
 from src.defaults import defaults
-from src import dump
-from src.get import data as get_data, album as get_album
-from src import load
-from src import search
+from src.get import data as get_data
 
 
 def __albums__(
-    path: Path,
+    field: str,
     function,
     type1,
     type2,
@@ -32,20 +26,24 @@ def __albums__(
     debug: bool = defaults.DEBUG,
 ):
     if verbose:
-        print(dedent(
-            f"""
+        print(
+            dedent(
+                f"""
             Download process started:
             - Types: {type1}
             - Types: {type2}
             - Minimum score: {min_score}
             - Maximum score: {max_score}
-            """))
+            """
+            )
+        )
     if not quiet:
         if name:
             print(f"Downloading lists from {name}:")
         else:
             print("Downloading lists:")
-    data = list(
+    data = (
+        list()
     )  # type: list[dict[str, str | int | float | list | dict | timedelta]]
     until = dump.until(
         function=function,
@@ -67,14 +65,11 @@ def __albums__(
     else:
         for album in until:
             data.append(album)
-    df = DataFrame(data)
-    df.serialize(path)
-    if not quiet:
-        print(f"\n{len(data)} albums registered.")
+    save.as_df(data, field)
 
 
 def aoty(
-    path: Path = defaults.AOTY_PATH,
+    field: str = "aoty",
     types: tuple = defaults.AOTY_TYPES,
     start_page: int = 1,
     min_score: int = defaults.AOTY_MIN_SCORE,
@@ -85,7 +80,7 @@ def aoty(
     debug: bool = defaults.DEBUG,
 ):
     __albums__(
-        path=path,
+        field=field,
         function=dump.aoty,
         type1=defaults.AOTY_TYPES if "all" in types else types,
         type2=start_page,
@@ -101,7 +96,7 @@ def aoty(
 
 
 def prog(
-    path: Path = defaults.PROG_PATH,
+    field: str = "prog",
     types: tuple = defaults.PROG_TYPES,
     min_score: float = defaults.PROG_MIN_SCORE,
     max_score: float = defaults.PROG_MAX_SCORE,
@@ -118,7 +113,7 @@ def prog(
         if "all" in types or t in types:
             name_types.append(i)
     __albums__(
-        path=path,
+        field=field,
         function=dump.progarchives,
         type1=(tuple((k, v) for k, v in genres.items())),
         type2=name_types,
@@ -217,13 +212,13 @@ def all(
         path=path,
         data=dict(
             diff(
-                data1=Path(aoty_path),
-                data2=Path(prog_path),
+                data1=Path(get.file.path("aoty")),
+                data2=Path(get.file.path("prog")),
                 dedup_path=dedup_path,
                 dedup=dedup,
             ),
         )
-        | load(Path(prog_path)),
+        | load(Path(get.file.path("prog"))),
         text_path=text_path,
         text=text,
         quiet=quiet,

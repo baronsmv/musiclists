@@ -8,7 +8,7 @@ from src.defaults import defaults
 
 def id(
     data: list | dict | str,
-    length: int = 14,
+    length: int = 16,
     sep: str = "",
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,

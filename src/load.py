@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 
 from polars import DataFrame
-from pathlib import Path
 
 from src.defaults import defaults
+from src.get import file
 
 
 def df(
-    path: Path,
+    field: str,
+    dedup: bool = False,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> DataFrame:
-    if not quiet:
-        print(f"Loading list from {path}...")
-    return DataFrame.deserialize(path)
+    file_path = file.path(field, dedup=dedup)
+    if verbose:
+        print(f"Loading list from {file_path}...")
+    return DataFrame.deserialize(file_path)

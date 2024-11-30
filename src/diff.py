@@ -4,7 +4,7 @@ from collections.abc import Iterator
 from pathlib import Path
 
 from src.defaults import defaults
-from src import get
+from src.get import file
 from src import load
 from src import search
 
@@ -21,12 +21,10 @@ def diff(
 ) -> Iterator[tuple[str, dict]]:
     if not quiet:
         print(f"Starting diff process between {data1} and {data2}...")
-    keys = load.df(data2).keys()
-    filePath, data, inv = search.dedup(
-        data1=data1, data2=data2, dedup_path=dedup_path
-    )
+    keys = load.df(data2).select("id").to_list()
+    file_path, data, inv = search.dedup(data1=data1, data2=data2)
     if not data:
-        print(f"Duplicate file {filePath} not found.")
+        print(f"Diff file {file_path} not found.")
         exit(1)
     d = data[field]
     values = list()
@@ -36,17 +34,17 @@ def diff(
                 values.append((k, i))
         else:
             values.append((k, v))
-    for key, value in load(data1).items():
+    for key, value in load.df(data1).items():
         if key not in keys:
-            pt = get.path(value)
+            pt = file.path(value)
             if (
                 dedup
                 and not inv
                 and pt in d.keys()  # Exists as key in the dedup
                 and (
-                    any(get.id(p) in keys for p in d[pt])
+                    any(id(p) in keys for p in d[pt])
                     if isinstance(d[pt], list)
-                    else get.id(d[pt]) in keys
+                    else id(d[pt]) in keys
                 )  # The value of the dedup exists in the second dict
             ):
                 continue
@@ -56,7 +54,7 @@ def diff(
                 and pt
                 in (v[1] for v in values)  # Exists as key in the dedup
                 and any(
-                    (get.id(v[0]) in keys if pt == v[1] else False)
+                    (id(v[0]) in keys if pt == v[1] else False)
                     for v in values
                 )  # The value of the dedup exists in the second dict
             ):

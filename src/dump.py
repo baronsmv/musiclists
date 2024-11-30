@@ -2,11 +2,11 @@
 
 from collections.abc import Iterator
 from datetime import timedelta
-from pathlib import Path
 from itertools import count
+from pathlib import Path
 
 from src.defaults import defaults
-from src.get import data as get_data, album as get_album, files as get_files
+from src.get import data as get_data, album as get_album, file as get_file
 from src.html_tags import aoty as aoty_tags, prog as prog_tags
 from src.verify import containsdirs
 
@@ -105,7 +105,7 @@ def progarchives(
     genre: tuple,
     album_type: int,
     base_page: str = "https://www.progarchives.com/",
-    list_tags: dict = prog_tags.albumlist,
+    list_tags: dict = prog_tags.album_list,
     album_tags: dict = prog_tags.album,
     no_tracklist: bool = defaults.NO_TRACKLIST,
     quiet: bool = defaults.QUIET,
@@ -161,6 +161,6 @@ def dirs(
         if (
             d.is_dir()
             and not containsdirs(d)
-            and min_level <= get_files.level(d, path) <= max_level
+            and min_level <= get_file.level(d, path) <= max_level
         ):
             yield d

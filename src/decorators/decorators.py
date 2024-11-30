@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
-import click
-from click_help_colors import HelpColorsCommand, version_option
 from functools import wraps
 from time import time
 
-from src.decorators import groups, path, number, types
+import click
+from click_help_colors import HelpColorsCommand, version_option
+
+from src.decorators import data, groups, path, number, types
 from src.defaults import defaults
 
 
@@ -20,7 +21,7 @@ def count_time(func):
     return wrapper
 
 
-def subcomm(supercomm):
+def subcomm(supercomm: object) -> object:
     return supercomm.command(
         cls=HelpColorsCommand,
     )
@@ -80,15 +81,6 @@ deduplic = click.option(
     show_default=True,
     help="Deduplicate the output based on its deduplicates file.",
 )
-data_source = click.option(
-    "-d",
-    "--data-source",
-    type=click.Choice(defaults.DATA_CHOICES.keys(), case_sensitive=False),
-    show_choices=True,
-    default=tuple(defaults.DL_CHOICES.keys())[0],
-    show_default=True,
-    help="Re-download lists before merge.",
-)
 markdown = click.option(
     "-m",
     "--markdown/--no-markdown",
@@ -100,13 +92,15 @@ markdown = click.option(
 )
 
 
-def add(func, decs: tuple):
-    for dec in reversed(decs):
+def add(func, decorators: tuple):
+    for dec in reversed(decorators):
         func = dec(func)
     return func
 
 
-def command(func, decs: tuple, supercomm=None):
+def command(
+    func: object, decorators: tuple, supercomm: object = None
+) -> object:
     return add(
         func,
         (
@@ -116,8 +110,8 @@ def command(func, decs: tuple, supercomm=None):
             quiet,
             subcomm(supercomm) if supercomm else comm,
         )
-        + decs
-        + count_time,
+        + decorators
+        + (count_time,),
     )
 
 
@@ -147,6 +141,17 @@ def prog(func):
     )
 
 
+def similars(func):
+    return command(
+        func,
+        (
+            data.source(suffix="1", default=0),
+            data.source(suffix="2", default=-1),
+        ),
+        groups.find,
+    )
+
+
 def dedup(func):
     return add(func, (deduplic, path.dedup))
 
@@ -154,7 +159,7 @@ def dedup(func):
 def merge(func):
     return command(
         func,
-        (dedup,),
+        (data.source(),),
         groups.operations,
     )
 
@@ -163,7 +168,7 @@ def albums(func):
     return command(
         func,
         (
-            data_source,
+            data.source(letter="d"),
             markdown,
             number.albums(letter="s", no_name_option=True, integer=False),
             number.albums(

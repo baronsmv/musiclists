@@ -3,13 +3,13 @@
 from pathlib import Path
 from shutil import copy as cp
 
-from src import get
+from src import load
 from src.defaults import defaults
-from src.load import from_path as load
+from src.get import file
 
 
 def copy(
-    data: Path,
+    field: str,
     source: Path,
     destination: Path,
     quiet: bool = defaults.QUIET,
@@ -40,17 +40,21 @@ def copy(
         information for debugging purposes.
     """
     if not quiet:
-        print(f"""
+        print(
+            f"""
               Moving directories registered in {data.name}
               Origin: {source}
               Destination: {destination}
-              """)
-    for d in load(data):
-        path = get.path(d)  # Formatting `d` to its string path equivalent.
+              """
+        )
+    for d in load.df(field).rows():
+        file_path = file.path(
+            d
+        )  # Formatting `d` to its string path equivalent.
         if not quiet:
-            print(f"Moving {path}.")
-        from_path = Path(source / path)
-        toPath = Path(destination / path)
-        cp(from_path, toPath)
+            print(f"Moving {file_path}.")
+        from_path = Path(source / file_path)
+        to_path = Path(destination / file_path)
+        cp(from_path, to_path)
     if not quiet:
         print("Process completed.")

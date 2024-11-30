@@ -3,6 +3,22 @@
 import polars as pl
 
 from src.defaults import defaults
+from src.get import file
+
+
+def as_df(
+    data: list[dict],
+    field: str,
+    quiet: bool = defaults.QUIET,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+) -> None:
+    if verbose:
+        print(f"Writing DataFrame to {field} file.")
+    df = pl.DataFrame(data)
+    df.serialize(file.path(field))
+    if not quiet:
+        print(f"\n{len(data)} albums registered.")
 
 
 def as_text(
@@ -12,7 +28,7 @@ def as_text(
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
-):
+) -> None:
     with pl.Config(
         fmt_str_lengths=30,
         tbl_cell_numeric_alignment="RIGHT",
@@ -22,9 +38,10 @@ def as_text(
         tbl_rows=1000000000,
     ):
         with open(
-            defaults.PATH(
-                field, suffix="md" if markdown else "txt",
-                export=True,
+            file.path(
+                field,
+                suffix="md" if markdown else "txt",
+                output=True,
             ),
             "w",
             encoding="utf-8",

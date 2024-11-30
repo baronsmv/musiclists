@@ -4,6 +4,7 @@ from pathlib import Path
 
 import src.decorators.decorators as de
 from src import write, output
+from src.compare import diff
 from src.copy import copy as cp
 
 
@@ -73,6 +74,23 @@ def prog(
     )
 
 
+@de.similars
+def similars(
+    data_1: str,
+    data_2: str,
+    quiet: bool,
+    verbose: bool,
+    debug: bool,
+):
+    diff(
+        data_1,
+        data_2,
+        quiet=quiet,
+        verbose=verbose,
+        debug=debug,
+    )
+
+
 @de.merge
 def merge(
     dedup: bool,
@@ -113,7 +131,7 @@ def merge(
 
 @de.albums
 def albums(
-    data_source,
+    data: str,
     markdown: bool,
     min_score: int | float,
     max_score: int | float,
@@ -124,7 +142,7 @@ def albums(
     debug: bool,
 ):
     output.albums(
-        field=data_source,
+        field=data,
         num_filter={
             "user_score": (min_score, max_score),
             "user_ratings": (min_ratings, max_ratings),
