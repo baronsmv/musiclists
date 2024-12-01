@@ -25,5 +25,6 @@ def similarities(
         num_diff=num_diff,
         quiet=quiet,
         verbose=verbose,
+        debug=debug,
     ):
         pass

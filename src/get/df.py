@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import pprint
 from difflib import SequenceMatcher
 from statistics import median
 
@@ -76,43 +77,78 @@ def similarities(
     num_diff: float,
     quiet: bool,
     verbose: bool,
+    debug: bool,
 ) -> tuple[list, list]:
     logger = logging.logger(similarities)
+    start_message = (
+        "Finding "
+        + (
+            "the highest similarities"
+            if only_highest_match
+            else "all similarities"
+        )
+        + f" between `{data_1}` and `{data_2}` data",
+        f"in {columns}, and a minimum match rate of {minimum * 100}%",
+    )
+    logger.info(" ".join(start_message))
     if not quiet:
-        print(f"Finding similarities between {data_1} and {data_2}.")
+        print(
+            (" ".join(start_message) if verbose else start_message[0]) + ".\n"
+        )
     rows_1 = load.df(data_1).sort(by="id").rows(named=True)
     logger.info(f"Loaded {data_1} DataFrame rows into `data_1`.")
     rows_2 = load.df(data_2).sort(by="id").rows(named=True)
     logger.info(f"Loaded {data_2} DataFrame rows into `data_2`.")
     for d1 in rows_1:
         matches = sorted(
-            ((__simil__(d1, d2, columns, num_diff), d1, d2) for d2 in rows_2),
+            (
+                (__simil__(d1, d2, columns, num_diff), d1, d2)
+                for d2 in rows_2
+                if minimum <= __simil__(d1, d2, columns, num_diff)
+            ),
             key=lambda row: row[0],
             reverse=True,
         )
+        if not matches:
+            logger.info("No matches found for: " + path(d1, sep=" - "))
+            continue
         if (
-            minimum <= matches[0][0] < 1
+            matches[0][0] != 1
             and max(
                 __simil__(matches[0][2], d, columns, num_diff) for d in rows_1
             )
             != 1
         ):
             if only_highest_match:
-                yield matches[0][1:]
+                match_message = (
+                    f"{round(matches[0][0] * 100)}%: Found match between:",
+                    path(matches[0][1], sep=" - "),
+                    path(matches[0][2], sep=" - "),
+                )
+                logger.info(
+                    match_message[0] + " " + ", ".join(match_message[1:])
+                )
+                if debug:
+                    logger.debug(pprint.pformat(matches[0]))
                 if verbose:
-                    print(
-                        f"- {round(matches[0][0] * 100)}%: Highest similarity between:",
-                        path(matches[0][1], sep=" - "),
-                        path(matches[0][2], sep=" - "),
-                        sep="\n  - ",
-                    )
+                    print(*match_message, sep="\n- ")
+                yield matches[0][1:]
             else:
-                print(f"- {matches[1]}:")
+                match_message = [
+                    "Found matches for: "
+                    + path(matches[0][1], sep=" - ")
+                    + ":"
+                ]
                 for match in matches:
-                    if minimum <= match[0] < 1:
-                        yield match[1:]
-                        if verbose:
-                            print(
-                                f"  - {round(matches[0][0] * 100)}%:",
-                                path(match[2], sep=" - "),
-                            )
+                    match_message.append(
+                        f"{round(matches[0][0] * 100)}%: "
+                        + path(match[2], sep=" - "),
+                    )
+                    yield match[1:]
+                logger.info(
+                    match_message[0] + ": " + ", ".join(match_message[1:])
+                )
+                if debug:
+                    logger.debug(pprint.pformat(matches))
+                if verbose:
+                    print(*match_message, sep="\n- ")
