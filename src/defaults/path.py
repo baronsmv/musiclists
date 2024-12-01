@@ -17,3 +17,5 @@ DIRS = (
 
 for d in DIRS:
     d.mkdir(exist_ok=True)
+
+LOG_PATH = Path(DATA_DIR / "musiclists.log")

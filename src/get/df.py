@@ -6,6 +6,7 @@ from statistics import median
 import polars as pl
 
 from src import load
+from src.debug import logging
 from src.get.album import path
 
 
@@ -50,7 +51,7 @@ def tracks(df: pl.DataFrame) -> pl.DataFrame:
     return df
 
 
-def __median__(
+def __simil__(
     d1: dict,
     d2: dict,
     columns: list[str] | tuple[str],
@@ -75,22 +76,24 @@ def similarities(
     num_diff: float,
     quiet: bool,
     verbose: bool,
-    debug: bool,
 ) -> tuple[list, list]:
+    logger = logging.logger(similarities)
     if not quiet:
-        print(f"Finding similarities between {data_1} and {data_2}...")
-    data_1 = load.df(data_1).sort(by="id").rows(named=True)
-    data_2 = load.df(data_2).sort(by="id").rows(named=True)
-    for d1 in data_1:
+        print(f"Finding similarities between {data_1} and {data_2}.")
+    rows_1 = load.df(data_1).sort(by="id").rows(named=True)
+    logger.info(f"Loaded {data_1} DataFrame rows into `data_1`.")
+    rows_2 = load.df(data_2).sort(by="id").rows(named=True)
+    logger.info(f"Loaded {data_2} DataFrame rows into `data_2`.")
+    for d1 in rows_1:
         matches = sorted(
-            ((__median__(d1, d2, columns, num_diff), d1, d2) for d2 in data_2),
+            ((__simil__(d1, d2, columns, num_diff), d1, d2) for d2 in rows_2),
             key=lambda row: row[0],
             reverse=True,
         )
         if (
             minimum <= matches[0][0] < 1
             and max(
-                __median__(matches[0][2], d, columns, num_diff) for d in data_1
+                __simil__(matches[0][2], d, columns, num_diff) for d in rows_1
             )
             != 1
         ):
