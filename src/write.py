@@ -5,6 +5,7 @@ from datetime import timedelta
 from pathlib import Path
 from textwrap import dedent
 
+import src.defaults.download
 from src import dump, save
 from src.defaults import defaults
 from src.get import data as get_data
@@ -70,10 +71,10 @@ def __albums__(
 
 def aoty(
     field: str = "aoty",
-    types: tuple = defaults.AOTY_TYPES,
+    types: tuple = src.defaults.download.AOTY_TYPES,
     start_page: int = 1,
-    min_score: int = defaults.AOTY_MIN_SCORE,
-    max_score: int = defaults.AOTY_MAX_SCORE,
+    min_score: int = src.defaults.download.AOTY_MIN_SCORE,
+    max_score: int = src.defaults.download.AOTY_MAX_SCORE,
     no_tracklist: bool = defaults.NO_TRACKLIST,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
@@ -82,7 +83,7 @@ def aoty(
     __albums__(
         field=field,
         function=dump.aoty,
-        type1=defaults.AOTY_TYPES if "all" in types else types,
+        type1=src.defaults.download.AOTY_TYPES if "all" in types else types,
         type2=start_page,
         score_key="user_score",
         min_score=min_score,
@@ -97,9 +98,9 @@ def aoty(
 
 def prog(
     field: str = "prog",
-    types: tuple = defaults.PROG_TYPES,
-    min_score: float = defaults.PROG_MIN_SCORE,
-    max_score: float = defaults.PROG_MAX_SCORE,
+    types: tuple = src.defaults.download.PROG_TYPES,
+    min_score: float = src.defaults.download.PROG_MIN_SCORE,
+    max_score: float = src.defaults.download.PROG_MAX_SCORE,
     no_tracklist: bool = defaults.NO_TRACKLIST,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
@@ -109,7 +110,7 @@ def prog(
         print("Generating list of genres...")
     genres = get_data.prog_genres()
     name_types = list()
-    for i, t in enumerate(defaults.PROG_TYPES, start=1):
+    for i, t in enumerate(src.defaults.download.PROG_TYPES, start=1):
         if "all" in types or t in types:
             name_types.append(i)
     __albums__(

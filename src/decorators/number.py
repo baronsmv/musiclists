@@ -2,6 +2,7 @@
 
 import click
 
+import src.defaults.download
 from src.defaults import defaults
 
 
@@ -43,8 +44,13 @@ def __number__(
     if not no_score:
         option = option + "-score"
     help_message = (
-        help_message if help_message else __help__(
-            name=name, maximum=maximum, elements=elements, no_score=no_score,
+        help_message
+        if help_message
+        else __help__(
+            name=name,
+            maximum=maximum,
+            elements=elements,
+            no_score=no_score,
         )
     )
     if letter:
@@ -78,7 +84,9 @@ def aoty(
 ):
     if not default_score:
         default_score = (
-            defaults.AOTY_MAX_SCORE if maximum else defaults.AOTY_MIN_SCORE
+            src.defaults.download.AOTY_MAX_SCORE
+            if maximum
+            else src.defaults.download.AOTY_MIN_SCORE
         )
     return __number__(
         name=name,
@@ -104,7 +112,9 @@ def prog(
 ):
     if not default_score:
         default_score = (
-            defaults.PROG_MAX_SCORE if maximum else defaults.PROG_MIN_SCORE
+            src.defaults.download.PROG_MAX_SCORE
+            if maximum
+            else src.defaults.download.PROG_MIN_SCORE
         )
     return __number__(
         name=name,
@@ -196,5 +206,5 @@ def ratings(
         help_message=help_message,
         no_name_option=no_name_option,
         no_score=True,
-        elements="tracks"
+        elements="tracks",
     )

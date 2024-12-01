@@ -73,7 +73,7 @@ def prog(
     )
 
 
-@de.similars
+@de.similarities
 def similars(
     data_1: str,
     data_2: str,

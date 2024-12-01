@@ -3,12 +3,12 @@
 import click
 from click_help_colors import HelpColorsGroup
 
-from src.defaults import defaults
+import src.defaults.click
 
 main_group = click.group(
     cls=HelpColorsGroup,
-    help_headers_color=defaults.HEADERS_COLOR,
-    help_options_color=defaults.OPTIONS_COLOR,
+    help_headers_color=src.defaults.click.HEADERS_COLOR,
+    help_options_color=src.defaults.click.OPTIONS_COLOR,
 )
 
 
@@ -40,8 +40,8 @@ def cli() -> None:
 
 sub_group = cli.group(
     cls=HelpColorsGroup,
-    help_headers_color=defaults.HEADERS_COLOR,
-    help_options_color=defaults.OPTIONS_COLOR,
+    help_headers_color=src.defaults.click.HEADERS_COLOR,
+    help_options_color=src.defaults.click.OPTIONS_COLOR,
 )
 
 

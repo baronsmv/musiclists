@@ -2,7 +2,7 @@
 
 import click
 
-from src.defaults import defaults
+import src.defaults.download
 
 
 def HELP(name: str, maximum: bool = False):
@@ -49,7 +49,7 @@ def TYPES(
 
 def aoty(
     name: str = "AOTY",
-    choices: tuple = defaults.AOTY_TYPES,
+    choices: tuple = src.defaults.download.AOTY_TYPES,
     default: tuple = ("all",),
     letter: str | None = None,
     option: str | None = None,
@@ -69,7 +69,7 @@ def aoty(
 
 def prog(
     name: str = "Progarchives",
-    choices: tuple = defaults.PROG_TYPES,
+    choices: tuple = src.defaults.download.PROG_TYPES,
     default: tuple = ("all",),
     letter: str | None = None,
     option: str | None = None,

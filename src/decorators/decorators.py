@@ -6,6 +6,7 @@ from time import time
 import click
 from click_help_colors import HelpColorsCommand, version_option
 
+import src.defaults.click
 from src.decorators import data, groups, path, number, types
 from src.defaults import defaults
 
@@ -23,6 +24,7 @@ def count_time(func):
 
 def subcomm(supercomm: object) -> object:
     return supercomm.command(
+        context_settings=src.defaults.click.CLICK_CONTEXT_SETTINGS,
         cls=HelpColorsCommand,
     )
 
@@ -30,11 +32,12 @@ def subcomm(supercomm: object) -> object:
 cli = groups.cli
 
 comm = cli.command(
+    context_settings=src.defaults.click.CLICK_CONTEXT_SETTINGS,
     cls=HelpColorsCommand,
 )
 version = version_option(
     version=defaults.VERSION,
-    prog_name=defaults.PROG_NAME,
+    prog_name=defaults.APP_NAME,
     message_color="green",
 )
 quiet = click.option(
@@ -141,7 +144,7 @@ def prog(func):
     )
 
 
-def similars(func):
+def similarities(func):
     return command(
         func,
         (
