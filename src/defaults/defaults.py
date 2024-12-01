@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
-
-from src.defaults.download import DL_CHOICES
-
 APP_NAME = "MusicLists"
 VERSION = "0.1"
 
@@ -33,23 +29,3 @@ TEXT_SUFFIX = "txt"
 
 MIN_LEVEL = 1
 MAX_LEVEL = 4
-
-CURRENT_DIR = Path(__file__).parent
-SRC_DIR = CURRENT_DIR.parent
-ROOT_DIR = SRC_DIR.parent
-DATA_DIR = Path(ROOT_DIR / "data")
-OUTPUT_DIR = Path(ROOT_DIR / "output")
-DEDUP_DIR = Path(DATA_DIR / "dedup")
-DIRS = (
-    DATA_DIR,
-    DEDUP_DIR,
-    OUTPUT_DIR,
-)  # type: tuple[Path, ...]
-for d in DIRS:
-    d.mkdir(exist_ok=True)
-
-MERGE_CHOICE = {"all": Path(DATA_DIR / f"merge.{DATA_SUFFIX}")}
-
-DATA_CHOICES = {
-    k: v for k, v in (MERGE_CHOICE | DL_CHOICES).items() if v.exists()
-}  # type: dict[str, Path]

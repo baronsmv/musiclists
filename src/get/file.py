@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import src.defaults.path
 from src.defaults import defaults
 
 
@@ -11,13 +12,13 @@ def path(
     output: bool = False,
     dedup: bool = False,
 ) -> Path:
-    path = (name + ("." + suffix if suffix else ""))
+    path = name + ("." + suffix if suffix else "")
     path_dir = (
-        defaults.OUTPUT_DIR
+        src.defaults.path.OUTPUT_DIR
         if output
-        else defaults.DEDUP_DIR
+        else src.defaults.path.DEDUP_DIR
         if dedup
-        else defaults.DATA_DIR
+        else src.defaults.path.DATA_DIR
     )
     return Path(path_dir / path)
 

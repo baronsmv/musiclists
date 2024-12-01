@@ -74,7 +74,7 @@ def prog(
 
 
 @de.similarities
-def similars(
+def similarities(
     data_1: str,
     data_2: str,
     quiet: bool,

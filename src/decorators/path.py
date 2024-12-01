@@ -4,6 +4,7 @@ from pathlib import Path
 
 import click
 
+import src.defaults.path
 from src.defaults import defaults
 from src.get import file
 
@@ -98,7 +99,7 @@ destination = click.argument(
 dedup = click.option(
     "--dedup-path",
     type=NEW_DIR,
-    default=defaults.DEDUP_DIR,
+    default=src.defaults.path.DEDUP_DIR,
     show_default=True,
     help="Directory of deduplicates files.",
 )

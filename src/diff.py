@@ -3,16 +3,17 @@
 from collections.abc import Iterator
 from pathlib import Path
 
-from src.defaults import defaults
-from src.get import file
+import src.defaults.path
 from src import load
 from src import search
+from src.defaults import defaults
+from src.get import file
 
 
 def diff(
     data1: str,
     data2: str,
-    dedup_path: Path = defaults.DEDUP_DIR,
+    dedup_path: Path = src.defaults.path.DEDUP_DIR,
     field: str = defaults.VERIFIED_FIELD,
     dedup: bool = defaults.DEDUP,
     quiet: bool = defaults.QUIET,
@@ -51,11 +52,9 @@ def diff(
             elif (
                 dedup
                 and inv
-                and pt
-                in (v[1] for v in values)  # Exists as key in the dedup
+                and pt in (v[1] for v in values)  # Exists as key in the dedup
                 and any(
-                    (id(v[0]) in keys if pt == v[1] else False)
-                    for v in values
+                    (id(v[0]) in keys if pt == v[1] else False) for v in values
                 )  # The value of the dedup exists in the second dict
             ):
                 continue

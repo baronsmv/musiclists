@@ -2,7 +2,7 @@
 
 import click
 
-from src.defaults import defaults
+import src.defaults.choice
 
 
 def source(
@@ -21,10 +21,11 @@ def source(
             f"-{letter}",
             f"--{parameter}",
             type=click.Choice(
-                tuple(defaults.DATA_CHOICES.keys()), case_sensitive=False
+                tuple(src.defaults.choice.DATA_CHOICES.keys()),
+                case_sensitive=False,
             ),
             show_choices=True,
-            default=tuple(defaults.DATA_CHOICES.keys())[default],
+            default=tuple(src.defaults.choice.DATA_CHOICES.keys())[default],
             show_default=True,
             help=help_message,
         )
@@ -32,10 +33,11 @@ def source(
         return click.option(
             f"--{parameter}",
             type=click.Choice(
-                tuple(defaults.DATA_CHOICES.keys()), case_sensitive=False
+                tuple(src.defaults.choice.DATA_CHOICES.keys()),
+                case_sensitive=False,
             ),
             show_choices=True,
-            default=tuple(defaults.DATA_CHOICES.keys())[default],
+            default=tuple(src.defaults.choice.DATA_CHOICES.keys())[default],
             show_default=True,
             help=help_message,
         )
