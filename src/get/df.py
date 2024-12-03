@@ -208,7 +208,7 @@ def duplicates(
                     any_to_abort=True,
                 )
                 if c:
-                    yield matches[0][1:2]
+                    yield matches[0][1:]
                     logger.info(
                         match_message[0] + ": " + ", ".join(match_message[1:])
                     )

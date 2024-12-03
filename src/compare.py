@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+from src import save
 from src.defaults import defaults
 
 from src.get import df
@@ -18,13 +18,15 @@ def duplicates(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> None:
+    data = []
+    data_search = dict()
     if search:
-        data_1 = df.search(" ".join(search), data_1, columns, results)
-        if not data_1:
+        data_search = df.search(" ".join(search), data_1, columns, results)
+        if not data_search:
             return
         print()
     for s in df.duplicates(
-        data_1=data_1,
+        data_1=data_search if search else data_1,
         data_2=data_2,
         columns=columns,
         min_rate=min_rate if not search else 0,
@@ -35,4 +37,14 @@ def duplicates(
         verbose=verbose,
         debug=debug,
     ):
-        pass
+        print(s)
+        data.append(
+            dict(
+                {
+                    f"{c}_{d}": s[i][c]
+                    for i, d in enumerate((data_1, data_2))
+                    for c in ("internal_id", "artist", "title", "year")
+                }
+            )
+        )
+    save.as_df(data, f"{data_1}_{data_2}", dedup=True)

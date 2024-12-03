@@ -9,6 +9,7 @@ from src.get import file
 def as_df(
     data: list[dict],
     field: str,
+    dedup: bool = False,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -16,7 +17,8 @@ def as_df(
     if verbose:
         print(f"Writing DataFrame to {field} file.")
     df = pl.DataFrame(data)
-    df.serialize(file.path(field))
+    print(df)
+    df.serialize(file.path(field, dedup=dedup))
     if not quiet:
         print(f"\n{len(data)} albums registered.")
 
