@@ -2,23 +2,47 @@
 
 import polars as pl
 
+from src.debug import logging
 from src.defaults import defaults
 from src.get import file
+
+
+def pl_config(markdown: bool = False) -> pl.Config:
+    return pl.Config(
+        fmt_str_lengths=30,
+        tbl_cell_numeric_alignment="RIGHT",
+        tbl_formatting="MARKDOWN" if markdown else "NOTHING",
+        tbl_hide_dataframe_shape=True,
+        tbl_hide_column_data_types=True,
+        tbl_rows=1000000000,
+    )
 
 
 def as_df(
     data: list[dict],
     field: str,
     dedup: bool = False,
+    output: bool = False,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> None:
+    logger = logging.logger(as_df)
     if verbose:
         print(f"Writing DataFrame to {field} file.")
     df = pl.DataFrame(data)
-    print(df)
-    df.serialize(file.path(field, dedup=dedup))
+    if not dedup and not output:
+        duplicates = df.filter(df.select("id").is_duplicated())
+        if not duplicates.is_empty():
+            with pl_config():
+                logger.warning(
+                    "Duplicated ID in the DataFrame:\n"
+                    + str(duplicates.select("id", "artist", "title", "year"))
+                    + "\nConsider increasing KEY_LENGTH in defaults (current one: "
+                    + str(defaults.KEY_LENGTH)
+                    + ")."
+                )
+    df.serialize(file.path(field, output=output, dedup=dedup))
     if not quiet:
         print(f"\n{len(data)} albums registered.")
 
@@ -31,14 +55,7 @@ def as_text(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> None:
-    with pl.Config(
-        fmt_str_lengths=30,
-        tbl_cell_numeric_alignment="RIGHT",
-        tbl_formatting="MARKDOWN" if markdown else "NOTHING",
-        tbl_hide_dataframe_shape=True,
-        tbl_hide_column_data_types=True,
-        tbl_rows=1000000000,
-    ):
+    with pl_config(markdown=markdown):
         with open(
             file.path(
                 field,

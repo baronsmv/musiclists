@@ -19,7 +19,7 @@ TRACK_MIN_SCORE = None
 MAX_RATINGS = None
 MIN_RATINGS = None
 
-KEY_LENGTH = 14
+KEY_LENGTH = 16
 KEY_SEP = "-"
 
 AUTO_FIELD = "possible"
