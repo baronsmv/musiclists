@@ -142,9 +142,9 @@ def aoty_tracks(
             if "length" in track:
                 le = str(track["length"]).split(":")
                 delta = timedelta(
-                    hours=int(le[-2]) if len(le) > 2 else 0,
-                    minutes=int(le[-1]) if len(le) > 1 else 0,
-                    seconds=int(le[0]) if len(le) > 0 else 0,
+                    hours=int(le[-3]) if len(le) > 2 else 0,
+                    minutes=int(le[-2]) if len(le) > 1 else 0,
+                    seconds=int(le[-1]) if len(le) > 0 else 0,
                 )
                 track["length"] = delta
                 total_length += delta
@@ -220,9 +220,9 @@ def prog_tracks(
         if t["track_length"]:
             le = str(t["track_length"]).split(":")
             delta = timedelta(
-                hours=int(le[-2]) if len(le) > 2 else 0,
-                minutes=int(le[-1]) if len(le) > 1 else 0,
-                seconds=int(le[0]) if len(le) > 0 else 0,
+                hours=int(le[-3]) if len(le) > 2 else 0,
+                minutes=int(le[-2]) if len(le) > 1 else 0,
+                seconds=int(le[-1]) if len(le) > 0 else 0,
             )
             t["track_length"] = delta
             total_length += delta
