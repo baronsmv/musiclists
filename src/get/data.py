@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-from bs4 import BeautifulSoup
-from datetime import timedelta
 import re
+from datetime import timedelta
 from urllib.request import Request, urlopen
+
+from bs4 import BeautifulSoup
 
 from src.defaults import defaults
 from src.html_tags import aoty as aoty_tags
@@ -120,11 +121,7 @@ def aoty_tracks(
     debug: bool = defaults.DEBUG,
 ) -> tuple[list[dict[str, str | int | list | timedelta]], timedelta]:
     tracklist = table(
-        url=url,
-        id=id,
-        user_agent=user_agent,
-        encoding=encoding,
-        parser=parser
+        url=url, id=id, user_agent=user_agent, encoding=encoding, parser=parser
     )
     tracks = list()  # type: list[dict[str, str | int | list | timedelta]]
     total_length = timedelta()
@@ -155,10 +152,10 @@ def aoty_tracks(
             track.clear()
     if tracks:
         return tracks, total_length
-    elif tracklist.find("ol", recursive=True).find("li"):
+    elif tracklist.find("ol", recursive=True).__search__("li"):
         return [
-            {"title": li.string} for li in
-            tracklist.find("ol", recursive=True).find_all("li")
+            {"title": li.string}
+            for li in tracklist.find("ol", recursive=True).find_all("li")
         ], total_length
     else:
         print(f"ERROR: Didn't find any tracks for {url}")
@@ -210,7 +207,7 @@ def prog_tracks(
         + r"\((?P<track_length>\d+\:\d+)\)"
         + r"( :(?P<subtracks>(\n-.*)+))?"
         + r"( (?P<track_extras>.*))?\n",
-        re.MULTILINE
+        re.MULTILINE,
     )
     tracks = [t.groupdict() for t in r_tracklist.finditer(tracklist)]
     extras = dict(
@@ -244,9 +241,7 @@ def prog_tracks(
         if t["track_extras"]:
             t["track_extras"] = t["track_extras"].split()
             t["track_extras"] = [
-                extras[e]
-                for e in t["track_extras"]
-                if e in extras
+                extras[e] for e in t["track_extras"] if e in extras
             ]
         if not t["track_extras"] and not include_none:
             del t["track_extras"]

@@ -6,6 +6,7 @@ from click_help_colors import HelpColorsGroup
 import src.defaults.click
 
 main_group = click.group(
+    context_settings=src.defaults.click.CLICK_CONTEXT_SETTINGS,
     cls=HelpColorsGroup,
     help_headers_color=src.defaults.click.HEADERS_COLOR,
     help_options_color=src.defaults.click.OPTIONS_COLOR,
@@ -23,22 +24,24 @@ def cli() -> None:
         - Download lists of the top albums from multiple platforms such as
             AOTY.org and Progarchives.com.
 
-        - Merge these lists into a single one for further analysis.
+        - Merge these lists into a single one (easily dealing with duplicates)
+            further analysis.
 
         - Provide utilities for filtering, sorting, and processing the album
-            data.
+            data, as well as their tracks.
 
         - Analyze the album data to derive useful insights, trends and
             comparisons.
 
-    The tool helps you easily aggregate and explore curated album rankings
-    across different platforms, making it ideal for music enthusiasts and
-    data-driven listeners.
+    The tool helps you easily aggregate and explore curated album and track
+    rankings across different platforms, making it ideal for music enthusiasts
+    and data-driven listeners.
     """
     pass
 
 
 sub_group = cli.group(
+    context_settings=src.defaults.click.CLICK_CONTEXT_SETTINGS,
     cls=HelpColorsGroup,
     help_headers_color=src.defaults.click.HEADERS_COLOR,
     help_options_color=src.defaults.click.OPTIONS_COLOR,
@@ -54,9 +57,9 @@ def download() -> None:
 
 
 @sub_group
-def find() -> None:
+def search() -> None:
     """
-    Find
+    Search
     """
     pass
 

@@ -3,6 +3,7 @@
 import pprint
 from difflib import SequenceMatcher
 from statistics import median
+from typing import Iterator
 
 import polars as pl
 
@@ -52,15 +53,19 @@ def tracks(df: pl.DataFrame) -> pl.DataFrame:
     return df
 
 
-def __simil__(
-    d1: dict,
+def similarity(
+    d1: dict | str,
     d2: dict,
     columns: list[str] | tuple[str],
-    num_diff: float,
+    num_diff: float = 0,
 ) -> float:
+    if isinstance(d1, str):
+        return sum(
+            SequenceMatcher(None, d1, str(d2[col])).ratio() for col in columns
+        )
     return median(
         (
-            SequenceMatcher(None, d1[col], d2[col]).ratio()
+            SequenceMatcher(None, d1[col], str(d2[col])).ratio()
             if isinstance(d1[col], str)
             else 1 - (abs(d1[col] - d2[col]) * num_diff)
         )
@@ -68,87 +73,160 @@ def __simil__(
     )
 
 
-def similarities(
-    data_1: str,
+def choice(
+    matches: tuple | list,
+    initial_prompt: str,
+    side_by_side: str | None = None,
+    choice_prompt: str = "Choose the desired option (0 to abort)",
+    accept_prompt: str = "Accept the match?",
+    final_prompt: str | None = None,
+    any_to_abort: bool = False,
+) -> dict | None:
+    while True:
+        if len(matches) > 1:
+            i = input(
+                f"\n{initial_prompt}:\n\n"
+                + ("   " + side_by_side + "\n" if side_by_side else "")
+                + "\n".join(
+                    f"{n:4}) " + path(m, sep=" - ")
+                    for n, m in enumerate(matches, start=1)
+                )
+                + f"\n\n{choice_prompt} [0-{len(matches)}]: "
+            )
+            if i.isdigit():
+                i = int(i)
+                if 0 < i <= len(matches):
+                    match = matches[i - 1]
+                    break
+                elif i == 0:
+                    return None
+        else:
+            i = input(
+                f"\n{initial_prompt}:\n\n"
+                + ("   " + side_by_side + "\n" if side_by_side else "")
+                + f"   {path(matches[0])}"
+                + f"\n\n{accept_prompt} [y/"
+                + ("N" if any_to_abort else "n")
+                + "]: "
+            )
+            if i.upper() == "Y":
+                match = matches[0]
+                break
+        if not i and any_to_abort:
+            return None
+    if final_prompt:
+        print(final_prompt)
+    return match
+
+
+def search(
+    field: str,
+    data: str,
+    columns: list[str] | tuple[str],
+    results: int,
+) -> dict | None:
+    return choice(
+        tuple(
+            r[1]
+            for r in sorted(
+                (
+                    (similarity(field, d1, columns), d1)
+                    for d1 in load.df(data).rows(named=True)
+                ),
+                key=lambda row: row[0],
+                reverse=True,
+            )[:results]
+        ),
+        f"Found similar refs. of «{field}» in «{data}»",
+    )
+
+
+def duplicates(
+    data_1: str | dict,
     data_2: str,
     columns: list[str] | tuple[str],
+    results: int,
     minimum: int | float,
     only_highest_match: bool,
     num_diff: float,
     quiet: bool,
     verbose: bool,
     debug: bool,
-) -> tuple[list, list]:
-    logger = logging.logger(similarities)
+) -> Iterator[tuple[dict, dict]]:
+    logger = logging.logger(duplicates)
+    data_1_str = data_1 if isinstance(data_1, str) else path(data_1, sep=" - ")
     start_message = (
         "Finding "
-        + (
-            "the highest similarities"
-            if only_highest_match
-            else "all similarities"
-        )
-        + f" between `{data_1}` and `{data_2}` data",
+        + ("the highest match" if only_highest_match else "all matches")
+        + f" between `{data_1_str}` and `{data_2}` data",
         f"in {columns}, and a minimum match rate of {minimum * 100}%",
     )
     logger.info(" ".join(start_message))
     if not quiet:
-        print(
-            (" ".join(start_message) if verbose else start_message[0]) + ".\n"
-        )
-    rows_1 = load.df(data_1).sort(by="id").rows(named=True)
-    logger.info(f"Loaded {data_1} DataFrame rows into `data_1`.")
-    rows_2 = load.df(data_2).sort(by="id").rows(named=True)
+        print((" ".join(start_message) if verbose else start_message[0]) + ".")
+    rows_1 = (
+        load.df(data_1).sort(by="id").rows(named=True)
+        if isinstance(data_1, str)
+        else (data_1,)
+    )
+    logger.info(f"Loaded {data_1_str} DataFrame rows into `data_1`.")
+    rows_2 = load.df(data_2).rows(named=True)
     logger.info(f"Loaded {data_2} DataFrame rows into `data_2`.")
     for d1 in rows_1:
         matches = sorted(
             (
-                (__simil__(d1, d2, columns, num_diff), d1, d2)
+                (similarity(d1, d2, columns, num_diff), d1, d2)
                 for d2 in rows_2
-                if minimum <= __simil__(d1, d2, columns, num_diff)
+                if minimum <= similarity(d1, d2, columns, num_diff)
             ),
             key=lambda row: row[0],
             reverse=True,
-        )
+        )[:results]
         if not matches:
             logger.info("No matches found for: " + path(d1, sep=" - "))
             continue
         if (
             matches[0][0] != 1
             and max(
-                __simil__(matches[0][2], d, columns, num_diff) for d in rows_1
+                similarity(matches[0][2], d, columns, num_diff) for d in rows_1
             )
             != 1
         ):
             if only_highest_match:
                 match_message = (
-                    f"{round(matches[0][0] * 100)}%: Found match between:",
+                    f"Found match ({round(matches[0][0] * 100)}%) between",
                     path(matches[0][1], sep=" - "),
                     path(matches[0][2], sep=" - "),
                 )
-                logger.info(
-                    match_message[0] + " " + ", ".join(match_message[1:])
+                c = choice(
+                    (matches[0][2],),
+                    match_message[0],
+                    side_by_side=match_message[1],
+                    final_prompt="Match accepted.",
+                    any_to_abort=True,
                 )
+                if c:
+                    yield matches[0][1:2]
+                    logger.info(
+                        match_message[0] + ": " + ", ".join(match_message[1:])
+                    )
                 if debug:
                     logger.debug(pprint.pformat(matches[0]))
-                if verbose:
-                    print(*match_message, sep="\n- ")
-                yield matches[0][1:]
             else:
-                match_message = [
-                    "Found matches for: "
-                    + path(matches[0][1], sep=" - ")
-                    + ":"
-                ]
-                for match in matches:
-                    match_message.append(
-                        f"{round(matches[0][0] * 100)}%: "
-                        + path(match[2], sep=" - "),
-                    )
-                    yield match[1:]
-                logger.info(
-                    match_message[0] + ": " + ", ".join(match_message[1:])
+                match_message = (
+                    "Found matches for",
+                    path(matches[0][1], sep=" - "),
                 )
+                c = choice(
+                    tuple(m[2] for m in matches),
+                    match_message[0],
+                    side_by_side=match_message[1],
+                    choice_prompt="Choose the desired match (0 if no match if desired)",
+                    final_prompt="Match accepted.",
+                    any_to_abort=True,
+                )
+                if c:
+                    yield matches[0][1], c
+                    logger.info(match_message + path(c, sep=" - "))
                 if debug:
                     logger.debug(pprint.pformat(matches))
-                if verbose:
-                    print(*match_message, sep="\n- ")

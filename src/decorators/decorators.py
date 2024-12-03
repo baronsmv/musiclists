@@ -93,6 +93,11 @@ markdown = click.option(
     show_default=True,
     help="Output as MarkDown.",
 )
+search = click.argument(
+    "search",
+    nargs=-1,
+    required=False,
+)
 
 
 def add(func, decorators: tuple):
@@ -144,14 +149,15 @@ def prog(func):
     )
 
 
-def similarities(func):
+def duplicates(func):
     return command(
         func,
         (
+            search,
             data.source(suffix="1", default=0),
             data.source(suffix="2", default=-1),
         ),
-        groups.find,
+        groups.search,
     )
 
 
@@ -207,7 +213,7 @@ def dirs(func):
             path.source,
             path.dirs(letter="p", no_name_option=True),
         ),
-        groups.find,
+        groups.search,
     )
 
 
@@ -220,7 +226,7 @@ def wanted(func):
             path.merge(read=True),
             path.dirs(read=True),
         ),
-        groups.find,
+        groups.search,
     )
 
 
@@ -233,7 +239,7 @@ def leftover(func):
             path.dirs(read=True),
             path.merge(read=True),
         ),
-        groups.find,
+        groups.search,
     )
 
 

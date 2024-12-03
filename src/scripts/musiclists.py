@@ -73,15 +73,17 @@ def prog(
     )
 
 
-@de.similarities
-def similarities(
+@de.duplicates
+def duplicates(
+    search: list,
     data_1: str,
     data_2: str,
     quiet: bool,
     verbose: bool,
     debug: bool,
 ):
-    compare.similarities(
+    compare.duplicates(
+        search,
         data_1,
         data_2,
         quiet=quiet,
