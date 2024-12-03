@@ -172,7 +172,7 @@ def dirs(
     letter: str | None = None,
     read: bool = False,
     help_message: str | None = None,
-    no_name_option: bool = False,
+    no_name: bool = False,
 ):
     return __path__(
         name=name,
@@ -181,7 +181,7 @@ def dirs(
         letter=letter,
         read=read,
         help_message=help_message,
-        no_name_option=no_name_option,
+        no_name_option=no_name,
     )
 
 
@@ -192,7 +192,7 @@ def wanted(
     letter: str | None = None,
     read: bool = False,
     help_message: str | None = None,
-    no_name_option: bool = False,
+    no_name: bool = False,
 ):
     return __path__(
         name=name,
@@ -201,7 +201,7 @@ def wanted(
         letter=letter,
         read=read,
         help_message=help_message,
-        no_name_option=no_name_option,
+        no_name_option=no_name,
     )
 
 
@@ -212,7 +212,7 @@ def leftover(
     letter: str | None = None,
     read: bool = False,
     help_message: str | None = None,
-    no_name_option: bool = False,
+    no_name: bool = False,
 ):
     return __path__(
         name=name,
@@ -221,5 +221,5 @@ def leftover(
         letter=letter,
         read=read,
         help_message=help_message,
-        no_name_option=no_name_option,
+        no_name_option=no_name,
     )

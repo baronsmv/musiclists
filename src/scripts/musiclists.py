@@ -76,16 +76,24 @@ def prog(
 @de.duplicates
 def duplicates(
     search: list,
+    columns: tuple,
     data_1: str,
     data_2: str,
+    highest: bool,
+    min_rate: float,
+    max_results: int,
     quiet: bool,
     verbose: bool,
     debug: bool,
 ):
     compare.duplicates(
-        search,
-        data_1,
-        data_2,
+        search=search,
+        data_1=data_1,
+        data_2=data_2,
+        only_highest_match=highest,
+        columns=columns,
+        min_rate=min_rate,
+        results=max_results,
         quiet=quiet,
         verbose=verbose,
         debug=debug,

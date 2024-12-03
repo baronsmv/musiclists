@@ -14,3 +14,12 @@ MERGE_CHOICE = {"all": Path(DATA_DIR / f"merge.{DATA_SUFFIX}")}
 DATA_CHOICES = {
     k: v for k, v in (MERGE_CHOICE | DL_CHOICES).items() if v.exists()
 }  # type: dict[str, Path]
+
+COLUMN_CHOICES = (
+    "title",
+    "artist",
+    "year",
+    "type",
+    "id",
+    "internal_id",
+)

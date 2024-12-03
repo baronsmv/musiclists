@@ -100,6 +100,8 @@ def choice(
                     break
                 elif i == 0:
                     return None
+            elif not i and any_to_abort:
+                return None
         else:
             i = input(
                 f"\n{initial_prompt}:\n\n"
@@ -112,8 +114,8 @@ def choice(
             if i.upper() == "Y":
                 match = matches[0]
                 break
-        if not i and any_to_abort:
-            return None
+            elif i.upper() == "N" or (not i and any_to_abort):
+                return None
     if final_prompt:
         print(final_prompt)
     return match
@@ -146,7 +148,7 @@ def duplicates(
     data_2: str,
     columns: list[str] | tuple[str],
     results: int,
-    minimum: int | float,
+    min_rate: int | float,
     only_highest_match: bool,
     num_diff: float,
     quiet: bool,
@@ -159,7 +161,7 @@ def duplicates(
         "Finding "
         + ("the highest match" if only_highest_match else "all matches")
         + f" between `{data_1_str}` and `{data_2}` data",
-        f"in {columns}, and a minimum match rate of {minimum * 100}%",
+        f"in {columns}, and a minimum match rate of {min_rate * 100}%",
     )
     logger.info(" ".join(start_message))
     if not quiet:
@@ -177,7 +179,7 @@ def duplicates(
             (
                 (similarity(d1, d2, columns, num_diff), d1, d2)
                 for d2 in rows_2
-                if minimum <= similarity(d1, d2, columns, num_diff)
+                if min_rate <= similarity(d1, d2, columns, num_diff)
             ),
             key=lambda row: row[0],
             reverse=True,
