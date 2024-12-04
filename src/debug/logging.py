@@ -46,8 +46,4 @@ def logger(func: FunctionType | Callable):
     l.addHandler(console_handler)
     l.addHandler(file_handler)
 
-    l.info(
-        f"Initiating `{func.__name__}` process of {func.__module__} module."
-    )
-
     return l

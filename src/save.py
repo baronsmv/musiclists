@@ -4,6 +4,7 @@ import polars as pl
 
 from src.debug import logging
 from src.defaults import defaults
+from src.defaults.path import PATH_TYPE
 from src.get import file
 
 
@@ -19,10 +20,9 @@ def pl_config(markdown: bool = False) -> pl.Config:
 
 
 def as_df(
-    data: list[dict],
+    data: list[dict] | pl.DataFrame,
     field: str,
-    dedup: bool = False,
-    output: bool = False,
+    path_type: PATH_TYPE,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -30,8 +30,8 @@ def as_df(
     logger = logging.logger(as_df)
     if verbose:
         print(f"Writing DataFrame to {field} file.")
-    df = pl.DataFrame(data)
-    if not dedup and not output:
+    df = data if isinstance(data, pl.DataFrame) else pl.DataFrame(data)
+    if path_type == "download":
         duplicates = df.filter(df.select("id").is_duplicated())
         if not duplicates.is_empty():
             with pl_config():
@@ -42,7 +42,7 @@ def as_df(
                     + str(defaults.KEY_LENGTH)
                     + ")."
                 )
-    df.serialize(file.path(field, output=output, dedup=dedup))
+    df.serialize(file.path(field, path_type=path_type))
     if not quiet:
         print(f"\n{len(data)} albums registered.")
 

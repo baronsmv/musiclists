@@ -6,6 +6,7 @@ from urllib.request import Request, urlopen
 
 from bs4 import BeautifulSoup
 
+from src.debug import logging
 from src.defaults import defaults
 from src.html_tags import aoty as aoty_tags
 
@@ -20,12 +21,13 @@ def table(
     parser: str = "html.parser",
     recursive: bool = True,
 ):
+    data = None
     req = Request(url=url, headers={"User-Agent": user_agent})
     with urlopen(req) as response:
         html = response.read().decode(encoding)
     soup = BeautifulSoup(html, parser)
     if soup:
-        table = (
+        data = (
             soup.find_all(tag, id=id, recursive=recursive)
             if tag and id
             else soup.find_all(tag, recursive=recursive)
@@ -35,8 +37,8 @@ def table(
             else None
         )
     return (
-        table[number]
-        if table and len(table) > abs(number + 1 if number < 0 else number)
+        data[number]
+        if data and len(data) > abs(number + 1 if number < 0 else number)
         else None
     )
 
@@ -114,12 +116,14 @@ def aoty_tracks(
     encoding: str = "utf-8",
     parser: str = "html.parser",
     tags: dict = aoty_tags.tracklist,
-    base_page: str = "https://www.albumoftheyear.org",
     include_none: bool = defaults.INCLUDE_NONE,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> tuple[list[dict[str, str | int | list | timedelta]], timedelta]:
+    logger = logging.logger(aoty_tracks)
+    if debug:
+        logger.info(f"Initiating tracklist scrapping of {url}")
     tracklist = table(
         url=url, id=id, user_agent=user_agent, encoding=encoding, parser=parser
     )
@@ -134,6 +138,8 @@ def aoty_tracks(
             tags=tags,
             include_none=include_none,
         )
+        if debug:
+            logger.info(track)
         if track:
             if "disc" in track:
                 disc = str(track["disc"])
@@ -151,14 +157,22 @@ def aoty_tracks(
             tracks.append(track.copy())
             track.clear()
     if tracks:
+        if debug:
+            logger.info(f"Returning successfully tracklist for {url}")
         return tracks, total_length
-    elif tracklist.find("ol", recursive=True).__search__("li"):
+    elif tracklist.find("ol", recursive=True).find_all("li"):
+        if debug:
+            logger.info(
+                f"Returning successfully simplified tracklist for {url}"
+            )
         return [
             {"title": li.string}
             for li in tracklist.find("ol", recursive=True).find_all("li")
         ], total_length
     else:
-        print(f"ERROR: Didn't find any tracks for {url}")
+        logger.error(f"Didn't find any tracklist for {url}")
+        if debug:
+            logger.debug(tracklist)
         exit(1)
 
 

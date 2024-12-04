@@ -2,25 +2,22 @@
 
 from pathlib import Path
 
-import src.defaults.path
-from src.defaults import defaults
+from src.defaults.defaults import DATA_SUFFIX
+from src.defaults.path import DIRS, PATH_TYPE, VALID_PATH_TYPE
 
 
 def path(
     name: str,
-    suffix: str | None = defaults.DATA_SUFFIX,
-    output: bool = False,
-    dedup: bool = False,
+    suffix: str | None = DATA_SUFFIX,
+    path_type: PATH_TYPE = "download",
 ) -> Path:
-    path = name + ("." + suffix if suffix else "")
-    path_dir = (
-        src.defaults.path.OUTPUT_DIR
-        if output
-        else src.defaults.path.DEDUP_DIR
-        if dedup
-        else src.defaults.path.DATA_DIR
-    )
-    return Path(path_dir / path)
+    if path_type not in VALID_PATH_TYPE:
+        raise ValueError(
+            f"`path_type` parameter must be one of {VALID_PATH_TYPE}"
+        )
+    path_name = name + ("." + suffix if suffix else "")
+    path_dir = DIRS[path_type]
+    return Path(path_dir / path_name)
 
 
 def level(

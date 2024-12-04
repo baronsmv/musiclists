@@ -163,7 +163,8 @@ def duplicates(
         + f" between `{data_1_str}` and `{data_2}` data",
         f"in {columns}, and a minimum match rate of {min_rate * 100}%",
     )
-    logger.info(" ".join(start_message))
+    if debug:
+        logger.info(" ".join(start_message))
     if not quiet:
         print((" ".join(start_message) if verbose else start_message[0]) + ".")
     rows_1 = (
@@ -171,9 +172,11 @@ def duplicates(
         if isinstance(data_1, str)
         else (data_1,)
     )
-    logger.info(f"Loaded {data_1_str} DataFrame rows into `data_1`.")
+    if debug:
+        logger.info(f"Loaded {data_1_str} DataFrame rows into `data_1`.")
     rows_2 = load.df(data_2).rows(named=True)
-    logger.info(f"Loaded {data_2} DataFrame rows into `data_2`.")
+    if debug:
+        logger.info(f"Loaded {data_2} DataFrame rows into `data_2`.")
     for d1 in rows_1:
         matches = sorted(
             (
@@ -185,7 +188,8 @@ def duplicates(
             reverse=True,
         )[:results]
         if not matches:
-            logger.info("No matches found for: " + path(d1, sep=" - "))
+            if debug:
+                logger.info("No matches found for: " + path(d1, sep=" - "))
             continue
         if (
             matches[0][0] != 1
@@ -229,6 +233,7 @@ def duplicates(
                 )
                 if c:
                     yield matches[0][1], c
-                    logger.info(match_message + path(c, sep=" - "))
+                    if debug:
+                        logger.info(match_message + path(c, sep=" - "))
                 if debug:
                     logger.debug(pprint.pformat(matches))
