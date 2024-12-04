@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
-from polars import col
-
 from src import load
 from src import save
 from src.defaults import defaults
+from src.defaults.path import LOCATION
 from src.get import df
 
 
@@ -12,6 +11,8 @@ def duplicates(
     search,
     data_1: str,
     data_2: str,
+    data_1_location: LOCATION,
+    data_2_location: LOCATION,
     columns: list | tuple = ("title", "artist", "year"),
     min_rate: int | float = 0.6,
     only_highest_match: bool = defaults.ONLY_HIGHEST_MATCH,
@@ -31,6 +32,8 @@ def duplicates(
     for s in df.duplicates(
         data_1=data_search if search else data_1,
         data_2=data_2,
+        data_1_location=data_1_location,
+        data_2_location=data_2_location,
         columns=columns,
         min_rate=min_rate if not search else 0,
         results=results,
@@ -56,25 +59,55 @@ def duplicates(
 def merge(
     data_1: str,
     data_2: str,
+    data_1_location: LOCATION,
+    data_2_location: LOCATION,
+    key: str = "id",
     dedup: bool = True,
     dedup_col: str = "internal_id",
+    quiet: bool = defaults.QUIET,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
 ):
     name = f"{data_1}_{data_2}"
-    data = (
-        load.df(data_1, path_type="download")
-        .merge_sorted(load.df(data_2, path_type="download"), key="id")
-        .unique(subset="id", keep="first")
+    data_1 = (
+        df.deduplicated(
+            data_1, data_2, data_1_location, data_2_location, key=dedup_col
+        )
+        if dedup
+        else load.df(data_1, location=data_1_location)
     )
-    if dedup:
-        data_keys = data.select(dedup_col)
-        col_1 = f"{data_1}_{dedup_col}"
-        col_2 = f"{data_2}_{dedup_col}"
-        dedup_dicts = (
-            load.df(name, path_type="dedup").select(col_1, col_2).to_dicts()
-        )
-        data = data.filter(
-            col(dedup_col)
-            .is_in(k[col_2] for k in dedup_dicts if k[col_1] in data_keys)
-            .not_()
-        )
+    data = data_1.merge_sorted(
+        load.df(data_2, location="download"), key=key
+    ).unique(subset=key, keep="first")
     save.as_df(data, name, path_type="merge")
+
+
+def diff(
+    data_1: str,
+    data_2: str,
+    data_1_location: LOCATION,
+    data_2_location: LOCATION,
+    key: str = "id",
+    dedup: bool = True,
+    dedup_col: str = "internal_id",
+    quiet: bool = defaults.QUIET,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+):
+    name = f"{data_1}_{data_2}"
+    d1 = (
+        df.deduplicated(
+            data_1, data_2, data_1_location, data_2_location, key=dedup_col
+        )
+        if dedup
+        else load.df(data_1, location=data_1_location)
+    )
+    d2 = (
+        df.deduplicated(
+            data_2, data_1, data_2_location, data_1_location, key=dedup_col
+        )
+        if dedup
+        else load.df(data_2, location=data_2_location)
+    )
+    data = d1.join(d2, on=key, how="anti")
+    save.as_df(data, name, path_type="diff")

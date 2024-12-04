@@ -11,15 +11,17 @@ DATA_DIR = Path(ROOT_DIR / "data")
 OUTPUT_DIR = Path(ROOT_DIR / "output")
 DEDUP_DIR = Path(DATA_DIR / "dedup")
 MERGE_DIR = Path(DATA_DIR / "merge")
+DIFF_DIR = Path(DATA_DIR / "diff")
 DIRS = {
     "download": DATA_DIR,
     "output": OUTPUT_DIR,
     "dedup": DEDUP_DIR,
     "merge": MERGE_DIR,
+    "diff": DIFF_DIR,
 }  # type: dict[str: Path]
 
-PATH_TYPE = Literal["download", "output", "dedup", "merge"]
-VALID_PATH_TYPE: Tuple[PATH_TYPE, ...] = get_args(PATH_TYPE)
+LOCATION = Literal["download", "output", "dedup", "merge", "diff"]
+VALID_LOCATION: Tuple[LOCATION, ...] = get_args(LOCATION)
 
 for d in DIRS.values():
     d.mkdir(exist_ok=True)

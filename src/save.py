@@ -4,11 +4,11 @@ import polars as pl
 
 from src.debug import logging
 from src.defaults import defaults
-from src.defaults.path import PATH_TYPE
+from src.defaults.path import LOCATION
 from src.get import file
 
 
-def pl_config(markdown: bool = False) -> pl.Config:
+def __pl_config__(markdown: bool = False) -> pl.Config:
     return pl.Config(
         fmt_str_lengths=30,
         tbl_cell_numeric_alignment="RIGHT",
@@ -22,7 +22,7 @@ def pl_config(markdown: bool = False) -> pl.Config:
 def as_df(
     data: list[dict] | pl.DataFrame,
     field: str,
-    path_type: PATH_TYPE,
+    path_type: LOCATION,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -34,7 +34,7 @@ def as_df(
     if path_type == "download":
         duplicates = df.filter(df.select("id").is_duplicated())
         if not duplicates.is_empty():
-            with pl_config():
+            with __pl_config__():
                 logger.warning(
                     "Duplicated ID in the DataFrame:\n"
                     + str(duplicates.select("id", "artist", "title", "year"))
@@ -42,7 +42,7 @@ def as_df(
                     + str(defaults.KEY_LENGTH)
                     + ")."
                 )
-    df.serialize(file.path(field, path_type=path_type))
+    df.serialize(file.path(field, location=path_type))
     if not quiet:
         print(f"\n{len(data)} albums registered.")
 
@@ -55,7 +55,7 @@ def as_text(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> None:
-    with pl_config(markdown=markdown):
+    with __pl_config__(markdown=markdown):
         with open(
             file.path(
                 field,

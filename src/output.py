@@ -32,7 +32,7 @@ def albums(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
-    df = load.df(field, path_type="download")
+    df = load.df(field, location="download")
     df = get_df.contextualize(df, num_filter, sort_by, select)
     save.as_text(df, field + "_albums", markdown)
 
@@ -67,7 +67,7 @@ def tracks(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
-    df = load.df(field, path_type="download")
+    df = load.df(field, location="download")
     df = get_df.tracks(df)
     df = get_df.contextualize(df, num_filter, sort_by, select)
     save.as_text(df, field + "_tracks", markdown)

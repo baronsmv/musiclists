@@ -1,8 +1,12 @@
+#!/usr/bin/env python3
+
 import logging
 from types import FunctionType
 from typing import Callable
 
 from src.defaults.path import LOG_PATH
+
+loggers = {}
 
 
 class ConsoleFormatter(logging.Formatter):
@@ -28,22 +32,32 @@ class ConsoleFormatter(logging.Formatter):
 
 
 def logger(func: FunctionType | Callable):
-    l = logging.getLogger(func.__module__ + "." + func.__name__)
+    global loggers
 
-    l.setLevel(logging.DEBUG)
+    if loggers.get(func):
+        return loggers.get(func)
 
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.WARNING)
-    console_handler.setFormatter(ConsoleFormatter())
+    else:
+        l = logging.getLogger(func.__module__ + "." + func.__name__)
 
-    file_handler = logging.FileHandler(LOG_PATH, mode="a", encoding="utf-8")
-    file_handler.setLevel(logging.DEBUG)
-    file_formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
-    )
-    file_handler.setFormatter(file_formatter)
+        l.setLevel(logging.DEBUG)
 
-    l.addHandler(console_handler)
-    l.addHandler(file_handler)
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.WARNING)
+        console_handler.setFormatter(ConsoleFormatter())
 
-    return l
+        file_handler = logging.FileHandler(
+            LOG_PATH, mode="a", encoding="utf-8"
+        )
+        file_handler.setLevel(logging.DEBUG)
+        file_formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+        )
+        file_handler.setFormatter(file_formatter)
+
+        l.addHandler(console_handler)
+        l.addHandler(file_handler)
+
+        loggers[func] = l
+
+        return l

@@ -20,12 +20,29 @@ def table(
     encoding: str = "utf-8",
     parser: str = "html.parser",
     recursive: bool = True,
+    debug: bool = defaults.DEBUG,
 ):
+    logger = logging.logger(table)
+    if debug:
+        logger.info(
+            "Getting table from url: "
+            + (url if url else "N/A")
+            + ", tag: "
+            + (tag if tag else "N/A")
+            + " and id: "
+            + (id if id else "N/A")
+        )
     data = None
     req = Request(url=url, headers={"User-Agent": user_agent})
+    if debug:
+        logger.info("Request successful.")
     with urlopen(req) as response:
         html = response.read().decode(encoding)
+    if debug:
+        logger.info("Got response from web server.")
     soup = BeautifulSoup(html, parser)
+    if debug:
+        logger.info("Parse with BS4 completed.")
     if soup:
         data = (
             soup.find_all(tag, id=id, recursive=recursive)
@@ -125,7 +142,12 @@ def aoty_tracks(
     if debug:
         logger.info(f"Initiating tracklist scrapping of {url}")
     tracklist = table(
-        url=url, id=id, user_agent=user_agent, encoding=encoding, parser=parser
+        url=url,
+        id=id,
+        user_agent=user_agent,
+        encoding=encoding,
+        parser=parser,
+        debug=debug,
     )
     tracks = list()  # type: list[dict[str, str | int | list | timedelta]]
     total_length = timedelta()
@@ -138,8 +160,6 @@ def aoty_tracks(
             tags=tags,
             include_none=include_none,
         )
-        if debug:
-            logger.info(track)
         if track:
             if "disc" in track:
                 disc = str(track["disc"])
@@ -156,6 +176,8 @@ def aoty_tracks(
                 total_length += delta
             tracks.append(track.copy())
             track.clear()
+        elif debug:
+            logger.debug(f"No track data for:\n{t}")
     if tracks:
         if debug:
             logger.info(f"Returning successfully tracklist for {url}")

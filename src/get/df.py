@@ -9,6 +9,7 @@ import polars as pl
 
 from src import load
 from src.debug import logging
+from src.defaults.path import LOCATION
 from src.get.album import path
 
 
@@ -124,6 +125,7 @@ def choice(
 def search(
     field: str,
     data: str,
+    data_type: LOCATION,
     columns: list[str] | tuple[str],
     results: int,
 ) -> dict | None:
@@ -133,7 +135,9 @@ def search(
             for r in sorted(
                 (
                     (similarity(field, d1, columns), d1)
-                    for d1 in load.df(data).rows(named=True)
+                    for d1 in load.df(data, location=data_type).rows(
+                        named=True
+                    )
                 ),
                 key=lambda row: row[0],
                 reverse=True,
@@ -146,6 +150,8 @@ def search(
 def duplicates(
     data_1: str | dict,
     data_2: str,
+    data_1_location: LOCATION,
+    data_2_location: LOCATION,
     columns: list[str] | tuple[str],
     results: int,
     min_rate: int | float,
@@ -168,13 +174,15 @@ def duplicates(
     if not quiet:
         print((" ".join(start_message) if verbose else start_message[0]) + ".")
     rows_1 = (
-        load.df(data_1).sort(by="id").rows(named=True)
+        load.df(data_1, location=data_1_location)
+        .sort(by="id")
+        .rows(named=True)
         if isinstance(data_1, str)
         else (data_1,)
     )
     if debug:
         logger.info(f"Loaded {data_1_str} DataFrame rows into `data_1`.")
-    rows_2 = load.df(data_2).rows(named=True)
+    rows_2 = load.df(data_2, location=data_2_location).rows(named=True)
     if debug:
         logger.info(f"Loaded {data_2} DataFrame rows into `data_2`.")
     for d1 in rows_1:
@@ -237,3 +245,24 @@ def duplicates(
                         logger.info(match_message + path(c, sep=" - "))
                 if debug:
                     logger.debug(pprint.pformat(matches))
+
+
+def deduplicated(
+    data_1: str,
+    data_2: str,
+    data_1_location: LOCATION,
+    data_2_location: LOCATION,
+    key: str = "internal_id",
+) -> pl.DataFrame:
+    name = f"{data_1}_{data_2}"
+    data_2_keys = set(load.df(data_2, location=data_2_location).select(key))
+    col_1 = f"{data_1}_{key}"
+    col_2 = f"{data_2}_{key}"
+    dedup_keys = (
+        load.df(name, location="dedup").select(col_1, col_2).to_dicts()
+    )
+    return load.df(data_1, location=data_1_location).filter(
+        pl.col(key)
+        .is_in(k[col_1] for k in dedup_keys if k[col_2] in data_2_keys)
+        .not_()
+    )

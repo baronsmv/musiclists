@@ -3,20 +3,20 @@
 from pathlib import Path
 
 from src.defaults.defaults import DATA_SUFFIX
-from src.defaults.path import DIRS, PATH_TYPE, VALID_PATH_TYPE
+from src.defaults.path import DIRS, LOCATION, VALID_LOCATION
 
 
 def path(
     name: str,
     suffix: str | None = DATA_SUFFIX,
-    path_type: PATH_TYPE = "download",
+    location: LOCATION = "download",
 ) -> Path:
-    if path_type not in VALID_PATH_TYPE:
+    if location not in VALID_LOCATION:
         raise ValueError(
-            f"`path_type` parameter must be one of {VALID_PATH_TYPE}"
+            f"`path_type` parameter must be one of {VALID_LOCATION}"
         )
     path_name = name + ("." + suffix if suffix else "")
-    path_dir = DIRS[path_type]
+    path_dir = DIRS[location]
     return Path(path_dir / path_name)
 
 

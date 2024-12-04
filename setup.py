@@ -17,7 +17,6 @@ setuptools.setup(
     entry_points={
         "console_scripts": [
             "musiclists = src.scripts.musiclists:cli",
-            "unittest = src.debug.test_data:main",
         ],
     },
 )

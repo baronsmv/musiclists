@@ -5,6 +5,7 @@ from datetime import timedelta
 from itertools import count
 from pathlib import Path
 
+from src.debug import logging
 from src.defaults import defaults
 from src.get import data as get_data, album as get_album, file as get_file
 from src.html_tags import aoty as aoty_tags, prog as prog_tags
@@ -25,11 +26,12 @@ def until(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator[dict[str, str | int | float | list | dict | timedelta]]:
+    logger = logging.logger(until)
     for a in type1:
-        foundLimit = False
-        iterType = count(type2) if isinstance(type2, int) else iter(type2)
-        while not foundLimit:
-            b = next(iterType)
+        found_limit = False
+        iter_type = count(type2) if isinstance(type2, int) else iter(type2)
+        while not found_limit:
+            b = next(iter_type)
             for album in function(
                 a,
                 b,
@@ -39,10 +41,16 @@ def until(
             ):
                 score = album.get(score_key)
                 if not score:
-                    print(f"ERROR: Score not found for: {album}")
+                    logger.error(
+                        f"Score with key {score_key}, not found for:\n{album}"
+                    )
                     exit(1)
                 if score < min_score:
-                    foundLimit = True
+                    if debug:
+                        logger.info(
+                            f"Found lower score ({score}) than limit for:\n{album}"
+                        )
+                    found_limit = True
                     break
                 if min_score <= score <= max_score:
                     if verbose:
@@ -78,7 +86,11 @@ def aoty(
         dict()
     )  # type: dict[str, str | int | float | list | dict | timedelta]
     url = f"{base_page}/{ratings_subpage}/{album_type}/all/{page_number}/"
-    albums_list = get_data.table(url=url, id="centerContent")
+    albums_list = get_data.table(
+        url=url,
+        id="centerContent",
+        debug=debug,
+    )
     for data in albums_list.find_all(class_="albumListRow"):
         album["id"] = str()
         album["internal_id"] = -1
@@ -89,11 +101,14 @@ def aoty(
         album["internal_id"] = int(
             album_url.split("album/", 1)[-1].split("-", 1)[0]
         )
-        album_data = get_data.table(url=album_url, id="centerContent")
+        album_data = get_data.table(
+            url=album_url, id="centerContent", debug=debug
+        )
         get_data.tag(element=album_data, data_struct=album, tags=album_tags)
         if not no_tracklist:
             album["tracks"], album["total_length"] = get_data.aoty_tracks(
-                album_url
+                url=album_url,
+                debug=debug,
             )
             if not album["total_length"]:
                 del album["total_length"]
