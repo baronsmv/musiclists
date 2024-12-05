@@ -7,7 +7,7 @@ import click
 from click_help_colors import HelpColorsCommand, version_option
 
 import src.defaults.click
-from src.decorators import data, choice, groups, number, path
+from src.decorators import data, choice, groups, number
 from src.defaults import defaults
 
 
@@ -75,7 +75,7 @@ no_tracklist = click.option(
     show_default=True,
     help="Omit tracklist and total length data, slightly speeding up the process.",
 )
-deduplic = click.option(
+dedup = click.option(
     "-d",
     "--dedup/--no-dedup",
     is_flag=True,
@@ -115,9 +115,7 @@ def add(func, decorators: tuple):
     return func
 
 
-def command(
-    func: object, decorators: tuple, supercomm: object = None
-) -> object:
+def command(func: object, decorators: tuple, group: object = None) -> object:
     return add(
         func,
         (
@@ -125,7 +123,7 @@ def command(
             debug,
             verbose,
             quiet,
-            subcomm(supercomm) if supercomm else comm,
+            subcomm(group) if group else comm,
         )
         + decorators
         + (count_time,),
@@ -163,9 +161,9 @@ def duplicates(func):
         func,
         (
             search,
-            choice.columns(),
-            data.source(suffix="1", default=0),
-            data.source(suffix="2", default=1),
+            choice.columns(letter="c"),
+            data.source(letter="d", suffix="1", default=0),
+            data.source(letter="D", suffix="2", default=1),
             highest_match,
             number.similarity(),
             number.num_results(),
@@ -174,14 +172,24 @@ def duplicates(func):
     )
 
 
-def dedup(func):
-    return add(func, (deduplic, path.dedup))
-
-
 def merge(func):
     return command(
         func,
-        (data.source(),),
+        (
+            data.source(letter="d", suffix="1", default=0),
+            data.source(letter="D", suffix="2", default=1),
+            choice.key(
+                letter="k",
+                help_message="Key for the merge process.",
+            ),
+            dedup,
+            choice.key(
+                letter="K",
+                option="dedup-key",
+                help_message="Key for the dedup process.",
+                default=1,
+            ),
+        ),
         groups.operations,
     )
 
@@ -196,6 +204,11 @@ def albums(func):
             number.albums(letter="S", maximum=True),
             number.ratings(letter="r"),
             number.ratings(letter="R", maximum=True),
+            choice.columns(
+                letter="c",
+                default=(9, 3, 4, 5),
+                help_message="Columns to include.",
+            ),
         ),
         groups.output,
     )
@@ -218,6 +231,7 @@ def tracks(func):
 
 
 def dirs(func):
+    """
     return command(
         func,
         (
@@ -226,9 +240,11 @@ def dirs(func):
         ),
         groups.search,
     )
+    """
 
 
 def wanted(func):
+    """
     return command(
         func,
         (
@@ -239,9 +255,11 @@ def wanted(func):
         ),
         groups.search,
     )
+    """
 
 
 def leftover(func):
+    """
     return command(
         func,
         (
@@ -252,11 +270,14 @@ def leftover(func):
         ),
         groups.search,
     )
+    """
 
 
 def copy(func):
+    """
     return command(
         func,
         (path.source, path.destination, path.wanted(read=True)),
         groups.operations,
     )
+    """

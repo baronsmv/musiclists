@@ -21,11 +21,11 @@ def source(
             f"-{letter}",
             f"--{parameter}",
             type=click.Choice(
-                tuple(src.defaults.choice.DATA_CHOICES.keys()),
+                tuple(src.defaults.choice.DATA_CHOICE.keys()),
                 case_sensitive=False,
             ),
             show_choices=True,
-            default=tuple(src.defaults.choice.DATA_CHOICES.keys())[default],
+            default=tuple(src.defaults.choice.DATA_CHOICE.keys())[default],
             show_default=True,
             help=help_message,
         )
@@ -33,11 +33,11 @@ def source(
         return click.option(
             f"--{parameter}",
             type=click.Choice(
-                tuple(src.defaults.choice.DATA_CHOICES.keys()),
+                tuple(src.defaults.choice.DATA_CHOICE.keys()),
                 case_sensitive=False,
             ),
             show_choices=True,
-            default=tuple(src.defaults.choice.DATA_CHOICES.keys())[default],
+            default=tuple(src.defaults.choice.DATA_CHOICE.keys())[default],
             show_default=True,
             help=help_message,
         )

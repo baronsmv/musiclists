@@ -1,5 +1,19 @@
 #!/usr/bin/env python3
 
+all_tags = (
+    "position",
+    "title",
+    "album_url",
+    "cover_url",
+    "artist",
+    "year",
+    "user_score",
+    "average_rating",
+    "user_ratings",
+    "reviews",
+    "score_distribution",
+)
+
 album_list = {
     "position": {
         "tag": "td",
@@ -51,7 +65,7 @@ album_list = {
         "tag": "span",
         "type": "float",
     },
-    "ratings": {
+    "user_ratings": {
         "tag": "span",
         "number": 1,
         "type": "int",

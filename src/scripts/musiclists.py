@@ -5,6 +5,7 @@ from pathlib import Path
 import src.decorators.decorators as de
 from src import write, output, compare
 from src.copy import copy as cp
+from src.defaults.choice import COLUMN_CHOICES
 
 
 @de.aoty
@@ -102,9 +103,11 @@ def duplicates(
 
 @de.merge
 def merge(
+    data_1: str,
+    data_2: str,
+    key: str,
     dedup: bool,
-    dedup_path: Path,
-    path: Path,
+    dedup_key: str,
     quiet: bool,
     verbose: bool,
     debug: bool,
@@ -129,9 +132,12 @@ def merge(
     The function provides detailed logging if `verbose` is enabled, and
     additional debugging information if `debug` is turned on.
     """
-    write.all(
+    compare.merge(
+        data_1=data_1,
+        data_2=data_2,
+        key=key,
         dedup=dedup,
-        dedup_path=dedup_path,
+        dedup_key=dedup_key,
         quiet=quiet,
         verbose=verbose,
         debug=debug,
@@ -146,6 +152,7 @@ def albums(
     max_score: int | float,
     min_ratings: int,
     max_ratings: int,
+    columns: tuple,
     quiet: bool,
     verbose: bool,
     debug: bool,
@@ -156,6 +163,9 @@ def albums(
             "user_score": (min_score, max_score),
             "user_ratings": (min_ratings, max_ratings),
         },
+        select=COLUMN_CHOICES
+        if "all" in columns
+        else {k: COLUMN_CHOICES[k] for k in columns},
         markdown=markdown,
     )
 

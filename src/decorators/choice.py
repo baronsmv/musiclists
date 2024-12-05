@@ -9,20 +9,24 @@ def __choice__(
     option: str,
     choices: tuple,
     help_message: str,
-    all_option: bool = True,
-    default: tuple = (0,),
-    letter: str | None = None,
+    all_option: bool,
+    default: int | tuple,
+    letter: str | None,
 ):
     if all_option:
         choices = ("all",) + choices
+    multiple = True if isinstance(default, tuple) or all_option else False
+    default = (
+        tuple(choices[d] for d in default) if multiple else choices[default]
+    )
     if letter:
         return click.option(
             "-" + letter,
             f"--{option}",
             type=click.Choice(choices, case_sensitive=False),
-            multiple=True,
+            multiple=multiple,
             show_choices=True,
-            default=tuple(choices[d] for d in default),
+            default=default,
             show_default=True,
             help=help_message,
         )
@@ -30,7 +34,7 @@ def __choice__(
         return click.option(
             f"--{option}",
             type=click.Choice(choices, case_sensitive=False),
-            multiple=True,
+            multiple=multiple,
             show_choices=True,
             default=default,
             show_default=True,
@@ -44,7 +48,7 @@ def aoty(
     choices: tuple = download.AOTY_TYPES,
     help_message: str = "Types of AOTY albums to download.",
     all_option: bool = True,
-    default: tuple = (0,),
+    default: int | tuple = (0,),
 ):
     return __choice__(
         option=option,
@@ -62,7 +66,7 @@ def prog(
     choices: tuple = download.PROG_TYPES,
     help_message: str = "Types of ProgArchives albums to download.",
     all_option: bool = True,
-    default: tuple = (0,),
+    default: int | tuple = (0,),
 ):
     return __choice__(
         option=option,
@@ -76,11 +80,29 @@ def prog(
 
 def columns(
     option: str = "columns",
-    letter: str | None = "c",
-    choices: tuple = choice.COLUMN_CHOICES,
+    letter: str | None = None,
+    choices: tuple = tuple(choice.COLUMN_CHOICES.keys()),
     help_message: str = "Columns to consider for the search process.",
+    all_option: bool = True,
+    default: int | tuple = (3, 4, 5),
+):
+    return __choice__(
+        option=option,
+        choices=choices,
+        help_message=help_message,
+        all_option=all_option,
+        default=default,
+        letter=letter,
+    )
+
+
+def key(
+    option: str = "key",
+    letter: str | None = None,
+    choices: tuple = choice.ID_CHOICES,
+    help_message: str = "Key for the process.",
     all_option: bool = False,
-    default: tuple = (0, 1, 2),
+    default: int | tuple = 0,
 ):
     return __choice__(
         option=option,

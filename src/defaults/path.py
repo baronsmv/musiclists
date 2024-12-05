@@ -12,6 +12,7 @@ OUTPUT_DIR = Path(ROOT_DIR / "output")
 DEDUP_DIR = Path(DATA_DIR / "dedup")
 MERGE_DIR = Path(DATA_DIR / "merge")
 DIFF_DIR = Path(DATA_DIR / "diff")
+
 DIRS = {
     "download": DATA_DIR,
     "output": OUTPUT_DIR,

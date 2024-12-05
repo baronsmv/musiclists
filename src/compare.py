@@ -3,7 +3,6 @@
 from src import load
 from src import save
 from src.defaults import defaults
-from src.defaults.path import LOCATION
 from src.get import df
 
 
@@ -11,8 +10,6 @@ def duplicates(
     search,
     data_1: str,
     data_2: str,
-    data_1_location: LOCATION,
-    data_2_location: LOCATION,
     columns: list | tuple = ("title", "artist", "year"),
     min_rate: int | float = 0.6,
     only_highest_match: bool = defaults.ONLY_HIGHEST_MATCH,
@@ -22,71 +19,76 @@ def duplicates(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> None:
-    data = []
     data_search = dict()
+    min_rate = 0 if search else min_rate
+    name = f"{data_1}-{data_2}"
     if search:
         data_search = df.search(" ".join(search), data_1, columns, results)
         if not data_search:
             return
-        print()
-    for s in df.duplicates(
-        data_1=data_search if search else data_1,
-        data_2=data_2,
-        data_1_location=data_1_location,
-        data_2_location=data_2_location,
-        columns=columns,
-        min_rate=min_rate if not search else 0,
-        results=results,
-        only_highest_match=only_highest_match,
-        num_diff=num_diff,
-        quiet=quiet,
-        verbose=verbose,
-        debug=debug,
-    ):
-        print(s)
+    matches = tuple(
+        df.duplicates(
+            data_1=data_1,
+            data_2=data_2,
+            search=data_search,
+            dedup_name=name,
+            columns=columns,
+            min_rate=min_rate,
+            results=results,
+            only_highest_match=only_highest_match,
+            num_diff=num_diff,
+            quiet=quiet,
+            verbose=verbose,
+            debug=debug,
+        )
+    )
+    if len(matches) == 0:
+        if not quiet:
+            print("Not found any new similarity.")
+        return
+    data = []
+    for m in matches:
         data.append(
             dict(
                 {
-                    f"{c}_{d}": s[i][c]
+                    f"{c}-{d}": m[i][c]
                     for i, d in enumerate((data_1, data_2))
-                    for c in ("internal_id", "artist", "title", "year")
+                    for c in ("id", "internal_id", "artist", "title", "year")
                 }
             )
         )
-    save.as_df(data, f"{data_1}_{data_2}", path_type="dedup")
+    print(data)
+    save.as_df(data, name, location="dedup", append=True)
 
 
 def merge(
     data_1: str,
     data_2: str,
-    data_1_location: LOCATION,
-    data_2_location: LOCATION,
     key: str = "id",
     dedup: bool = True,
-    dedup_col: str = "internal_id",
+    dedup_key: str = "internal_id",
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
-    name = f"{data_1}_{data_2}"
-    data_1 = (
-        df.deduplicated(
-            data_1, data_2, data_1_location, data_2_location, key=dedup_col
-        )
+    name = f"{data_1}-{data_2}"
+    data_2 = (
+        df.deduplicated(data_2, data_1, key=dedup_key)
         if dedup
-        else load.df(data_1, location=data_1_location)
+        else load.df(data_2)
     )
-    data = data_1.merge_sorted(
-        load.df(data_2, location="download"), key=key
-    ).unique(subset=key, keep="first")
-    save.as_df(data, name, path_type="merge")
+    data = (
+        load.df(data_1)
+        .join(data_2, on=key, how="inner")
+        .unique(subset=key, keep="first")
+    )
+    print(data)
+    save.as_df(data, name, location="merge")
 
 
 def diff(
     data_1: str,
     data_2: str,
-    data_1_location: LOCATION,
-    data_2_location: LOCATION,
     key: str = "id",
     dedup: bool = True,
     dedup_col: str = "internal_id",
@@ -94,20 +96,16 @@ def diff(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
-    name = f"{data_1}_{data_2}"
+    name = f"{data_1}-{data_2}"
     d1 = (
-        df.deduplicated(
-            data_1, data_2, data_1_location, data_2_location, key=dedup_col
-        )
+        df.deduplicated(data_1, data_2, key=dedup_col)
         if dedup
-        else load.df(data_1, location=data_1_location)
+        else load.df(data_1)
     )
     d2 = (
-        df.deduplicated(
-            data_2, data_1, data_2_location, data_1_location, key=dedup_col
-        )
+        df.deduplicated(data_2, data_1, key=dedup_col)
         if dedup
-        else load.df(data_2, location=data_2_location)
+        else load.df(data_2)
     )
     data = d1.join(d2, on=key, how="anti")
-    save.as_df(data, name, path_type="diff")
+    save.as_df(data, name, location="diff")

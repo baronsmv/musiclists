@@ -11,7 +11,7 @@ from src.defaults import defaults
 from src.get import data as get_data
 
 
-def __albums__(
+def __download__(
     field: str,
     function,
     type1,
@@ -66,7 +66,7 @@ def __albums__(
     else:
         for album in until:
             data.append(album)
-    save.as_df(data, field)
+    save.as_df(data, field, location="download")
 
 
 def aoty(
@@ -80,7 +80,7 @@ def aoty(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
-    __albums__(
+    __download__(
         field=field,
         function=dump.aoty,
         type1=src.defaults.download.AOTY_TYPES if "all" in types else types,
@@ -113,7 +113,7 @@ def prog(
     for i, t in enumerate(src.defaults.download.PROG_TYPES, start=1):
         if "all" in types or t in types:
             name_types.append(i)
-    __albums__(
+    __download__(
         field=field,
         function=dump.progarchives,
         type1=(tuple((k, v) for k, v in genres.items())),

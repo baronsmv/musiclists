@@ -62,7 +62,7 @@ def until(
                                 else f"{score}"
                             )
                             + ": "
-                            + get_album.path(album, sep=" - ")
+                            + get_album.repr(album)
                         )
                     album["id"] = get_album.id(album)
                     yield album

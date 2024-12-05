@@ -1,5 +1,33 @@
 #!/usr/bin/env python3
 
+all_tags = (
+    "position",
+    "title",
+    "album_url",
+    "cover_url",
+    "artist",
+    "critic_score",
+    "critic_reviews",
+    "user_score",
+    "user_ratings",
+    "year",
+    "month",
+    "day",
+    "genre",
+    "labels",
+    "producers",
+    "writers",
+    "track_disc",
+    "track_number",
+    "track_title",
+    "track_url",
+    "sub_tracks",
+    "track_length",
+    "featuring",
+    "track_score",
+    "track_ratings",
+)
+
 album_list = {
     "position": {
         "tag": "span",
@@ -114,7 +142,7 @@ album = {
         "match": r"(\d+)",
         "type": "str",
     },
-    "genres": {
+    "genre": {
         "tag": "div",
         "class": "detailRow",
         "number": 3,

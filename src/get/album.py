@@ -38,10 +38,10 @@ def id(
     return result[sep_length:]
 
 
-def path(
+def repr(
     data: dict,
-    sep: str = "/",
-    includeyear: bool = True,
+    sep: str = " - ",
+    include_year: bool = True,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -52,19 +52,11 @@ def path(
             + sep
             + data.get("title", str())
             + (
-                " ("
-                + str(data.get("year"))
-                + ")"
-                if includeyear
-                and "year" in data
+                " (" + str(data.get("year")) + ")"
+                if include_year and "year" in data
                 else ""
             )
         )
     except Exception as err:
-        print(
-            "Error while printing path:",
-            data,
-            repr(err),
-            sep="\n"
-        )
+        print("Error while printing path:", data, repr(err), sep="\n")
     return str()
