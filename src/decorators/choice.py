@@ -82,7 +82,7 @@ def columns(
     option: str = "columns",
     letter: str | None = None,
     choices: tuple = tuple(choice.COLUMN_CHOICES.keys()),
-    help_message: str = "Columns to consider for the search process.",
+    help_message: str = "Columns to consider for the process.",
     all_option: bool = True,
     default: int | tuple = (3, 4, 5),
 ):

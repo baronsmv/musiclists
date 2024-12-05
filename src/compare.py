@@ -64,6 +64,7 @@ def duplicates(
 def merge(
     data_1: str,
     data_2: str,
+    columns: tuple,
     key: str = "id",
     dedup: bool = True,
     dedup_key: str = "internal_id",
@@ -76,10 +77,12 @@ def merge(
         df.deduplicated(data_2, data_1, key=dedup_key)
         if dedup
         else load.df(data_2)
-    )
+    ).select(columns)
     data = (
         load.df(data_1)
-        .join(data_2, on=key, how="inner")
+        .select(columns)
+        .join(data_2, on=key, how="outer")
+        .fill_null(strategy="zero")
         .unique(subset=key, keep="first")
     )
     print(data)
@@ -89,6 +92,7 @@ def merge(
 def diff(
     data_1: str,
     data_2: str,
+    columns: tuple,
     key: str = "id",
     dedup: bool = True,
     dedup_col: str = "internal_id",
@@ -101,11 +105,11 @@ def diff(
         df.deduplicated(data_1, data_2, key=dedup_col)
         if dedup
         else load.df(data_1)
-    )
+    ).select(columns)
     d2 = (
         df.deduplicated(data_2, data_1, key=dedup_col)
         if dedup
         else load.df(data_2)
-    )
+    ).select(columns)
     data = d1.join(d2, on=key, how="anti")
     save.as_df(data, name, location="diff")

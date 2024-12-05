@@ -178,6 +178,9 @@ def merge(func):
         (
             data.source(letter="d", suffix="1", default=0),
             data.source(letter="D", suffix="2", default=1),
+            choice.columns(
+                letter="c",
+            ),
             choice.key(
                 letter="k",
                 help_message="Key for the merge process.",

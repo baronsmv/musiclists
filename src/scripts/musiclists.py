@@ -105,6 +105,7 @@ def duplicates(
 def merge(
     data_1: str,
     data_2: str,
+    columns: tuple,
     key: str,
     dedup: bool,
     dedup_key: str,
@@ -135,6 +136,7 @@ def merge(
     compare.merge(
         data_1=data_1,
         data_2=data_2,
+        columns=columns,
         key=key,
         dedup=dedup,
         dedup_key=dedup_key,
