@@ -82,9 +82,7 @@ def aoty(
 ) -> Iterator[dict[str, str | int | float | list | dict | timedelta]]:
     if not quiet:
         print(f"- Downloading {album_type}, page {page_number}...")
-    album = (
-        dict()
-    )  # type: dict[str, str | int | float | list | dict | timedelta]
+    album = dict()
     url = f"{base_page}/{ratings_subpage}/{album_type}/all/{page_number}/"
     albums_list = get_data.table(
         url=url,
@@ -117,8 +115,8 @@ def aoty(
 
 
 def progarchives(
-    genre: tuple,
-    album_type: int,
+    genre: tuple[str, int],
+    album_type: tuple[str, int],
     base_page: str = "https://www.progarchives.com/",
     list_tags: dict = prog_tags.album_list,
     album_tags: dict = prog_tags.album,
@@ -128,17 +126,13 @@ def progarchives(
     debug: bool = defaults.DEBUG,
 ) -> Iterator[dict[str, str | int | float | list | dict | timedelta]]:
     if not quiet:
-        print(
-            f"- Downloading {genre[0]}, page {genre[1]}, type {album_type}..."
-        )
-    album = (
-        dict()
-    )  # type: dict[str, str | int | float | list | dict | timedelta]
+        print(f"- Downloading {genre[0]}, type {album_type[0]}...")
+    album = dict()
     url = (
         base_page
         + "top-prog-albums.asp"
         + f"?ssubgenres={genre[1]}"
-        + f"&salbumtypes={album_type}"
+        + f"&salbumtypes={album_type[1]}"
         + "&smaxresults=250#list"
     )
     albums_list = get_data.table(

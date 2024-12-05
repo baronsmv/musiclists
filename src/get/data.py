@@ -205,7 +205,7 @@ def prog_genres(
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
-):
+) -> dict:
     prog_table = table(url=prog_url, id=id_table, encoding=encoding)
     return {
         g.string: int(g.get("href").split("=")[-1])

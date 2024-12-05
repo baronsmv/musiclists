@@ -81,7 +81,7 @@ def merge(
     data = (
         load.df(data_1)
         .select(columns)
-        .join(data_2, on=key, how="outer")
+        .join(data_2, on=columns, how="full", coalesce=True)
         .fill_null(strategy="zero")
         .unique(subset=key, keep="first")
     )

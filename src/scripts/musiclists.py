@@ -6,6 +6,7 @@ import src.decorators.decorators as de
 from src import write, output, compare
 from src.copy import copy as cp
 from src.defaults.choice import COLUMN_CHOICES
+from src.defaults.download import AOTY_TYPES, PROG_TYPES
 
 
 @de.aoty
@@ -33,7 +34,7 @@ def aoty(
     write.aoty(
         min_score=min_score,
         max_score=max_score,
-        types=types,
+        types=AOTY_TYPES if "all" in types else types,
         no_tracklist=no_tracklist,
         quiet=quiet,
         verbose=verbose,
@@ -66,7 +67,7 @@ def prog(
     write.prog(
         min_score=min_score,
         max_score=max_score,
-        types=types,
+        types=tuple(PROG_TYPES.keys()) if "all" in types else types,
         no_tracklist=no_tracklist,
         quiet=quiet,
         verbose=verbose,
@@ -136,7 +137,9 @@ def merge(
     compare.merge(
         data_1=data_1,
         data_2=data_2,
-        columns=columns,
+        columns=COLUMN_CHOICES
+        if "all" in columns
+        else {k: COLUMN_CHOICES[k] for k in columns},
         key=key,
         dedup=dedup,
         dedup_key=dedup_key,

@@ -5,9 +5,16 @@ from datetime import timedelta
 from pathlib import Path
 from textwrap import dedent
 
-import src.defaults.download
 from src import dump, save
 from src.defaults import defaults
+from src.defaults.download import (
+    AOTY_TYPES,
+    AOTY_MIN_SCORE,
+    AOTY_MAX_SCORE,
+    PROG_TYPES,
+    PROG_MIN_SCORE,
+    PROG_MAX_SCORE,
+)
 from src.get import data as get_data
 
 
@@ -31,8 +38,16 @@ def __download__(
             dedent(
                 f"""
             Download process started:
-            - Types: {type1}
-            - Types: {type2}
+            - Types: {(
+                    tuple(t[0] for t in type1)
+                    if isinstance(type1[0], tuple)
+                    else type1
+                )}
+            - Types: {(
+                    tuple(t[0] for t in type2)
+                    if isinstance(type2[0], tuple)
+                    else type2
+                )}
             - Minimum score: {min_score}
             - Maximum score: {max_score}
             """
@@ -71,10 +86,10 @@ def __download__(
 
 def aoty(
     field: str = "aoty",
-    types: tuple = src.defaults.download.AOTY_TYPES,
+    types: tuple = AOTY_TYPES,
     start_page: int = 1,
-    min_score: int = src.defaults.download.AOTY_MIN_SCORE,
-    max_score: int = src.defaults.download.AOTY_MAX_SCORE,
+    min_score: int = AOTY_MIN_SCORE,
+    max_score: int = AOTY_MAX_SCORE,
     no_tracklist: bool = defaults.NO_TRACKLIST,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
@@ -83,7 +98,7 @@ def aoty(
     __download__(
         field=field,
         function=dump.aoty,
-        type1=src.defaults.download.AOTY_TYPES if "all" in types else types,
+        type1=types,
         type2=start_page,
         score_key="user_score",
         min_score=min_score,
@@ -98,9 +113,9 @@ def aoty(
 
 def prog(
     field: str = "prog",
-    types: tuple = src.defaults.download.PROG_TYPES,
-    min_score: float = src.defaults.download.PROG_MIN_SCORE,
-    max_score: float = src.defaults.download.PROG_MAX_SCORE,
+    types: tuple = tuple(PROG_TYPES.keys()),
+    min_score: float = PROG_MIN_SCORE,
+    max_score: float = PROG_MAX_SCORE,
     no_tracklist: bool = defaults.NO_TRACKLIST,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
@@ -108,16 +123,11 @@ def prog(
 ):
     if not quiet:
         print("Generating list of genres...")
-    genres = get_data.prog_genres()
-    name_types = list()
-    for i, t in enumerate(src.defaults.download.PROG_TYPES, start=1):
-        if "all" in types or t in types:
-            name_types.append(i)
     __download__(
         field=field,
         function=dump.progarchives,
-        type1=(tuple((k, v) for k, v in genres.items())),
-        type2=name_types,
+        type1=tuple(get_data.prog_genres().items()),
+        type2=tuple((t, PROG_TYPES[t]) for t in types),
         score_key="user_score",
         min_score=min_score,
         max_score=max_score,

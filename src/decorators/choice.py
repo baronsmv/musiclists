@@ -63,7 +63,7 @@ def aoty(
 def prog(
     option: str = "types",
     letter: str | None = "t",
-    choices: tuple = download.PROG_TYPES,
+    choices: tuple = tuple(download.PROG_TYPES.keys()),
     help_message: str = "Types of ProgArchives albums to download.",
     all_option: bool = True,
     default: int | tuple = (0,),
