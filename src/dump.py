@@ -140,7 +140,7 @@ def progarchives(
     )
     for data in albums_list.find_all("tr"):
         album["id"] = str()
-        album["type"] = album_type
+        album["type"] = album_type[0]
         album["genre"] = genre[0]
         get_data.tag(element=data, data_struct=album, tags=list_tags)
         album_url = base_page + str(album["album_url"])
