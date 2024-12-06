@@ -8,8 +8,8 @@ from pathlib import Path
 from src.debug import logging
 from src.defaults import defaults
 from src.get import data as get_data, album as get_album, file as get_file
+from src.get.file import containsdirs
 from src.html_tags import aoty as aoty_tags, prog as prog_tags
-from src.verify import containsdirs
 
 
 def until(

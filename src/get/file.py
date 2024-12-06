@@ -44,3 +44,10 @@ def level(
         return lvl
     else:
         return level(child.parent, parent, lvl + 1)
+
+
+def contains_dirs(dir_path: Path):
+    for c in dir_path.iterdir():
+        if c.is_dir():
+            return True
+    return False
