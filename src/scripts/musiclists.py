@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import src.decorators.commands as de
-from src import export, compare
+from src import compare, download, export
 from src.decorators.decorators import cli
 from src.defaults.choice import COLUMN_CHOICES
 from src.defaults.download import AOTY_TYPES, PROG_TYPES
@@ -25,7 +25,7 @@ def aoty(
     with a score closest to `max_score` and will stop once an album with a score
     below `min_score` is encountered.
     """
-    write.aoty(
+    download.aoty(
         min_score=min_score,
         max_score=max_score,
         types=AOTY_TYPES if "all" in types else types,
@@ -54,7 +54,7 @@ def prog(
     with a score closest to `max_score` and will stop once an album with a score
     below `min_score` is encountered.
     """
-    write.prog(
+    download.prog(
         min_score=min_score,
         max_score=max_score,
         types=tuple(PROG_TYPES.keys()) if "all" in types else types,
@@ -140,7 +140,7 @@ def merge(
     )
 
 
-@de.merge
+@de.diff
 def diff(
     data_1: str,
     data_2: str,
@@ -163,7 +163,7 @@ def diff(
     both lists (based on their `dedup_key`), in addition to calculating the
     difference between the two lists using the specified `key`.
     """
-    compare.merge(
+    compare.diff(
         data_1=data_1,
         data_2=data_2,
         columns=COLUMN_CHOICES

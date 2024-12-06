@@ -78,6 +78,31 @@ def merge(func):
     )
 
 
+def diff(func):
+    return command(
+        func,
+        (
+            data.source(letter="d", suffix="1", default=0),
+            data.source(letter="D", suffix="2", default=1),
+            choice.columns(
+                letter="c",
+            ),
+            choice.key(
+                letter="k",
+                help_message="Key for the diff process.",
+            ),
+            dedup,
+            choice.key(
+                letter="K",
+                option="dedup-key",
+                help_message="Key for the dedup process.",
+                default=1,
+            ),
+        ),
+        groups.transform,
+    )
+
+
 def albums(func):
     return command(
         func,

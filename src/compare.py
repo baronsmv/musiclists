@@ -95,19 +95,19 @@ def diff(
     columns: tuple,
     key: str = "id",
     dedup: bool = True,
-    dedup_col: str = "internal_id",
+    dedup_key: str = "internal_id",
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
     name = f"{data_1}-{data_2}"
     d1 = (
-        df.deduplicated(data_1, data_2, key=dedup_col)
+        df.deduplicated(data_1, data_2, key=dedup_key)
         if dedup
         else load.df(data_1)
     ).select(columns)
     d2 = (
-        df.deduplicated(data_2, data_1, key=dedup_col)
+        df.deduplicated(data_2, data_1, key=dedup_key)
         if dedup
         else load.df(data_2)
     ).select(columns)

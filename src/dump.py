@@ -8,7 +8,7 @@ from pathlib import Path
 from src.debug import logging
 from src.defaults import defaults
 from src.get import data as get_data, album as get_album, file as get_file
-from src.get.file import containsdirs
+from src.get.file import contains_dirs
 from src.html_tags import aoty as aoty_tags, prog as prog_tags
 
 
@@ -19,9 +19,6 @@ def until(
     score_key: str,
     min_score: int | float,
     max_score: int | float,
-    lowest_score: int | float = 0,
-    highest_score: int | float = 100,
-    no_tracklist: bool = defaults.NO_TRACKLIST,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -75,7 +72,6 @@ def aoty(
     ratings_subpage: str = "ratings/user-highest-rated",
     list_tags: dict = aoty_tags.album_list,
     album_tags: dict = aoty_tags.album,
-    no_tracklist: bool = defaults.NO_TRACKLIST,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -97,19 +93,18 @@ def aoty(
         get_data.tag(element=data, data_struct=album, tags=list_tags)
         album_url = base_page + str(album["album_url"])
         album["internal_id"] = int(
-            album_url.split("album/", 1)[-1].split("-", 1)[0]
+            tuple(album_url.split("album/", 1))[-1].split("-", 1)[0]
         )
         album_data = get_data.table(
             url=album_url, id="centerContent", debug=debug
         )
         get_data.tag(element=album_data, data_struct=album, tags=album_tags)
-        if not no_tracklist:
-            album["tracks"], album["total_length"] = get_data.aoty_tracks(
-                url=album_url,
-                debug=debug,
-            )
-            if not album["total_length"]:
-                del album["total_length"]
+        album["tracks"], album["total_length"] = get_data.aoty_tracks(
+            url=album_url,
+            debug=debug,
+        )
+        if not album["total_length"]:
+            del album["total_length"]
         yield album.copy()
         album.clear()
 
@@ -144,7 +139,7 @@ def progarchives(
         album["genre"] = genre[0]
         get_data.tag(element=data, data_struct=album, tags=list_tags)
         album_url = base_page + str(album["album_url"])
-        album["internal_id"] = int(album_url.split("?id=")[-1])
+        album["internal_id"] = int(tuple(album_url.split("?id="))[-1])
         album_data = get_data.table(url=album_url, tag="td", encoding="latin1")
         get_data.tag(element=album_data, data_struct=album, tags=album_tags)
         album["score_distribution"] = get_data.prog_distribution_score(
@@ -169,7 +164,7 @@ def dirs(
     for d in path.rglob("*"):
         if (
             d.is_dir()
-            and not containsdirs(d)
+            and not contains_dirs(d)
             and min_level <= get_file.level(d, path) <= max_level
         ):
             yield d
