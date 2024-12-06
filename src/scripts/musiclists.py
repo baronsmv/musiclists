@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import src.decorators.commands as de
-from src import write, export, compare
+from src import export, compare
 from src.decorators.decorators import cli
 from src.defaults.choice import COLUMN_CHOICES
 from src.defaults.download import AOTY_TYPES, PROG_TYPES
