@@ -12,7 +12,6 @@ setuptools.setup(
         "polars",
         "pathlib",
         "pyexiftool",
-        "python-dateutil",
     ),
     entry_points={
         "console_scripts": [
