@@ -79,7 +79,7 @@ def duplicates(
     debug: bool,
 ):
     """
-    Find duplicate entries between two album lists.
+    Find duplicate entries between lists.
 
     This function compares two album data lists to identify duplicates,
     considering for the match the specified columns provided in `columns`.
@@ -140,6 +140,44 @@ def merge(
     )
 
 
+@de.merge
+def diff(
+    data_1: str,
+    data_2: str,
+    columns: tuple,
+    key: str,
+    dedup: bool,
+    dedup_key: str,
+    quiet: bool,
+    verbose: bool,
+    debug: bool,
+):
+    """
+    Find the difference between lists.
+
+    This function identifies the albums present in the first data list
+    (`data_1`) but not in the second (`data_2`), selecting only the specified
+    `columns` and using the given `key` to perform the comparison.
+
+    If `dedup` is enabled, the function will remove any albums that appear in
+    both lists (based on their `dedup_key`), in addition to calculating the
+    difference between the two lists using the specified `key`.
+    """
+    compare.merge(
+        data_1=data_1,
+        data_2=data_2,
+        columns=COLUMN_CHOICES
+        if "all" in columns
+        else {k: COLUMN_CHOICES[k] for k in columns},
+        key=key,
+        dedup=dedup,
+        dedup_key=dedup_key,
+        quiet=quiet,
+        verbose=verbose,
+        debug=debug,
+    )
+
+
 @de.albums
 def albums(
     data: str,
@@ -153,6 +191,16 @@ def albums(
     verbose: bool,
     debug: bool,
 ):
+    """
+    Export a list of albums to a text file.
+
+    This function processes an album data list (`data`), applying filters based
+    on the specified score range (`min_score`, `max_score`), ratings range
+    (`min_ratings`, `max_ratings`), and the selected columns (`columns`).
+
+    The resulting list is then sorted and optionally formatted as Markdown
+    before being exported to a text file.
+    """
     export.albums(
         field=data,
         num_filter={
@@ -179,6 +227,17 @@ def tracks(
     verbose: bool,
     debug: bool,
 ):
+    """
+    Export a list of tracks to a text file.
+
+    This function processes a list of tracks, filtering based on track scores
+    (`min_score`, `max_score`),album scores (`min_album_score`,
+    `max_album_score`), ratings count (`min_ratings`, `max_ratings`), and the
+    selected columns (`columns`).
+
+    The resulting list is then sorted and
+    optionally formatted as Markdown before being exported to a text file.
+    """
     export.tracks(
         field="aoty",
         num_filter={
