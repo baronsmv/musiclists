@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
-
-import src.decorators.decorators as de
-from src import write, output, compare
-from src.copy import copy as cp
+import src.decorators.commands as de
+from src import write, export, compare
+from src.decorators.decorators import cli
 from src.defaults.choice import COLUMN_CHOICES
 from src.defaults.download import AOTY_TYPES, PROG_TYPES
 
@@ -22,14 +20,10 @@ def aoty(
     """
     Download a list of top albums from AlbumOfTheYear.org (AOTY).
 
-    This function downloads albums data whose scores (based on user ratings)
-    meet the criteria set by `min_score`.
-
-    The albums are downloaded in order of their score, and the process will
-    stop as soon as an album with a score lower than `min_score` is found.
-
-    The function provides detailed logging if `verbose` is enabled, and
-    additional debugging information if `debug` is turned on.
+    This function retrieves albums whose scores fall within the range defined by
+    `min_score` and `max_score`. The albums are fetched starting from the one
+    with a score closest to `max_score` and will stop once an album with a score
+    below `min_score` is encountered.
     """
     write.aoty(
         min_score=min_score,
@@ -55,14 +49,10 @@ def prog(
     """
     Download a list of top albums from ProgArchives.com.
 
-    This function downloads albums data whose scores (based on user ratings)
-    meet the criteria set by `min_score`.
-
-    The albums are downloaded in order of their score, and the process will
-    stop as soon as an album with a score lower than `min_score` is found.
-
-    The function provides detailed logging if `verbose` is enabled, and
-    additional debugging information if `debug` is turned on.
+    This function retrieves albums whose scores fall within the range defined by
+    `min_score` and `max_score`. The albums are fetched starting from the one
+    with a score closest to `max_score` and will stop once an album with a score
+    below `min_score` is encountered.
     """
     write.prog(
         min_score=min_score,
@@ -88,6 +78,16 @@ def duplicates(
     verbose: bool,
     debug: bool,
 ):
+    """
+    Find duplicate entries between two album lists.
+
+    This function compares two album data lists to identify duplicates,
+    considering for the match the specified columns provided in `columns`.
+
+    If `SEARCH` is not empty, the function will search for a specific entry
+    within `data_1` and then for duplicates of that entry in `data_2`.
+    Otherwise, it compares all entries in `data_1` against `data_2`.
+    """
     compare.duplicates(
         search=search,
         data_1=data_1,
@@ -117,22 +117,13 @@ def merge(
     """
     Merge downloaded lists into one.
 
-    This function combines top album data from all sources, dealing with
-    duplicates by their ID, and saves the result in the specified `path` in
-    `polars` format.
+    This function combines album data from two sources (`data_1` and `data_2`),
+    selecting only the specified `columns` and joining the lists based on the
+    given `key`.
 
-    If `re_download` is specified, the albums in it will be downloaded again,
-    otherwise, existing data will be reused.
-
-    If `dedup` is enabled, besides the standard deduplication by ID, any
-    duplicate albums found between the two sources registered in `dedup-path`
-    will be removed as well.
-
-    The process stops once all albums from both sources are merged, and albums
-    that meet the minimum score criteria are included.
-
-    The function provides detailed logging if `verbose` is enabled, and
-    additional debugging information if `debug` is turned on.
+    If `dedup` is enabled, the function will remove duplicates based on the
+    specified `dedup_key`, in addition to performing the standard deduplication
+    by `key`.
     """
     compare.merge(
         data_1=data_1,
@@ -162,7 +153,7 @@ def albums(
     verbose: bool,
     debug: bool,
 ):
-    output.albums(
+    export.albums(
         field=data,
         num_filter={
             "user_score": (min_score, max_score),
@@ -188,7 +179,7 @@ def tracks(
     verbose: bool,
     debug: bool,
 ):
-    output.tracks(
+    export.tracks(
         field="aoty",
         num_filter={
             "track_score": (min_score, max_score),
@@ -199,6 +190,7 @@ def tracks(
     )
 
 
+'''
 @de.dirs
 def dirs(
     source_path: Path,
@@ -344,10 +336,7 @@ def copy(
         verbose=verbose,
         debug=debug,
     )
-
-
-cli = de.cli
-
+'''
 
 if __name__ == "__main__":
     cli()

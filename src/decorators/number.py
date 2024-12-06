@@ -267,7 +267,7 @@ def num_results(
     show_min_max: bool = True,
     show_name: bool = True,
     show_score: bool = False,
-    help_message: str = "Number of maximum results to include in the search.",
+    help_message: str = "Limit of results to return.",
 ):
     return __number__(
         name=name,

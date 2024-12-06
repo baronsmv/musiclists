@@ -22,16 +22,12 @@ def cli() -> None:
     Features:
 
         - Download lists of the top albums from multiple platforms such as
-            AOTY.org and Progarchives.com.
+            AOTY.org and ProgArchives.com.
 
-        - Merge these lists into a single one (easily dealing with duplicates)
-            further analysis.
+        - Provide utilities for merging, subtracting, filtering, sorting,
+            and processing the album data, as well as their tracks.
 
-        - Provide utilities for filtering, sorting, and processing the album
-            data, as well as their tracks.
-
-        - Analyze the album data to derive useful insights, trends and
-            comparisons.
+        - Export to multiple formats, for further analysis.
 
     The tool helps you easily aggregate and explore curated album and track
     rankings across different platforms, making it ideal for music enthusiasts
@@ -50,31 +46,23 @@ sub_group = cli.group(
 
 @sub_group
 def download() -> None:
-    """
-    Download
-    """
+    """Download lists of top albums from different music databases."""
     pass
 
 
 @sub_group
-def search() -> None:
-    """
-    Search
-    """
+def duplicates() -> None:
+    """Manage album duplicates."""
     pass
 
 
 @sub_group
-def operations() -> None:
-    """
-    Operations
-    """
+def transform() -> None:
+    """Transform, merge and compare album lists."""
     pass
 
 
 @sub_group
-def output() -> None:
-    """
-    Output
-    """
+def export() -> None:
+    """Export album lists to other formats."""
     pass
