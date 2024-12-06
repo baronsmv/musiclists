@@ -211,6 +211,9 @@ def albums(
         if "all" in columns
         else {k: COLUMN_CHOICES[k] for k in columns},
         markdown=markdown,
+        quiet=quiet,
+        verbose=verbose,
+        debug=debug,
     )
 
 
@@ -246,6 +249,9 @@ def tracks(
             "user_score": (min_album_score, max_album_score),
         },
         markdown=markdown,
+        quiet=quiet,
+        verbose=verbose,
+        debug=debug,
     )
 
 
