@@ -6,6 +6,7 @@ from statistics import median
 from typing import Iterator
 
 import polars as pl
+import polars.selectors as cs
 
 from src import load
 from src.debug import logging
@@ -207,9 +208,7 @@ def duplicates(
             == 1
         ):
             logger.info(
-                f"Identical match for "
-                + repr(matches[0][1])
-                + ", skipping."
+                f"Identical match for " + repr(matches[0][1]) + ", skipping."
             )
             continue
         if only_highest_match:
@@ -270,3 +269,7 @@ def deduplicated(
         .is_in(set(k[col_1] for k in dedup_keys if k[col_2] in data_2_keys))
         .not_(),
     )
+
+
+def cast(df: pl.DataFrame):
+    return df.with_columns(cs.numeric().cast(pl.Float32))

@@ -126,7 +126,7 @@ def prog_score(
         )
     return __number__(
         name=name,
-        integer=False,
+        integer=True,
         default_value=default_value,
         letter=letter,
         option=option,

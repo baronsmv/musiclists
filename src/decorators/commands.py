@@ -3,7 +3,7 @@
 from src.decorators import choice, number, groups, data
 from src.decorators.decorators import (
     command,
-    no_tracklist,
+    ceil,
     search,
     highest_match,
     dedup,
@@ -18,7 +18,6 @@ def aoty(func):
             choice.aoty(),
             number.aoty_score(letter="s"),
             number.aoty_score(letter="S", maximum=True),
-            no_tracklist,
         ),
         groups.download,
     )
@@ -29,9 +28,9 @@ def prog(func):
         func,
         (
             choice.prog(),
+            ceil,
             number.prog_score(letter="s"),
             number.prog_score(letter="S", maximum=True),
-            no_tracklist,
         ),
         groups.download,
     )

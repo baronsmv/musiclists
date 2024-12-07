@@ -7,7 +7,7 @@ all_tags = (
     "cover_url",
     "artist",
     "year",
-    "user_score",
+    "qwr",
     "average_rating",
     "user_ratings",
     "reviews",
@@ -55,7 +55,7 @@ album_list = {
         "match": r"\d{4}",
         "type": "int",
     },
-    "user_score": {
+    "qwr": {
         "tag": "div",
         "number": 1,
         "replace": {"QWR = ": ""},

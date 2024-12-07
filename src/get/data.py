@@ -220,7 +220,7 @@ def prog_distribution_score(album_url: str) -> dict[str, int]:
         t.extract()
     r = iter(range(5, 0, -1))
     return {
-        str(next(r)) + "stars": int(re.sub(r"\D", "", i))
+        str(next(r)) + "_stars": int(re.sub(r"\D", "", i))
         for i in str(prog_table).splitlines()
         if re.search(r"\d+\%", i)
     }

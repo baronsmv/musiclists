@@ -66,15 +66,14 @@ debug = click.option(
     show_default=True,
     help="Enable debug-level logging for troubleshooting.",
 )
-no_tracklist = click.option(
-    "-n",
-    "--no-tracklist",
+ceil = click.option(
+    "-c/-f",
+    "--ceil/--floor",
     is_flag=True,
     type=click.BOOL,
-    default=defaults.NO_TRACKLIST,
+    default=defaults.CEIL,
     show_default=True,
-    help="Tracklist and total length data information will not be retrieved, "
-    + "slightly speeding up the process.",
+    help="Round up (ceil) or down (floor) the score.",
 )
 dedup = click.option(
     "-d",

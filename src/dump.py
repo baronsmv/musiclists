@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import math
+import pprint
 from collections.abc import Iterator
 from datetime import timedelta
 from itertools import count
@@ -19,6 +21,7 @@ def until(
     score_key: str,
     min_score: int | float,
     max_score: int | float,
+    ceil: bool = defaults.CEIL,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
@@ -32,6 +35,7 @@ def until(
             for album in function(
                 a,
                 b,
+                ceil=ceil,
                 quiet=quiet,
                 verbose=verbose,
                 debug=debug,
@@ -72,14 +76,21 @@ def aoty(
     ratings_subpage: str = "ratings/user-highest-rated",
     list_tags: dict = aoty_tags.album_list,
     album_tags: dict = aoty_tags.album,
+    ceil: bool = defaults.CEIL,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator[dict[str, str | int | float | list | dict | timedelta]]:
+    logger = logging.logger(aoty)
+    message = f"- Downloading {album_type}, page {page_number}..."
+    if debug:
+        logger.info(message + f", ceil = {ceil}")
     if not quiet:
-        print(f"- Downloading {album_type}, page {page_number}...")
+        print(message)
     album = dict()
     url = f"{base_page}/{ratings_subpage}/{album_type}/all/{page_number}/"
+    if debug:
+        logger.debug(f"URL is {url}")
     albums_list = get_data.table(
         url=url,
         id="centerContent",
@@ -105,23 +116,29 @@ def aoty(
         )
         if not album["total_length"]:
             del album["total_length"]
+        if debug:
+            logger.debug(pprint.pformat(album))
         yield album.copy()
         album.clear()
 
 
-def progarchives(
+def prog(
     genre: tuple[str, int],
     album_type: tuple[str, int],
     base_page: str = "https://www.progarchives.com/",
     list_tags: dict = prog_tags.album_list,
     album_tags: dict = prog_tags.album,
-    no_tracklist: bool = defaults.NO_TRACKLIST,
+    ceil: bool = defaults.CEIL,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator[dict[str, str | int | float | list | dict | timedelta]]:
+    logger = logging.logger(prog)
+    message = f"- Downloading {genre[0]}, type {album_type[0]}..."
+    if debug:
+        logger.info(message)
     if not quiet:
-        print(f"- Downloading {genre[0]}, type {album_type[0]}...")
+        print(message)
     album = dict()
     url = (
         base_page
@@ -130,6 +147,8 @@ def progarchives(
         + f"&salbumtypes={album_type[1]}"
         + "&smaxresults=250#list"
     )
+    if debug:
+        logger.debug(f"URL is {url}")
     albums_list = get_data.table(
         url=url, tag="table", number=1, encoding="latin1"
     )
@@ -142,13 +161,17 @@ def progarchives(
         album["internal_id"] = int(tuple(album_url.split("?id="))[-1])
         album_data = get_data.table(url=album_url, tag="td", encoding="latin1")
         get_data.tag(element=album_data, data_struct=album, tags=album_tags)
+        album["user_score"] = (math.ceil if ceil else math.floor)(
+            album["qwr"] * 20
+        )
         album["score_distribution"] = get_data.prog_distribution_score(
             album_url
         )
-        if not no_tracklist:
-            album["tracks"], album["total_length"] = get_data.prog_tracks(
-                album_url
-            )
+        album["tracks"], album["total_length"] = get_data.prog_tracks(
+            album_url
+        )
+        if debug:
+            logger.debug(pprint.pformat(album))
         yield album.copy()
         album.clear()
 

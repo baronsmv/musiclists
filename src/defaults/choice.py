@@ -36,7 +36,6 @@ COLUMN_CHOICES = {
     "title": "Album",
     "year": "Year",
     "type": "Type",
-    "genre": "Genre",
     "position": "Pos.",
     "user_score": "Score",
     "user_ratings": "Ratings",

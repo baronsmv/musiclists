@@ -12,7 +12,6 @@ def aoty(
     types: tuple,
     min_score: int,
     max_score: int,
-    no_tracklist: bool,
     quiet: bool,
     verbose: bool,
     debug: bool,
@@ -29,7 +28,6 @@ def aoty(
         min_score=min_score,
         max_score=max_score,
         types=AOTY_TYPES if "all" in types else types,
-        no_tracklist=no_tracklist,
         quiet=quiet,
         verbose=verbose,
         debug=debug,
@@ -39,9 +37,9 @@ def aoty(
 @de.prog
 def prog(
     types: tuple,
-    min_score: float,
-    max_score: float,
-    no_tracklist: bool,
+    min_score: int,
+    max_score: int,
+    ceil: bool,
     quiet: bool,
     verbose: bool,
     debug: bool,
@@ -53,12 +51,18 @@ def prog(
     `min_score` and `max_score`. The albums are fetched starting from the one
     with a score closest to `max_score` and will stop once an album with a score
     below `min_score` is encountered.
+
+    Note: To ensure compatibility with other lists, the QWR scores from
+    ProgArchives, which are originally in a decimal format ranging from 0 to 5,
+    are converted to integers and saved into `user_score`, with a range from 0
+    to 100, with rounding based on the `ceil` parameter (rounding either up or
+    down).
     """
     download.prog(
         min_score=min_score,
         max_score=max_score,
         types=tuple(PROG_TYPES.keys()) if "all" in types else types,
-        no_tracklist=no_tracklist,
+        ceil=ceil,
         quiet=quiet,
         verbose=verbose,
         debug=debug,
