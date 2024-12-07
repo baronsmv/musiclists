@@ -7,11 +7,11 @@ from datetime import timedelta
 from itertools import count
 from pathlib import Path
 
+from src.attributes import aoty as aoty_tags, prog as prog_tags
 from src.debug import logging
 from src.defaults import defaults
 from src.get import data as get_data, album as get_album, file as get_file
 from src.get.file import contains_dirs
-from src.html_tags import aoty as aoty_tags, prog as prog_tags
 
 
 def until(
@@ -55,16 +55,7 @@ def until(
                     break
                 if min_score <= score <= max_score:
                     if verbose:
-                        print(
-                            "  - "
-                            + (
-                                f"{score:.4f}"
-                                if isinstance(score, float)
-                                else f"{score}"
-                            )
-                            + ": "
-                            + get_album.repr(album)
-                        )
+                        print(f"   {score}: {get_album.repr(album)}")
                     album["id"] = get_album.id(album)
                     yield album
 
@@ -101,7 +92,7 @@ def aoty(
         album["internal_id"] = -1
         album["type"] = album_type
         album["page_number"] = page_number
-        get_data.tag(element=data, data_struct=album, tags=list_tags)
+        get_data.data(element=data, data_struct=album, tags=list_tags)
         album_url = base_page + str(album["album_url"])
         album["internal_id"] = int(
             tuple(album_url.split("album/", 1))[-1].split("-", 1)[0]
@@ -109,7 +100,7 @@ def aoty(
         album_data = get_data.table(
             url=album_url, id="centerContent", debug=debug
         )
-        get_data.tag(element=album_data, data_struct=album, tags=album_tags)
+        get_data.data(element=album_data, data_struct=album, tags=album_tags)
         album["tracks"], album["total_length"] = get_data.aoty_tracks(
             url=album_url,
             debug=debug,
@@ -136,7 +127,7 @@ def prog(
     logger = logging.logger(prog)
     message = f"- Downloading {genre[0]}, type {album_type[0]}..."
     if debug:
-        logger.info(message)
+        logger.info(message + f", ceil = {ceil}")
     if not quiet:
         print(message)
     album = dict()
@@ -156,11 +147,11 @@ def prog(
         album["id"] = str()
         album["type"] = album_type[0]
         album["genre"] = genre[0]
-        get_data.tag(element=data, data_struct=album, tags=list_tags)
+        get_data.data(element=data, data_struct=album, tags=list_tags)
         album_url = base_page + str(album["album_url"])
         album["internal_id"] = int(tuple(album_url.split("?id="))[-1])
         album_data = get_data.table(url=album_url, tag="td", encoding="latin1")
-        get_data.tag(element=album_data, data_struct=album, tags=album_tags)
+        get_data.data(element=album_data, data_struct=album, tags=album_tags)
         album["user_score"] = (math.ceil if ceil else math.floor)(
             album["qwr"] * 20
         )

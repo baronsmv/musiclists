@@ -13,7 +13,7 @@ class AOTYTestCase(unittest.TestCase):
         f"AOTY page {page_number} of type {album_type} cannot be retrieved."
     )
     expected_albums = 25
-    member = "title"
+    member = "album"
 
     print("Retrieving AOTY albums...")
     albums = tuple(

@@ -33,7 +33,7 @@ COLUMN_CHOICES = {
     "id": "ID",
     "internal_id": "Int. ID",
     "artist": "Artist",
-    "title": "Album",
+    "album": "Album",
     "year": "Year",
     "type": "Type",
     "position": "Pos.",

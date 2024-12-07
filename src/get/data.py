@@ -6,9 +6,20 @@ from urllib.request import Request, urlopen
 
 from bs4 import BeautifulSoup
 
+from src.attributes import aoty as aoty_tags
 from src.debug import logging
 from src.defaults import defaults
-from src.html_tags import aoty as aoty_tags
+
+
+def typed(in_: str | list, sep: str = ", ") -> str | int | float:
+    in_ = sep.join(in_) if not isinstance(in_, str) else in_
+    return (
+        in_
+        if not in_.replace(".", "", 1).isdigit()
+        else int(in_)
+        if in_.isdigit()
+        else float(in_)
+    )
 
 
 def table(
@@ -77,7 +88,7 @@ def find_tag(element, values):
         return element
 
 
-def tag(
+def data(
     element,
     data_struct: dict,
     tags: dict,
@@ -91,7 +102,7 @@ def tag(
             d = d.get(v["key"])
         if d and "contains" in v and isinstance(v["contains"], dict):
             data_struct[k] = None
-            tag(element=d, data_struct=data_struct, tags=dict(v["contains"]))
+            data(element=d, data_struct=data_struct, tags=dict(v["contains"]))
         if d and "expand" in v:
             if "expand_url" in v:
                 d = list(
@@ -154,7 +165,7 @@ def aoty_tracks(
     disc = str()
     for t in tracklist.find_all("tr"):
         track = dict()  # type: dict[str, str | int | list | timedelta]
-        tag(
+        data(
             element=t,
             data_struct=track,
             tags=tags,
@@ -188,7 +199,7 @@ def aoty_tracks(
                 f"Returning successfully simplified tracklist for {url}"
             )
         return [
-            {"title": li.string}
+            {"album": li.string}
             for li in tracklist.find("ol", recursive=True).find_all("li")
         ], total_length
     else:

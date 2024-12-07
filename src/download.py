@@ -5,7 +5,10 @@ from datetime import timedelta
 from pathlib import Path
 from textwrap import dedent
 
+import mutagen
+
 from src import dump, save
+from src.attributes.local_dirs import album as album_attr, track as track_attr
 from src.defaults import defaults
 from src.defaults.download import (
     AOTY_TYPES,
@@ -16,6 +19,7 @@ from src.defaults.download import (
     PROG_MAX_SCORE,
 )
 from src.get import data as get_data
+from src.get.album import id as get_id
 
 
 def __download__(
@@ -38,11 +42,13 @@ def __download__(
                 f"""
             Download process started:
             - Types: {(
+                    type1 if isinstance(type1, int) else
                     tuple(t[0] for t in type1)
                     if isinstance(type1[0], tuple)
                     else type1
                 )}
             - Types: {(
+                    type2 if isinstance(type2, int) else
                     tuple(t[0] for t in type2)
                     if isinstance(type2[0], tuple)
                     else type2
@@ -137,64 +143,44 @@ def prog(
 
 def dirs(
     source: Path,
-    path: Path,
-    use_exiftool: bool = True,
+    suffixes: tuple = ("opus", "mp3", "m4a", "flac"),
+    album_data: dict = album_attr,
+    track_data: dict = track_attr,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ):
-    """
+    albums = []
+    album = {}
     if not quiet:
-        print(f"Registering music from '{source.name}'")
-    album = dict()
-    if use_exiftool:
-        album_tags = {
-            "album": "Album",
-            "artist": "Albumartist",
-            "total_tracks": "Totaltracks",
-            "total_discs": "Totaldiscs",
-            "directory": "Directory",
-            "original_year": "Originalyear",
-            "label": "Label",
-            "catalog_number": "Catalognumber",
-        }
-        track_tags = {
-            "disc_number": "Discnumber",
-            "track_number": "TrackNumber",
-            "title": "Title",
-            "artist": "Artist",
-            "file_size": "FileSize",
-            "file_type": "FileType",
-        }
-        suffixes = ("*.opus", "*.mp3", "*.m4a", "*.flac")
-        with ExifToolHelper(common_args=None) as et:
-            for d in dump.dirs(source):
-                track_files = tuple(d.glob(s) for s in suffixes)
-                metadata = et.get_metadata(track_files[0])[0]
-                for k, v in album_tags.items():
-                    album[k] = metadata[v]
-                album["tracks"] = [
-                    {
-                        k: et.get_metadata(t)[0][v]
-                        for k, v in track_tags.items()
-                    }
-                    for t in track_files
-                ]
-                print(album)
-                exit()
-    else:
-        data = list()
-        album = dict()
-        for d in dump.dirs(source):
-            album["artist"] = d.parent.name.strip()
-            if d.name[-5:-1].isdigit():
-                album["year"] = d.name[-5:-1]
-                album["title"] = d.name[:-7].strip()
-            else:
-                album["title"] = d.name.replace(" ()", "").strip()
-        album["id"] = get_album.id(album)
-        data.append(album.copy())
-    DataFrame(data).serialize(path)
-    if not quiet:
-        print(f"\n{len(data)} albums registered.")
-    """
+        print(f"Registering music from '{source}'")
+    for d in dump.dirs(source):
+        print(d)
+        track_files = tuple(
+            mutagen.File(f) for s in suffixes for f in d.glob(f"*.{s}")
+        )
+        if len(track_files) == 0:
+            continue
+        print(track_files)
+        album["id"] = ""
+        for k, v in album_data.items():
+            tag = track_files[0].get(v)
+            print(d, k, v, tag)
+            if not tag:
+                continue
+            album[k] = get_data.typed(tag)
+        album["tracks"] = []
+        for t in track_files:
+            album["tracks"].append(
+                {
+                    k: get_data.typed(t[v])
+                    for k, v in track_data.items()
+                    if v in t
+                }
+            )
+        album["id"] = get_id(album)
+        print(album)
+        albums.append(album.copy())
+        album.clear()
+    print(albums)
+    save.as_df(albums, "dirs", "download")

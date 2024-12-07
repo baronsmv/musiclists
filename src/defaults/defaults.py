@@ -19,7 +19,7 @@ TRACK_MIN_SCORE = None
 MAX_RATINGS = None
 MIN_RATINGS = None
 
-KEY_LENGTH = 16
+KEY_LENGTH = 22
 KEY_SEP = "-"
 
 AUTO_FIELD = "possible"
@@ -27,21 +27,21 @@ VERIFIED_FIELD = "verified"
 DATA_SUFFIX = "polars"
 TEXT_SUFFIX = "txt"
 
-MIN_LEVEL = 1
-MAX_LEVEL = 4
+MIN_LEVEL = 0
+MAX_LEVEL = 5
 
 ALBUM_NUM_FILTER = {
     "user_score": (95, 100),
 }
 ALBUM_SORT_BY = {
     "artist": False,
-    "title": False,
+    "album": False,
     "user_score": True,
 }
 ALBUM_SELECT = {
     "user_score": "SC",
     "artist": "Artist",
-    "title": "Album",
+    "album": "Album",
     "year": "Year",
 }
 

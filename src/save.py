@@ -50,7 +50,7 @@ def as_df(
             with __pl_config__():
                 logger.warning(
                     "Duplicated ID in the DataFrame:\n"
-                    + str(duplicates.select("id", "artist", "title", "year"))
+                    + str(duplicates.select("id", "artist", "album", "year"))
                     + "\nConsider increasing KEY_LENGTH in defaults (current one: "
                     + str(defaults.KEY_LENGTH)
                     + ")."

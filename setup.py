@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import setuptools
 
 setuptools.setup(
@@ -9,10 +11,8 @@ setuptools.setup(
         "bs4",
         "click",
         "click_help_colors",
+        "mutagen",
         "polars",
-        "pathlib",
-        "pyexiftool",
-        "python-dateutil",
     ),
     entry_points={
         "console_scripts": [

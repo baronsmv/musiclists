@@ -2,7 +2,7 @@
 
 all_tags = (
     "position",
-    "title",
+    "album",
     "album_url",
     "cover_url",
     "artist",
@@ -37,7 +37,7 @@ album_list = {
         },
         "type": "int",
     },
-    "title": {
+    "album": {
         "tag": "h2",
         "class": "albumListTitle",
         "subtag": {
@@ -53,7 +53,7 @@ album_list = {
     },
 }
 album = {
-    "title": {
+    "album": {
         "tag": "div",
         "class": "albumTitle",
         "subtag": {

@@ -27,7 +27,7 @@ def copy(
     ----------
     data:
         Path to the JSON file, which contains a dictionary of album
-        objects, each with at least the fields: artist, title, and year.
+        objects, each with at least the fields: artist, album, and year.
     source:
         Path to the source directory containing the albums.
     destination:

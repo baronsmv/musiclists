@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
+
 import src.decorators.commands as de
 from src import compare, download, export
 from src.decorators.decorators import cli
@@ -238,12 +240,12 @@ def tracks(
     Export a list of tracks to a text file.
 
     This function processes a list of tracks, filtering based on track scores
-    (`min_score`, `max_score`),album scores (`min_album_score`,
+    (`min_score`, `max_score`), album scores (`min_album_score`,
     `max_album_score`), ratings count (`min_ratings`, `max_ratings`), and the
     selected columns (`columns`).
 
-    The resulting list is then sorted and
-    optionally formatted as Markdown before being exported to a text file.
+    The resulting list is then sorted and optionally formatted as Markdown
+    before being exported to a text file.
     """
     export.tracks(
         field="aoty",
@@ -259,10 +261,9 @@ def tracks(
     )
 
 
-'''
 @de.dirs
 def dirs(
-    source_path: Path,
+    path: Path,
     quiet: bool,
     verbose: bool,
     debug: bool,
@@ -277,14 +278,15 @@ def dirs(
     The function provides detailed logging if `verbose` is enabled, and
     additional debugging information if `debug` is turned on.
     """
-    write.dirs(
-        source=source_path,
+    download.dirs(
+        source=path,
         quiet=quiet,
         verbose=verbose,
         debug=debug,
     )
 
 
+'''
 @de.wanted
 def wanted(
     path: Path,

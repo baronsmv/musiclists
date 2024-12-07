@@ -36,6 +36,14 @@ def prog(func):
     )
 
 
+def dirs(func):
+    return command(
+        func,
+        (data.path(),),
+        groups.download,
+    )
+
+
 def duplicates(func):
     return command(
         func,

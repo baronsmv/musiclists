@@ -2,7 +2,7 @@
 
 all_tags = (
     "position",
-    "title",
+    "album",
     "album_url",
     "cover_url",
     "artist",
@@ -22,7 +22,7 @@ album_list = {
         },
         "type": "int",
     },
-    "title": {
+    "album": {
         "tag": "a",
         "number": 0,
         "contains": {

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from pathlib import Path
+
 import click
 
 import src.defaults.choice
@@ -41,3 +43,19 @@ def source(
             show_default=True,
             help=help_message,
         )
+
+
+def path(
+    name: str = "path",
+    exists: bool = True,
+    is_file: bool = False,
+):
+    return click.argument(
+        name,
+        type=click.Path(
+            exists=exists,
+            file_okay=is_file,
+            dir_okay=not is_file,
+            path_type=Path,
+        ),
+    )

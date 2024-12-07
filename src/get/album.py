@@ -22,7 +22,7 @@ def id(
             print(f"ID not identified for {data}.")
             return str()
     if isinstance(data, dict):
-        return id([data.get(i) for i in ("artist", "year", "title")])
+        return id([data.get(i) for i in ("artist", "year", "album")])
     result = str()
     sep_length = len(sep)
     for d in data:
@@ -46,17 +46,13 @@ def repr(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> str:
-    try:
-        return (
-            data.get("artist", str())
-            + sep
-            + data.get("title", str())
-            + (
-                " (" + str(data.get("year")) + ")"
-                if include_year and "year" in data
-                else ""
-            )
+    return (
+        data.get("artist", "")
+        + sep
+        + data.get("album", "")
+        + (
+            " (" + str(data.get("year")) + ")"
+            if include_year and "year" in data
+            else ""
         )
-    except Exception as err:
-        print("Error while printing path:", data, repr(err), sep="\n")
-    return str()
+    )

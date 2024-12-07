@@ -10,7 +10,7 @@ def duplicates(
     search,
     data_1: str,
     data_2: str,
-    columns: list | tuple = ("title", "artist", "year"),
+    columns: list | tuple = ("album", "artist", "year"),
     min_rate: int | float = 0.6,
     only_highest_match: bool = defaults.ONLY_HIGHEST_MATCH,
     num_diff: float = 0.25,
@@ -53,7 +53,7 @@ def duplicates(
                 {
                     f"{c}-{d}": m[i][c]
                     for i, d in enumerate((data_1, data_2))
-                    for c in ("id", "internal_id", "artist", "title", "year")
+                    for c in ("id", "internal_id", "artist", "album", "year")
                 }
             )
         )
