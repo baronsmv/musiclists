@@ -13,11 +13,6 @@ setuptools.setup(
         "click_help_colors",
         "mutagen",
         "polars",
-<<<<<<< HEAD
-=======
-        "pathlib",
-        "pyexiftool",
->>>>>>> origin/main
     ),
     entry_points={
         "console_scripts": [
