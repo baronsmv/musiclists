@@ -2,6 +2,7 @@
 
 import polars as pl
 
+
 from src import load
 from src.debug import logging
 from src.defaults import defaults
