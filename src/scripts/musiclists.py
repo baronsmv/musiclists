@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 
-from pathlib import Path
-
 import src.decorators.commands as de
-from src import compare, download, export
+from src import download
+from src.classes.MusicList import MusicList
 from src.decorators.decorators import cli
-from src.defaults.choice import COLUMN_CHOICES
+from src.defaults.choice import (
+    ALBUM_COLUMNS,
+    TRACK_COLUMNS,
+    ALBUM_SORT_BY,
+    TRACK_SORT_BY,
+)
 from src.defaults.download import AOTY_TYPES, PROG_TYPES
 
 
@@ -94,17 +98,20 @@ def duplicates(
     within `data_1` and then for duplicates of that entry in `data_2`.
     Otherwise, it compares all entries in `data_1` against `data_2`.
     """
-    compare.duplicates(
-        search=search,
-        data_1=data_1,
-        data_2=data_2,
+    ml_1 = MusicList().load(data_1)
+    ml_2 = MusicList().load(data_2)
+    if search:
+        ml_1 = ml_1.search_album(
+            " ".join(search), columns, max_results, in_list=True
+        )
+        if ml_1 is None:
+            return
+    ml_1.find_duplicates_with(
+        ml_2,
+        save=True,
+        min_rate=0 if search else min_rate,
         only_highest_match=highest,
-        columns=columns,
-        min_rate=min_rate,
-        results=max_results,
-        quiet=quiet,
-        verbose=verbose,
-        debug=debug,
+        max_results=max_results,
     )
 
 
@@ -131,18 +138,13 @@ def merge(
     specified `dedup_key`, in addition to performing the standard deduplication
     by `key`.
     """
-    compare.merge(
-        data_1=data_1,
-        data_2=data_2,
-        columns=COLUMN_CHOICES
-        if "all" in columns
-        else {k: COLUMN_CHOICES[k] for k in columns},
+    MusicList().load(data_1).merge_with(
+        other=MusicList().load(data_2),
+        columns=tuple(ALBUM_COLUMNS.keys() if "all" in columns else columns),
+        save=True,
         key=key,
         dedup=dedup,
         dedup_key=dedup_key,
-        quiet=quiet,
-        verbose=verbose,
-        debug=debug,
     )
 
 
@@ -169,18 +171,13 @@ def diff(
     both lists (based on their `dedup_key`), in addition to calculating the
     difference between the two lists using the specified `key`.
     """
-    compare.diff(
-        data_1=data_1,
-        data_2=data_2,
-        columns=COLUMN_CHOICES
-        if "all" in columns
-        else {k: COLUMN_CHOICES[k] for k in columns},
+    MusicList().load(data_1).diff_with(
+        other=MusicList().load(data_2),
+        columns=tuple(ALBUM_COLUMNS.keys() if "all" in columns else columns),
+        save=True,
         key=key,
         dedup=dedup,
         dedup_key=dedup_key,
-        quiet=quiet,
-        verbose=verbose,
-        debug=debug,
     )
 
 
@@ -193,6 +190,7 @@ def albums(
     min_ratings: int,
     max_ratings: int,
     columns: tuple,
+    sort_by: tuple,
     quiet: bool,
     verbose: bool,
     debug: bool,
@@ -207,24 +205,27 @@ def albums(
     The resulting list is then sorted and optionally formatted as Markdown
     before being exported to a text file.
     """
-    export.albums(
-        field=data,
+    MusicList().load(data).contextualize(
         num_filter={
             "user_score": (min_score, max_score),
             "user_ratings": (min_ratings, max_ratings),
         },
-        select=COLUMN_CHOICES
-        if "all" in columns
-        else {k: COLUMN_CHOICES[k] for k in columns},
-        markdown=markdown,
-        quiet=quiet,
-        verbose=verbose,
-        debug=debug,
+        select_rename=(
+            ALBUM_COLUMNS
+            if "all" in columns
+            else {k: ALBUM_COLUMNS[k] for k in columns}
+        ),
+        sort_by={k: ALBUM_SORT_BY[k] for k in sort_by},
+    ).table(
+        save=True,
+        as_md=markdown,
+        name_postfix="_albums",
     )
 
 
 @de.tracks
 def tracks(
+    data: str,
     markdown: bool,
     min_score: int,
     max_score: int,
@@ -232,6 +233,8 @@ def tracks(
     max_album_score: int,
     min_ratings: int,
     max_ratings: int,
+    columns: tuple,
+    sort_by: tuple,
     quiet: bool,
     verbose: bool,
     debug: bool,
@@ -247,20 +250,26 @@ def tracks(
     The resulting list is then sorted and optionally formatted as Markdown
     before being exported to a text file.
     """
-    export.tracks(
-        field="aoty",
+    MusicList().load(data).tracks().contextualize(
         num_filter={
             "track_score": (min_score, max_score),
-            "track_ratings": (min_ratings, max_ratings),
             "user_score": (min_album_score, max_album_score),
+            "track_ratings": (min_ratings, max_ratings),
         },
-        markdown=markdown,
-        quiet=quiet,
-        verbose=verbose,
-        debug=debug,
+        select_rename=(
+            TRACK_COLUMNS
+            if "all" in columns
+            else {k: TRACK_COLUMNS[k] for k in columns}
+        ),
+        sort_by={k: TRACK_SORT_BY[k] for k in sort_by},
+    ).table(
+        save=True,
+        as_md=markdown,
+        name_postfix="_tracks",
     )
 
 
+'''
 @de.dirs
 def dirs(
     path: Path,
@@ -286,7 +295,6 @@ def dirs(
     )
 
 
-'''
 @de.wanted
 def wanted(
     path: Path,

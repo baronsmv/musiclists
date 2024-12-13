@@ -4,7 +4,7 @@ from pathlib import Path
 
 import click
 
-import src.defaults.choice
+from src.defaults.choice import DATA_CHOICE
 
 
 def source(
@@ -23,11 +23,11 @@ def source(
             f"-{letter}",
             f"--{parameter}",
             type=click.Choice(
-                tuple(src.defaults.choice.DATA_CHOICE.keys()),
+                tuple(DATA_CHOICE.keys()),
                 case_sensitive=False,
             ),
             show_choices=True,
-            default=tuple(src.defaults.choice.DATA_CHOICE.keys())[default],
+            default=tuple(DATA_CHOICE.keys())[default],
             show_default=True,
             help=help_message,
         )
@@ -35,11 +35,11 @@ def source(
         return click.option(
             f"--{parameter}",
             type=click.Choice(
-                tuple(src.defaults.choice.DATA_CHOICE.keys()),
+                tuple(DATA_CHOICE.keys()),
                 case_sensitive=False,
             ),
             show_choices=True,
-            default=tuple(src.defaults.choice.DATA_CHOICE.keys())[default],
+            default=tuple(DATA_CHOICE.keys())[default],
             show_default=True,
             help=help_message,
         )

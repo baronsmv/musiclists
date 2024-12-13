@@ -7,8 +7,10 @@ from textwrap import dedent
 
 import mutagen
 
-from src import dump, save
+from src import dump
 from src.attributes.local_dirs import album as album_attr, track as track_attr
+from src.classes.Album import Album
+from src.classes.MusicList import MusicList
 from src.defaults import defaults
 from src.defaults.download import (
     AOTY_TYPES,
@@ -19,7 +21,6 @@ from src.defaults.download import (
     PROG_MAX_SCORE,
 )
 from src.get import data as get_data
-from src.get.album import id as get_id
 
 
 def __download__(
@@ -85,7 +86,7 @@ def __download__(
     else:
         for album in until:
             data.append(album)
-    save.as_df(data, field, location="download")
+    MusicList(data).save(f"download.{field}")
 
 
 def aoty(
@@ -151,7 +152,7 @@ def dirs(
     debug: bool = defaults.DEBUG,
 ):
     albums = []
-    album = {}
+    album = Album()
     if not quiet:
         print(f"Registering music from '{source}'")
     for d in dump.dirs(source):
@@ -168,19 +169,15 @@ def dirs(
             print(d, k, v, tag)
             if not tag:
                 continue
-            album[k] = get_data.typed(tag)
+            album[k] = tag
         album["tracks"] = []
         for t in track_files:
             album["tracks"].append(
-                {
-                    k: get_data.typed(t[v])
-                    for k, v in track_data.items()
-                    if v in t
-                }
+                {k: t[v] for k, v in track_data.items() if v in t}
             )
-        album["id"] = get_id(album)
+        album.compute_id()
         print(album)
         albums.append(album.copy())
         album.clear()
     print(albums)
-    save.as_df(albums, "dirs", "download")
+    MusicList(albums).save("download.dirs")

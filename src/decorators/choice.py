@@ -7,12 +7,14 @@ from src.defaults import choice, download
 
 def __choice__(
     option: str,
-    choices: tuple,
+    choices: tuple | dict,
     help_message: str,
     all_option: bool,
     default: int | tuple,
     letter: str | None,
 ):
+    if isinstance(choices, dict):
+        choices = tuple(choices.keys())
     if all_option:
         choices = ("all",) + choices
     multiple = True if isinstance(default, tuple) or all_option else False
@@ -63,7 +65,7 @@ def aoty(
 def prog(
     option: str = "types",
     letter: str | None = "t",
-    choices: tuple = tuple(download.PROG_TYPES.keys()),
+    choices: tuple = download.PROG_TYPES,
     help_message: str = "Types of ProgArchives albums to download.",
     all_option: bool = True,
     default: int | tuple = (0,),
@@ -81,15 +83,15 @@ def prog(
 def columns(
     option: str = "columns",
     letter: str | None = None,
-    choices: tuple = tuple(choice.COLUMN_CHOICES.keys()),
-    help_message: str = "Columns to consider for the process.",
+    choices: tuple = choice.ALBUM_COLUMNS,
+    help: str = "Columns to consider for the process.",
     all_option: bool = True,
     default: int | tuple = (3, 4, 5),
 ):
     return __choice__(
         option=option,
         choices=choices,
-        help_message=help_message,
+        help_message=help,
         all_option=all_option,
         default=default,
         letter=letter,

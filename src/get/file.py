@@ -2,35 +2,18 @@
 
 from pathlib import Path
 
+from src.debug import logging
 from src.defaults.choice import ALL_CHOICE
 from src.defaults.defaults import DATA_SUFFIX
-from src.defaults.path import DIRS, LOCATION, VALID_LOCATION
+from src.defaults.path import DIRS, VALID_LOCATION
 
 
-def name_exists(
+def get_path(
     name: str,
-    location: LOCATION,
-) -> tuple[str, bool]:
-    prefix = location + "-" if location != "download" else ""
-    if "-" in name:
-        names = [name, "-".join(name.split("-")[::-1])]
-        names.sort()
-        if (prefix + names[1]) in ALL_CHOICE:
-            return names[1], True
-        return names[0], (prefix + names[0]) in ALL_CHOICE
-    return name, (prefix + name) in ALL_CHOICE
-
-
-def path(
-    name: str,
-    location: LOCATION,
-    suffix: str | None = DATA_SUFFIX,
+    location: str,
+    suffix: str | None = None,
 ) -> Path:
-    if location not in VALID_LOCATION:
-        raise ValueError(
-            f"`path_type` parameter must be one of {VALID_LOCATION}"
-        )
-    path_name = name + ("." + suffix if suffix else "")
+    path_name = name + "." + (suffix if suffix else DATA_SUFFIX)
     path_dir = DIRS[location]
     return Path(path_dir / path_name)
 
@@ -51,3 +34,32 @@ def contains_dirs(dir_path: Path):
         if c.is_dir():
             return True
     return False
+
+
+def source(
+    name: str,
+) -> tuple[str, str, bool]:
+    logger = logging.logger(source)
+    new_name = name.split(".")
+    if len(new_name) == 1:
+        new_name = new_name[0]
+        location = "download"
+        prefix = ""
+    elif len(new_name) == 2:
+        location, new_name = new_name
+        if location not in VALID_LOCATION:
+            raise ValueError(
+                f"`{location}` parameter must be one of {VALID_LOCATION}"
+            )
+        prefix = f"{location}."
+    else:
+        logger.error(
+            f"{name} is empty or has more than two fields separated by a dot."
+        )
+        exit(1)
+    if f"{prefix}{new_name}" in ALL_CHOICE:
+        return location, new_name, True
+    if "-" in new_name:
+        ord_name = "-".join(sorted(new_name.split("-")))
+        return location, ord_name, f"{prefix}{ord_name}" in ALL_CHOICE
+    return location, new_name, f"{prefix}{new_name}" in ALL_CHOICE

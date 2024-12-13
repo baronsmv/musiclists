@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 
-import click
+from click import group
 from click_help_colors import HelpColorsGroup
 
-import src.defaults.click
+from src.defaults.click import (
+    CLICK_CONTEXT_SETTINGS,
+    HEADERS_COLOR,
+    OPTIONS_COLOR,
+)
 
-main_group = click.group(
-    context_settings=src.defaults.click.CLICK_CONTEXT_SETTINGS,
+main_group = group(
+    context_settings=CLICK_CONTEXT_SETTINGS,
     cls=HelpColorsGroup,
-    help_headers_color=src.defaults.click.HEADERS_COLOR,
-    help_options_color=src.defaults.click.OPTIONS_COLOR,
+    help_headers_color=HEADERS_COLOR,
+    help_options_color=OPTIONS_COLOR,
 )
 
 
@@ -36,33 +40,33 @@ def cli() -> None:
     pass
 
 
-sub_group = cli.group(
-    context_settings=src.defaults.click.CLICK_CONTEXT_SETTINGS,
+cli_subgroup = cli.group(
+    context_settings=CLICK_CONTEXT_SETTINGS,
     cls=HelpColorsGroup,
-    help_headers_color=src.defaults.click.HEADERS_COLOR,
-    help_options_color=src.defaults.click.OPTIONS_COLOR,
+    help_headers_color=HEADERS_COLOR,
+    help_options_color=OPTIONS_COLOR,
 )
 
 
-@sub_group
+@cli_subgroup
 def download() -> None:
     """Download lists of top albums from different music databases."""
     pass
 
 
-@sub_group
+@cli_subgroup
 def duplicates() -> None:
     """Manage album duplicates."""
     pass
 
 
-@sub_group
+@cli_subgroup
 def transform() -> None:
     """Transform, merge and compare album lists."""
     pass
 
 
-@sub_group
+@cli_subgroup
 def export() -> None:
     """Export album lists to other formats."""
     pass

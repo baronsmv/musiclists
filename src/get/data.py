@@ -1,25 +1,16 @@
 #!/usr/bin/env python3
 
 import re
+from collections import UserDict
 from datetime import timedelta
 from urllib.request import Request, urlopen
 
 from bs4 import BeautifulSoup
 
 from src.attributes import aoty as aoty_tags
+from src.classes.Album import Album
 from src.debug import logging
 from src.defaults import defaults
-
-
-def typed(in_: str | list, sep: str = ", ") -> str | int | float:
-    in_ = sep.join(in_) if not isinstance(in_, str) else in_
-    return (
-        in_
-        if not in_.replace(".", "", 1).isdigit()
-        else int(in_)
-        if in_.isdigit()
-        else float(in_)
-    )
 
 
 def table(
@@ -90,7 +81,7 @@ def find_tag(element, values):
 
 def data(
     element,
-    data_struct: dict,
+    data_struct: Album | dict,
     tags: dict,
     include_none: bool = defaults.INCLUDE_NONE,
 ) -> None:
@@ -148,7 +139,7 @@ def aoty_tracks(
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
-) -> tuple[list[dict[str, str | int | list | timedelta]], timedelta]:
+) -> tuple[list[UserDict | dict], timedelta]:
     logger = logging.logger(aoty_tracks)
     if debug:
         logger.info(f"Initiating tracklist scrapping of {url}")
@@ -160,11 +151,11 @@ def aoty_tracks(
         parser=parser,
         debug=debug,
     )
-    tracks = list()  # type: list[dict[str, str | int | list | timedelta]]
+    tracks = []  # type: list[dict]
+    track = {}
     total_length = timedelta()
-    disc = str()
+    disc = ""
     for t in tracklist.find_all("tr"):
-        track = dict()  # type: dict[str, str | int | list | timedelta]
         data(
             element=t,
             data_struct=track,
@@ -193,14 +184,14 @@ def aoty_tracks(
         if debug:
             logger.info(f"Returning successfully tracklist for {url}")
         return tracks, total_length
-    elif tracklist.find("ol", recursive=True).find_all("li"):
+    elif simple_tl := tracklist.find("ol", recursive=True).find_all("li"):
         if debug:
             logger.info(
                 f"Returning successfully simplified tracklist for {url}"
             )
         return [
-            {"album": li.string}
-            for li in tracklist.find("ol", recursive=True).find_all("li")
+            {"track_number": num, "track_title": li.string}
+            for num, li in enumerate(simple_tl, start=1)
         ], total_length
     else:
         logger.error(f"Didn't find any tracklist for {url}")

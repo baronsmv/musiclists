@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
-from typing import Literal, Tuple, get_args
 
 CURRENT_DIR = Path(__file__).parent
 SRC_DIR = CURRENT_DIR.parent
@@ -21,8 +20,7 @@ DIRS = {
     "diff": DIFF_DIR,
 }  # type: dict[str: Path]
 
-LOCATION = Literal["download", "output", "dedup", "merge", "diff"]
-VALID_LOCATION: Tuple[LOCATION, ...] = get_args(LOCATION)
+VALID_LOCATION = {"download", "output", "dedup", "merge", "diff"}
 
 for d in DIRS.values():
     d.mkdir(exist_ok=True)

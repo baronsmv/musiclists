@@ -8,9 +8,10 @@ from itertools import count
 from pathlib import Path
 
 from src.attributes import aoty as aoty_tags, prog as prog_tags
+from src.classes.Album import Album
 from src.debug import logging
 from src.defaults import defaults
-from src.get import data as get_data, album as get_album, file as get_file
+from src.get import data as get_data, file as get_file
 from src.get.file import contains_dirs
 
 
@@ -40,6 +41,8 @@ def until(
                 verbose=verbose,
                 debug=debug,
             ):
+                album = Album(album)
+                album.compute_id()
                 score = album.get(score_key)
                 if not score:
                     logger.error(
@@ -55,9 +58,8 @@ def until(
                     break
                 if min_score <= score <= max_score:
                     if verbose:
-                        print(f"   {score}: {get_album.repr(album)}")
-                    album["id"] = get_album.id(album)
-                    yield album
+                        print(f"   {score}: {album}")
+                    yield dict(album)
 
 
 def aoty(
@@ -71,14 +73,14 @@ def aoty(
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
-) -> Iterator[dict[str, str | int | float | list | dict | timedelta]]:
+) -> Iterator[Album]:
     logger = logging.logger(aoty)
     message = f"- Downloading {album_type}, page {page_number}..."
     if debug:
         logger.info(message + f", ceil = {ceil}")
     if not quiet:
         print(message)
-    album = dict()
+    album = Album()
     url = f"{base_page}/{ratings_subpage}/{album_type}/all/{page_number}/"
     if debug:
         logger.debug(f"URL is {url}")
@@ -88,7 +90,6 @@ def aoty(
         debug=debug,
     )
     for data in albums_list.find_all(class_="albumListRow"):
-        album["id"] = str()
         album["internal_id"] = -1
         album["type"] = album_type
         album["page_number"] = page_number
@@ -123,14 +124,14 @@ def prog(
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
-) -> Iterator[dict[str, str | int | float | list | dict | timedelta]]:
+) -> Iterator[Album]:
     logger = logging.logger(prog)
     message = f"- Downloading {genre[0]}, type {album_type[0]}..."
     if debug:
         logger.info(message + f", ceil = {ceil}")
     if not quiet:
         print(message)
-    album = dict()
+    album = Album()
     url = (
         base_page
         + "top-prog-albums.asp"
@@ -144,7 +145,6 @@ def prog(
         url=url, tag="table", number=1, encoding="latin1"
     )
     for data in albums_list.find_all("tr"):
-        album["id"] = str()
         album["type"] = album_type[0]
         album["genre"] = genre[0]
         get_data.data(element=data, data_struct=album, tags=list_tags)

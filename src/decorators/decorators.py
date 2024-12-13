@@ -6,9 +6,9 @@ from time import time
 import click
 from click_help_colors import HelpColorsCommand, version_option
 
-import src.defaults.click
 from src.decorators import groups
 from src.defaults import defaults
+from src.defaults.click import CLICK_CONTEXT_SETTINGS
 
 
 def count_time(func):
@@ -24,7 +24,7 @@ def count_time(func):
 
 def subcomm(supercomm: object) -> object:
     return supercomm.command(
-        context_settings=src.defaults.click.CLICK_CONTEXT_SETTINGS,
+        context_settings=CLICK_CONTEXT_SETTINGS,
         cls=HelpColorsCommand,
     )
 
@@ -32,7 +32,7 @@ def subcomm(supercomm: object) -> object:
 cli = groups.cli
 
 comm = cli.command(
-    context_settings=src.defaults.click.CLICK_CONTEXT_SETTINGS,
+    context_settings=CLICK_CONTEXT_SETTINGS,
     cls=HelpColorsCommand,
 )
 version = version_option(
@@ -94,13 +94,13 @@ markdown = click.option(
     help="Output as MarkDown.",
 )
 highest_match = click.option(
-    "-h",
+    "-H/-A",
     "--highest/--all-matches",
     is_flag=True,
     type=click.BOOL,
     default=True,
     show_default=True,
-    help="Returns only the highest match of each entry.",
+    help="Returns only the highest match of each entry, or every match.",
 )
 search = click.argument(
     "search",
@@ -109,14 +109,14 @@ search = click.argument(
 )
 
 
-def add(func, decorators: tuple):
+def add_decorators(func, decorators: tuple):
     for dec in reversed(decorators):
         func = dec(func)
     return func
 
 
 def command(func: object, decorators: tuple, group: object = None) -> object:
-    return add(
+    return add_decorators(
         func,
         (
             version,

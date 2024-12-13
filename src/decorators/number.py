@@ -141,7 +141,7 @@ def prog_score(
 def albums(
     name: str | None = "albums",
     integer: bool = False,
-    default_value: int | None = None,
+    default: int | None = None,
     letter: str | None = None,
     option: str | None = "album",
     show_min_max: bool = True,
@@ -150,14 +150,14 @@ def albums(
     maximum: bool = False,
     help_message: str | None = None,
 ):
-    if not default_value:
-        default_value = (
+    if not default:
+        default = (
             defaults.ALBUM_MAX_SCORE if maximum else defaults.ALBUM_MIN_SCORE
         )
     return __number__(
         name=name,
         integer=integer,
-        default_value=default_value,
+        default_value=default,
         letter=letter,
         option=option,
         show_min_max=show_min_max,
@@ -172,7 +172,7 @@ def albums(
 def tracks(
     name: str | None = "tracks",
     integer: bool = True,
-    default_value: int | None = None,
+    default: int | None = None,
     letter: str | None = None,
     option: str | None = "tracks",
     show_min_max: bool = True,
@@ -181,14 +181,14 @@ def tracks(
     maximum: bool = False,
     help_message: str | None = None,
 ):
-    if not default_value:
-        default_value = (
+    if not default:
+        default = (
             defaults.TRACK_MAX_SCORE if maximum else defaults.TRACK_MIN_SCORE
         )
     return __number__(
         name=name,
         integer=integer,
-        default_value=default_value,
+        default_value=default,
         letter=letter,
         option=option,
         show_min_max=show_min_max,
@@ -203,7 +203,7 @@ def tracks(
 def ratings(
     name: str | None = "ratings",
     integer: bool = True,
-    default_value: int | None = None,
+    default: int | None = None,
     letter: str | None = None,
     option: str | None = "ratings",
     show_min_max: bool = True,
@@ -212,14 +212,16 @@ def ratings(
     maximum: bool = False,
     help_message: str | None = None,
 ):
-    if not default_value:
-        default_value = (
-            defaults.MAX_RATINGS if maximum else defaults.MIN_RATINGS
+    if not default:
+        default = (
+            defaults.ALBUM_MAX_RATINGS
+            if maximum
+            else defaults.ALBUM_MIN_RATINGS
         )
     return __number__(
         name=name,
         integer=integer,
-        default_value=default_value,
+        default_value=default,
         letter=letter,
         option=option,
         show_min_max=show_min_max,

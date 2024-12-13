@@ -9,14 +9,16 @@ from src.defaults.defaults import DATA_SUFFIX
 def __search__(
     directory: Path,
     prefix: str | None = None,
-) -> dict[str, dict[str, str | Path]]:
+) -> dict[str, Path]:
     return {
-        (prefix + "-" if prefix else "") + file.stem: file
+        (f"{prefix}." if prefix else "") + file.stem: file
         for file in sorted(directory.glob(f"*.{DATA_SUFFIX}"))
     }
 
 
 DL_CHOICE = __search__(path.DATA_DIR)
+if "dirs" in DL_CHOICE:
+    DL_CHOICE["dirs"] = DL_CHOICE.pop("dirs")
 DIFF_CHOICE = __search__(path.DIFF_DIR, prefix="diff")
 MERGE_CHOICE = __search__(path.MERGE_DIR, prefix="merge")
 DEDUP_CHOICE = __search__(path.DEDUP_DIR, prefix="dedup")
@@ -29,7 +31,7 @@ ID_CHOICES = (
     "internal_id",
 )
 
-COLUMN_CHOICES = {
+ALBUM_COLUMNS = {
     "id": "ID",
     "internal_id": "Int. ID",
     "artist": "Artist",
@@ -37,8 +39,39 @@ COLUMN_CHOICES = {
     "year": "Year",
     "type": "Type",
     "position": "Pos.",
-    "user_score": "Score",
-    "user_ratings": "Ratings",
+    "user_score": "SC",
+    "user_ratings": "RT",
     "album_url": "Album URL",
     "cover_url": "Cover URL",
 }
+TRACK_COLUMNS = {
+    "track_score": "TSC",
+    "track_ratings": "TRT",
+    "track_number": "No.",
+    "track_title": "Track Title",
+    "track_length": "Track Length",
+    "track_disc": "Disc",
+    "featuring": "Featuring",
+    "track_url": "Track URL",
+} | ALBUM_COLUMNS
+
+ALBUM_SORT_BY = {
+    "id": False,
+    "internal_id": False,
+    "artist": False,
+    "album": False,
+    "year": False,
+    "type": False,
+    "position": False,
+    "user_score": True,
+    "user_ratings": False,
+}  # True if order is DESC, False otherwise.
+TRACK_SORT_BY = {
+    "track_score": True,
+    "track_ratings": True,
+    "track_number": False,
+    "track_title": False,
+    "track_length": True,
+    "track_disc": False,
+    "featuring": False,
+} | ALBUM_SORT_BY  # True if order is DESC, False otherwise.

@@ -9,6 +9,22 @@ from src.decorators.decorators import (
     dedup,
     markdown,
 )
+from src.defaults.choice import (
+    DATA_CHOICE,
+    TRACK_COLUMNS,
+    ALBUM_SORT_BY,
+    TRACK_SORT_BY,
+)
+from src.defaults.defaults import (
+    ALBUM_MIN_SCORE,
+    ALBUM_MAX_SCORE,
+    TRACK_MIN_SCORE,
+    TRACK_MAX_SCORE,
+    ALBUM_MIN_RATINGS,
+    ALBUM_MAX_RATINGS,
+    TRACK_MIN_RATINGS,
+    TRACK_MAX_RATINGS,
+)
 
 
 def aoty(func):
@@ -45,6 +61,8 @@ def dirs(func):
 
 
 def duplicates(func):
+    if len(DATA_CHOICE) < 2:
+        return func
     return command(
         func,
         (
@@ -61,6 +79,8 @@ def duplicates(func):
 
 
 def merge(func):
+    if len(DATA_CHOICE) < 2:
+        return func
     return command(
         func,
         (
@@ -86,6 +106,8 @@ def merge(func):
 
 
 def diff(func):
+    if len(DATA_CHOICE) < 2:
+        return func
     return command(
         func,
         (
@@ -116,14 +138,23 @@ def albums(func):
         (
             data.source(letter="d"),
             markdown,
-            number.albums(letter="s"),
-            number.albums(letter="S", maximum=True),
-            number.ratings(letter="r"),
-            number.ratings(letter="R", maximum=True),
+            number.albums(letter="s", default=ALBUM_MIN_SCORE),
+            number.albums(letter="S", default=ALBUM_MAX_SCORE, maximum=True),
+            number.ratings(letter="r", default=ALBUM_MIN_RATINGS),
+            number.ratings(
+                letter="R", default=ALBUM_MAX_RATINGS, maximum=True
+            ),
             choice.columns(
                 letter="c",
-                default=(9, 3, 4, 5),
-                help_message="Columns to include.",
+                default=(8, 3, 4, 5, 6),
+                help="Columns to include.",
+            ),
+            choice.columns(
+                option="sort-by",
+                choices=ALBUM_SORT_BY,
+                default=(0,),
+                all_option=False,
+                help="Columns to sort by.",
             ),
         ),
         groups.export,
@@ -134,13 +165,34 @@ def tracks(func):
     return command(
         func,
         (
+            data.source(letter="d"),
             markdown,
-            number.tracks(letter="s"),
-            number.tracks(letter="S", maximum=True),
-            number.albums(letter="a", show_name=True),
-            number.albums(letter="A", show_name=True, maximum=True),
-            number.ratings(letter="r"),
-            number.ratings(letter="R", maximum=True),
+            number.tracks(letter="s", default=TRACK_MIN_SCORE),
+            number.tracks(letter="S", default=TRACK_MAX_SCORE, maximum=True),
+            number.albums(letter="a", default=ALBUM_MIN_SCORE, show_name=True),
+            number.albums(
+                letter="A",
+                default=ALBUM_MAX_SCORE,
+                show_name=True,
+                maximum=True,
+            ),
+            number.ratings(letter="r", default=TRACK_MIN_RATINGS),
+            number.ratings(
+                letter="R", default=TRACK_MAX_RATINGS, maximum=True
+            ),
+            choice.columns(
+                letter="c",
+                choices=TRACK_COLUMNS,
+                default=(1, 3, 4, 11, 12, 13),
+                help="Columns to include.",
+            ),
+            choice.columns(
+                option="sort-by",
+                choices=TRACK_SORT_BY,
+                default=(7, 0),
+                all_option=False,
+                help="Columns to sort by.",
+            ),
         ),
         groups.export,
     )
