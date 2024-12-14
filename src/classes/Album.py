@@ -9,7 +9,7 @@ from src.defaults.defaults import ALBUM_REPR_SEP, ID_LENGTH, ID_SEP
 
 
 class Album(UserDict):
-    def __repr__(self):
+    def __str__(self):
         return (
             self.get("artist", "")
             + ALBUM_REPR_SEP

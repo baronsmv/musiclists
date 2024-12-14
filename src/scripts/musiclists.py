@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from pathlib import Path
 
 import src.decorators.commands as de
 from src import download
@@ -269,7 +270,6 @@ def tracks(
     )
 
 
-'''
 @de.dirs
 def dirs(
     path: Path,
@@ -295,6 +295,7 @@ def dirs(
     )
 
 
+'''
 @de.wanted
 def wanted(
     path: Path,
@@ -322,7 +323,7 @@ def wanted(
     The resulting `wanted` albums will be saved in the `path` directory.
 
     If `dedup` is enabled, any duplicate albums found between the two lists
-    registered in `dedup-path` will be ommited.
+    registered in `dedup-path` will be omitted.
 
     The function provides detailed logging if `verbose` is enabled, and
     additional debugging information if `debug` is turned on.
@@ -367,7 +368,7 @@ def leftover(
     The resulting `leftover` albums will be saved in the `path` directory.
 
     If `dedup` is enabled, any duplicate albums found between the two lists
-    registered in `dedup-path` will be ommited.
+    registered in `dedup-path` will be omitted.
 
     The function provides detailed logging if `verbose` is enabled, and
     additional debugging information if `debug` is turned on.

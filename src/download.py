@@ -142,6 +142,13 @@ def prog(
     )
 
 
+def extract_tag(tag: list, key: str, sep: str = "; ") -> str | int:
+    tag = sep.join(tag)
+    if key in ("year", "total_tracks", "total_discs", "track_number", "disc"):
+        tag = int(tag.split("/")[0])
+    return tag
+
+
 def dirs(
     source: Path,
     suffixes: tuple = ("opus", "mp3", "m4a", "flac"),
@@ -156,28 +163,35 @@ def dirs(
     if not quiet:
         print(f"Registering music from '{source}'")
     for d in dump.dirs(source):
-        print(d)
         track_files = tuple(
-            mutagen.File(f) for s in suffixes for f in d.glob(f"*.{s}")
+            mutagen.File(f, easy=True)
+            for s in suffixes
+            for f in sorted(d.glob(f"*.{s}"))
         )
         if len(track_files) == 0:
             continue
-        print(track_files)
-        album["id"] = ""
         for k, v in album_data.items():
             tag = track_files[0].get(v)
-            print(d, k, v, tag)
             if not tag:
                 continue
-            album[k] = tag
+            album[k] = extract_tag(tag, k)
+        album["album_path"] = d.as_posix()
+        if not "year" in album:  # M4a Tags don't have year tag
+            if "original_date" in album:
+                album["year"] = int(album["original_date"][:4])
+            elif "release_date" in album:
+                album["year"] = int(album["release_date"][:4])
         album["tracks"] = []
         for t in track_files:
             album["tracks"].append(
-                {k: t[v] for k, v in track_data.items() if v in t}
+                {
+                    k: extract_tag(t[v], k)
+                    for k, v in track_data.items()
+                    if v in t
+                }
+                | {"track_path": t.filename}
             )
         album.compute_id()
-        print(album)
-        albums.append(album.copy())
+        albums.append(dict(album.copy()))
         album.clear()
-    print(albums)
     MusicList(albums).save("download.dirs")

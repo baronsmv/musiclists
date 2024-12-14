@@ -41,6 +41,7 @@ ALBUM_COLUMNS = {
     "position": "Pos.",
     "user_score": "SC",
     "user_ratings": "RT",
+    "album_path": "Directory",
     "album_url": "Album URL",
     "cover_url": "Cover URL",
 }
@@ -51,6 +52,7 @@ TRACK_COLUMNS = {
     "track_title": "Track Title",
     "track_length": "Track Length",
     "track_disc": "Disc",
+    "track_path": "Filename",
     "featuring": "Featuring",
     "track_url": "Track URL",
 } | ALBUM_COLUMNS

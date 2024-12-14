@@ -10,7 +10,7 @@ def __choice__(
     choices: tuple | dict,
     help_message: str,
     all_option: bool,
-    default: int | tuple,
+    default: str | int | tuple,
     letter: str | None,
 ):
     if isinstance(choices, dict):
@@ -18,9 +18,12 @@ def __choice__(
     if all_option:
         choices = ("all",) + choices
     multiple = True if isinstance(default, tuple) or all_option else False
-    default = (
-        tuple(choices[d] for d in default) if multiple else choices[default]
-    )
+    if isinstance(default, int) or isinstance(default[0], int):
+        default = (
+            tuple(choices[d] for d in default)
+            if isinstance(default, tuple)
+            else choices[default]
+        )
     if letter:
         return click.option(
             "-" + letter,
@@ -50,7 +53,7 @@ def aoty(
     choices: tuple = download.AOTY_TYPES,
     help_message: str = "Types of AOTY albums to download.",
     all_option: bool = True,
-    default: int | tuple = (0,),
+    default: str | int | tuple = (0,),
 ):
     return __choice__(
         option=option,
@@ -68,7 +71,7 @@ def prog(
     choices: tuple = download.PROG_TYPES,
     help_message: str = "Types of ProgArchives albums to download.",
     all_option: bool = True,
-    default: int | tuple = (0,),
+    default: str | int | tuple = (0,),
 ):
     return __choice__(
         option=option,
@@ -86,7 +89,7 @@ def columns(
     choices: tuple = choice.ALBUM_COLUMNS,
     help: str = "Columns to consider for the process.",
     all_option: bool = True,
-    default: int | tuple = (3, 4, 5),
+    default: str | int | tuple = (3, 4, 5),
 ):
     return __choice__(
         option=option,
@@ -104,7 +107,7 @@ def key(
     choices: tuple = choice.ID_CHOICES,
     help_message: str = "Key for the process.",
     all_option: bool = False,
-    default: int | tuple = 0,
+    default: str | int | tuple = 0,
 ):
     return __choice__(
         option=option,

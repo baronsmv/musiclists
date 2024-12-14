@@ -146,13 +146,13 @@ def albums(func):
             ),
             choice.columns(
                 letter="c",
-                default=(8, 3, 4, 5, 6),
+                default=("user_score", "artist", "album", "year", "type"),
                 help="Columns to include.",
             ),
             choice.columns(
                 option="sort-by",
                 choices=ALBUM_SORT_BY,
-                default=(0,),
+                default=("id",),
                 all_option=False,
                 help="Columns to sort by.",
             ),
@@ -183,13 +183,20 @@ def tracks(func):
             choice.columns(
                 letter="c",
                 choices=TRACK_COLUMNS,
-                default=(1, 3, 4, 11, 12, 13),
+                default=(
+                    "track_score",
+                    "track_number",
+                    "track_title",
+                    "internal_id",
+                    "artist",
+                    "album",
+                ),
                 help="Columns to include.",
             ),
             choice.columns(
                 option="sort-by",
                 choices=TRACK_SORT_BY,
-                default=(7, 0),
+                default=("id", "track_score"),
                 all_option=False,
                 help="Columns to sort by.",
             ),
