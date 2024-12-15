@@ -4,7 +4,7 @@ import polars as pl
 
 from src.debug import logging
 from src.defaults.choice import DEDUP_CHOICE
-from src.get.file import get_path, source
+from src.get.file import path, source
 
 
 class DuplicatesList(pl.DataFrame):
@@ -36,6 +36,6 @@ class DuplicatesList(pl.DataFrame):
     def save(self, name: str) -> None:
         _, self.name, self.exists = source(f"dedup.{name}")
         (self.append() if self.exists else self).serialize(
-            get_path(self.name, location="dedup")
+            path(self.name, location="dedup")
         )
         self.exists = True

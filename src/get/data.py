@@ -7,6 +7,8 @@ from urllib.request import Request, urlopen
 
 from bs4 import BeautifulSoup
 
+import src.files
+import src.get.file
 from src.attributes import aoty as aoty_tags
 from src.classes.Album import Album
 from src.debug import logging
@@ -219,7 +221,7 @@ def prog_genres(
 def prog_distribution_score(album_url: str) -> dict[str, int]:
     prog_table = table(url=album_url, tag="blockquote", encoding="latin1")
     for t in prog_table.select("img") + prog_table.select("div"):
-        t.extract_tag()
+        src.files.extract_tag()
     r = iter(range(5, 0, -1))
     return {
         str(next(r)) + "_stars": int(re.sub(r"\D", "", i))

@@ -2,14 +2,9 @@
 
 import multiprocessing.dummy as mp
 from datetime import timedelta
-from pathlib import Path
 from textwrap import dedent
 
-import mutagen
-
 from src import dump
-from src.attributes.local_dirs import album as album_attr, track as track_attr
-from src.classes.Album import Album
 from src.classes.MusicList import MusicList
 from src.defaults import defaults
 from src.defaults.download import (
@@ -140,58 +135,3 @@ def prog(
         verbose=verbose,
         debug=debug,
     )
-
-
-def extract_tag(tag: list, key: str, sep: str = "; ") -> str | int:
-    tag = sep.join(tag)
-    if key in ("year", "total_tracks", "total_discs", "track_number", "disc"):
-        tag = int(tag.split("/")[0])
-    return tag
-
-
-def dirs(
-    source: Path,
-    suffixes: tuple = ("opus", "mp3", "m4a", "flac"),
-    album_data: dict = album_attr,
-    track_data: dict = track_attr,
-    quiet: bool = defaults.QUIET,
-    verbose: bool = defaults.VERBOSE,
-    debug: bool = defaults.DEBUG,
-):
-    albums = []
-    album = Album()
-    if not quiet:
-        print(f"Registering music from '{source}'")
-    for d in dump.dirs(source):
-        track_files = tuple(
-            mutagen.File(f, easy=True)
-            for s in suffixes
-            for f in sorted(d.glob(f"*.{s}"))
-        )
-        if len(track_files) == 0:
-            continue
-        for k, v in album_data.items():
-            tag = track_files[0].get(v)
-            if not tag:
-                continue
-            album[k] = extract_tag(tag, k)
-        album["album_path"] = d.as_posix()
-        if not "year" in album:  # M4a Tags don't have year tag
-            if "original_date" in album:
-                album["year"] = int(album["original_date"][:4])
-            elif "release_date" in album:
-                album["year"] = int(album["release_date"][:4])
-        album["tracks"] = []
-        for t in track_files:
-            album["tracks"].append(
-                {
-                    k: extract_tag(t[v], k)
-                    for k, v in track_data.items()
-                    if v in t
-                }
-                | {"track_path": t.filename}
-            )
-        album.compute_id()
-        albums.append(dict(album.copy()))
-        album.clear()
-    MusicList(albums).save("download.dirs")

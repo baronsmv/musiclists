@@ -4,10 +4,10 @@ from src.decorators import choice, number, groups, data
 from src.decorators.decorators import (
     command,
     ceil,
-    search,
     highest_match,
     dedup,
     markdown,
+    search,
 )
 from src.defaults.choice import (
     DATA_CHOICE,
@@ -52,15 +52,15 @@ def prog(func):
     )
 
 
-def dirs(func):
+def get(func):
     return command(
         func,
         (data.path(),),
-        groups.download,
+        groups.files,
     )
 
 
-def duplicates(func):
+def find(func):
     if len(DATA_CHOICE) < 2:
         return func
     return command(
@@ -78,7 +78,7 @@ def duplicates(func):
     )
 
 
-def merge(func):
+def union(func):
     if len(DATA_CHOICE) < 2:
         return func
     return command(
@@ -91,14 +91,34 @@ def merge(func):
             ),
             choice.key(
                 letter="k",
-                help_message="Key for the merge process.",
+                help_message="Key for the union process.",
             ),
             dedup,
             choice.key(
                 letter="K",
                 option="dedup-key",
                 help_message="Key for the dedup process.",
-                default=1,
+                default="id",
+            ),
+        ),
+        groups.transform,
+    )
+
+
+def intersect(func):
+    if len(DATA_CHOICE) < 2:
+        return func
+    return command(
+        func,
+        (
+            data.source(letter="d", suffix="1", default=0),
+            data.source(letter="D", suffix="2", default=1),
+            choice.columns(
+                letter="c",
+            ),
+            choice.key(
+                letter="k",
+                help_message="Key for the intersect process.",
             ),
         ),
         groups.transform,
@@ -125,7 +145,7 @@ def diff(func):
                 letter="K",
                 option="dedup-key",
                 help_message="Key for the dedup process.",
-                default=1,
+                default="internal_id",
             ),
         ),
         groups.transform,

@@ -175,6 +175,8 @@ def dirs(
     verbose: bool = defaults.VERBOSE,
     debug: bool = defaults.DEBUG,
 ) -> Iterator[Path]:
+    if min_level < 1:
+        yield path
     for d in path.rglob("*"):
         if (
             d.is_dir()

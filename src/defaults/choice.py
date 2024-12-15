@@ -19,11 +19,12 @@ def __search__(
 DL_CHOICE = __search__(path.DATA_DIR)
 if "dirs" in DL_CHOICE:
     DL_CHOICE["dirs"] = DL_CHOICE.pop("dirs")
+UNION_CHOICE = __search__(path.UNION_DIR, prefix="merge")
+INTERSECT_CHOICE = __search__(path.INTERSECT_DIR, prefix="intersect")
 DIFF_CHOICE = __search__(path.DIFF_DIR, prefix="diff")
-MERGE_CHOICE = __search__(path.MERGE_DIR, prefix="merge")
 DEDUP_CHOICE = __search__(path.DEDUP_DIR, prefix="dedup")
 
-DATA_CHOICE = DL_CHOICE | MERGE_CHOICE | DIFF_CHOICE
+DATA_CHOICE = DL_CHOICE | UNION_CHOICE | INTERSECT_CHOICE | DIFF_CHOICE
 ALL_CHOICE = DATA_CHOICE | DEDUP_CHOICE
 
 ID_CHOICES = (

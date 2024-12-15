@@ -8,7 +8,7 @@ from src.defaults.defaults import DATA_SUFFIX
 from src.defaults.path import DIRS, VALID_LOCATION
 
 
-def get_path(
+def path(
     name: str,
     location: str,
     suffix: str | None = None,
@@ -21,7 +21,7 @@ def get_path(
 def level(
     child: Path,
     parent: Path,
-    lvl: int = 0,
+    lvl: int = 1,
 ) -> int:
     if child.parent.absolute() == parent.absolute():
         return lvl

@@ -56,7 +56,7 @@ def download() -> None:
 
 @cli_subgroup
 def duplicates() -> None:
-    """Manage album duplicates."""
+    """Manage album duplicates between lists."""
     pass
 
 
@@ -69,4 +69,10 @@ def transform() -> None:
 @cli_subgroup
 def export() -> None:
     """Export album lists to other formats."""
+    pass
+
+
+@cli_subgroup
+def files() -> None:
+    """Get and manage album data from files."""
     pass

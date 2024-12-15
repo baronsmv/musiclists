@@ -14,9 +14,7 @@ class Album(UserDict):
             self.get("artist", "")
             + ALBUM_REPR_SEP
             + self.get("album", "")
-            + " ("
-            + str(self.get("year"))
-            + ")"
+            + (" (" + str(self.get("year")) + ")" if "year" in self else "")
         )
 
     def compute_id(self) -> None:

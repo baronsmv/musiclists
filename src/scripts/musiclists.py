@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+
 from pathlib import Path
 
 import src.decorators.commands as de
@@ -12,6 +13,7 @@ from src.defaults.choice import (
     TRACK_SORT_BY,
 )
 from src.defaults.download import AOTY_TYPES, PROG_TYPES
+from src.files import from_dir
 
 
 @de.aoty
@@ -76,8 +78,8 @@ def prog(
     )
 
 
-@de.duplicates
-def duplicates(
+@de.find
+def find(
     search: list,
     columns: tuple,
     data_1: str,
@@ -116,8 +118,8 @@ def duplicates(
     )
 
 
-@de.merge
-def merge(
+@de.union
+def union(
     data_1: str,
     data_2: str,
     columns: tuple,
@@ -129,7 +131,7 @@ def merge(
     debug: bool,
 ):
     """
-    Merge downloaded lists into one.
+    Merge downloaded lists into one, returning any album of each.
 
     This function combines album data from two sources (`data_1` and `data_2`),
     selecting only the specified `columns` and joining the lists based on the
@@ -139,13 +141,38 @@ def merge(
     specified `dedup_key`, in addition to performing the standard deduplication
     by `key`.
     """
-    MusicList().load(data_1).merge_with(
+    MusicList().load(data_1).union_with(
         other=MusicList().load(data_2),
         columns=tuple(ALBUM_COLUMNS.keys() if "all" in columns else columns),
         save=True,
         key=key,
         dedup=dedup,
         dedup_key=dedup_key,
+    )
+
+
+@de.intersect
+def intersect(
+    data_1: str,
+    data_2: str,
+    columns: tuple,
+    key: str,
+    quiet: bool,
+    verbose: bool,
+    debug: bool,
+):
+    """
+    Join lists, only returning albums that are in both lists.
+
+    This function identifies the albums present in both data lists (`data_1`
+    and `data_2`), selecting only the specified `columns` and using the given
+    `key` to perform the comparison.
+    """
+    MusicList().load(data_1).intersect_with(
+        other=MusicList().load(data_2),
+        columns=tuple(ALBUM_COLUMNS.keys() if "all" in columns else columns),
+        save=True,
+        key=key,
     )
 
 
@@ -270,8 +297,8 @@ def tracks(
     )
 
 
-@de.dirs
-def dirs(
+@de.get
+def get(
     path: Path,
     quiet: bool,
     verbose: bool,
@@ -280,14 +307,10 @@ def dirs(
     """
     Find album data from a directory.
 
-    This function scans the `source_path` directory, where albums are stored,
-    and extracts their artist, name and year. The album data is then written
-    to a `polars` file in the `path` directory.
-
-    The function provides detailed logging if `verbose` is enabled, and
-    additional debugging information if `debug` is turned on.
+    This function scans the `PATH` directory, where albums are stored, and
+    extracts their data.
     """
-    download.dirs(
+    from_dir(
         source=path,
         quiet=quiet,
         verbose=verbose,

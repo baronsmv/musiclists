@@ -8,7 +8,7 @@ from src.classes.Album import Album
 from src.classes.DuplicatesList import DuplicatesList
 from src.defaults import defaults
 from src.defaults.choice import ALL_CHOICE
-from src.get.file import get_path, source
+from src.get.file import path, source
 
 
 def export_config(markdown: bool) -> pl.Config:
@@ -177,7 +177,7 @@ class MusicList(pl.DataFrame):
         self.location, self.name, self.exists = source(name)
         if warn_duplicates:
             self.warn_duplicates()
-        self.serialize(get_path(self.name, self.location, suffix=suffix))
+        self.serialize(path(self.name, self.location, suffix=suffix))
         self.exists = True
 
     def table(
@@ -191,7 +191,7 @@ class MusicList(pl.DataFrame):
         txt = self.as_df(as_md=as_md)
         if save:
             with open(
-                get_path(
+                path(
                     name_prefix
                     + (
                         f"{self.location}-"
@@ -276,10 +276,14 @@ class MusicList(pl.DataFrame):
         location, name, exists = source(f"dedup.{self}-{other}")
         return DuplicatesList().load(name) if exists else None
 
-    def duplicated_ids_with(self, other: Self) -> tuple | None:
+    def duplicated_ids_with(
+        self, other: Self, key: str = "id"
+    ) -> tuple | None:
         ids = self.duplicates_with(other)
         return (
-            ids.get_column(f"id-{self}").to_list() if ids is not None else None
+            ids.get_column(f"{key}-{self}").to_list()
+            if ids is not None
+            else None
         )
 
     def yield_duplicates_with(
@@ -415,7 +419,7 @@ class MusicList(pl.DataFrame):
             )
         )
 
-    def merge_with(
+    def union_with(
         self,
         other: Self,
         columns: tuple,
@@ -429,13 +433,33 @@ class MusicList(pl.DataFrame):
         other_data = (
             other.deduplicated_from(self, key=dedup_key) if dedup else other
         ).select(columns)
-        merged = MusicList(data.extend(other_data).unique(key, keep="first"))
-        merged.name = f"{self}-{other}"
-        merged.location = "merge"
+        union = MusicList(data.extend(other_data).unique(key, keep="first"))
+        union.name = f"{self}-{other}"
+        union.location = "union"
         if save:
-            merged.save(f"{merged.location}.{merged.name}")
+            union.save(f"{union.location}.{union.name}")
         else:
-            return merged
+            return union
+
+    def intersect_with(
+        self,
+        other: Self,
+        columns: tuple,
+        save: bool = True,
+        key: str = "id",
+    ):
+        columns += (key,)
+        data = self.select(columns)
+        other_data = set(other.get_column(key))
+        if di := other.duplicated_ids_with(self, key):
+            other_data |= set(di)
+        intersect = MusicList(data.filter(pl.col(key).is_in(other_data)))
+        intersect.name = f"{self}-{other}"
+        intersect.location = "intersect"
+        if save:
+            intersect.save(f"{intersect.location}.{intersect.name}")
+        else:
+            return intersect
 
     def diff_with(
         self,
