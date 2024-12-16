@@ -3,19 +3,58 @@
 from pathlib import Path
 
 from src.debug import logging
-from src.defaults.choice import ALL_CHOICE
+from src.defaults.choice import ALL_ALBUMS, ALL_TRACKS
 from src.defaults.defaults import DATA_SUFFIX
-from src.defaults.path import DIRS, VALID_LOCATION
+from src.defaults.path import (
+    LOCATION,
+    TYPE,
+    ALBUMS_LOCATIONS,
+    TRACKS_LOCATIONS,
+    VALID_TYPES,
+)
+
+
+def __verify__(type_, location, logger) -> Path:
+    if type_ not in VALID_TYPES:
+        logger.error(f"Type `{type_}` must be one of these: {VALID_TYPES}")
+        exit(1)
+    loc = ALBUMS_LOCATIONS if type_ == "albums" else TRACKS_LOCATIONS
+    location = f"{type_}-{location}"
+    if location not in loc:
+        logger.error(
+            f"`{location}` location parameter must be one of these: "
+            f"{tuple(loc.keys())}"
+        )
+        exit(1)
+    return loc[location]
 
 
 def path(
     name: str,
-    location: str,
+    type_: TYPE,
+    location: LOCATION,
     suffix: str | None = None,
 ) -> Path:
     path_name = name + "." + (suffix if suffix else DATA_SUFFIX)
-    path_dir = DIRS[location]
-    return Path(path_dir / path_name)
+    path_dir = __verify__(type_, location, logging.logger(path))
+    return path_dir / path_name
+
+
+def source(
+    name: str,
+    type_: TYPE,
+    location: LOCATION,
+    order: bool = False,
+) -> tuple[str, TYPE, LOCATION, bool]:
+    __verify__(type_, location, logging.logger(source))
+    postfix = f".{location}" if location != "download" else ""
+    files = ALL_ALBUMS if type_ == "albums" else ALL_TRACKS
+    if f"{name}{postfix}" in files:
+        return name, type_, location, True
+    if order and "-" in name:
+        ord_name = "-".join(sorted(name.split("-")))
+        return ord_name, type_, location, f"{ord_name}{postfix}" in files
+    return name, type_, location, f"{name}{postfix}" in files
 
 
 def level(
@@ -34,32 +73,3 @@ def contains_dirs(dir_path: Path):
         if c.is_dir():
             return True
     return False
-
-
-def source(
-    name: str,
-) -> tuple[str, str, bool]:
-    logger = logging.logger(source)
-    new_name = name.split(".")
-    if len(new_name) == 1:
-        new_name = new_name[0]
-        location = "download"
-        prefix = ""
-    elif len(new_name) == 2:
-        location, new_name = new_name
-        if location not in VALID_LOCATION:
-            raise ValueError(
-                f"`{location}` parameter must be one of {VALID_LOCATION}"
-            )
-        prefix = f"{location}."
-    else:
-        logger.error(
-            f"{name} is empty or has more than two fields separated by a dot."
-        )
-        exit(1)
-    if f"{prefix}{new_name}" in ALL_CHOICE:
-        return location, new_name, True
-    if "-" in new_name:
-        ord_name = "-".join(sorted(new_name.split("-")))
-        return location, ord_name, f"{prefix}{ord_name}" in ALL_CHOICE
-    return location, new_name, f"{prefix}{new_name}" in ALL_CHOICE

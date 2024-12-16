@@ -8,24 +8,35 @@ from src.defaults.defaults import DATA_SUFFIX
 
 def __search__(
     directory: Path,
-    prefix: str | None = None,
+    postfix: str | None = None,
 ) -> dict[str, Path]:
     return {
-        (f"{prefix}." if prefix else "") + file.stem: file
+        file.stem + (f".{postfix}" if postfix else ""): file
         for file in sorted(directory.glob(f"*.{DATA_SUFFIX}"))
     }
 
 
-DL_CHOICE = __search__(path.DATA_DIR)
-if "dirs" in DL_CHOICE:
-    DL_CHOICE["dirs"] = DL_CHOICE.pop("dirs")
-UNION_CHOICE = __search__(path.UNION_DIR, prefix="merge")
-INTERSECT_CHOICE = __search__(path.INTERSECT_DIR, prefix="intersect")
-DIFF_CHOICE = __search__(path.DIFF_DIR, prefix="diff")
-DEDUP_CHOICE = __search__(path.DEDUP_DIR, prefix="dedup")
+ALBUMS_DEDUP = __search__(path.ALBUMS_DEDUP, postfix="dedup")
+TRACKS_DEDUP = __search__(path.TRACKS_DEDUP, postfix="dedup")
+ALL_DEDUP = ALBUMS_DEDUP | TRACKS_DEDUP
 
-DATA_CHOICE = DL_CHOICE | UNION_CHOICE | INTERSECT_CHOICE | DIFF_CHOICE
-ALL_CHOICE = DATA_CHOICE | DEDUP_CHOICE
+ALBUMS = __search__(path.ALBUMS_DOWNLOAD)
+ALBUMS_FILTERED = __search__(path.ALBUMS_FILTERED, postfix="filter")
+ALBUMS_UNION = __search__(path.ALBUMS_UNION, postfix="union")
+ALBUMS_INTERSECT = __search__(path.ALBUMS_INTERSECT, postfix="inter")
+ALBUMS_DIFF = __search__(path.ALBUMS_DIFF, postfix="diff")
+ALL_ALBUMS = (
+    ALBUMS | ALBUMS_FILTERED | ALBUMS_UNION | ALBUMS_INTERSECT | ALBUMS_DIFF
+)
+
+TRACKS = __search__(path.TRACKS_DOWNLOAD)
+TRACKS_FILTERED = __search__(path.TRACKS_FILTERED, postfix="filter")
+TRACKS_UNION = __search__(path.TRACKS_UNION, postfix="union")
+TRACKS_INTERSECT = __search__(path.TRACKS_INTERSECT, postfix="inter")
+TRACKS_DIFF = __search__(path.TRACKS_DIFF, postfix="diff")
+ALL_TRACKS = (
+    TRACKS | TRACKS_FILTERED | TRACKS_UNION | TRACKS_INTERSECT | TRACKS_DIFF
+)
 
 ID_CHOICES = (
     "id",

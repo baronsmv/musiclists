@@ -2,7 +2,14 @@
 
 import click
 
-from src.defaults import choice, download
+from src.defaults.choice import (
+    TRACK_SORT_BY,
+    TRACK_COLUMNS,
+    ALBUM_SORT_BY,
+    ALBUM_COLUMNS,
+    ID_CHOICES,
+)
+from src.defaults.download import AOTY_TYPES, PROG_TYPES
 
 
 def __choice__(
@@ -50,7 +57,7 @@ def __choice__(
 def aoty(
     option: str = "types",
     letter: str | None = "t",
-    choices: tuple = download.AOTY_TYPES,
+    choices: tuple = AOTY_TYPES,
     help_message: str = "Types of AOTY albums to download.",
     all_option: bool = True,
     default: str | int | tuple = (0,),
@@ -68,7 +75,7 @@ def aoty(
 def prog(
     option: str = "types",
     letter: str | None = "t",
-    choices: tuple = download.PROG_TYPES,
+    choices: tuple = PROG_TYPES,
     help_message: str = "Types of ProgArchives albums to download.",
     all_option: bool = True,
     default: str | int | tuple = (0,),
@@ -86,15 +93,20 @@ def prog(
 def columns(
     option: str = "columns",
     letter: str | None = None,
-    choices: tuple = choice.ALBUM_COLUMNS,
-    help: str = "Columns to consider for the process.",
+    help_msg: str = "Columns to consider for the process.",
     all_option: bool = True,
+    tracks: bool = False,
+    sorting: bool = False,
     default: str | int | tuple = (3, 4, 5),
 ):
+    if tracks:
+        choices = TRACK_SORT_BY if sorting else TRACK_COLUMNS
+    else:
+        choices = ALBUM_SORT_BY if sorting else ALBUM_COLUMNS
     return __choice__(
         option=option,
         choices=choices,
-        help_message=help,
+        help_message=help_msg,
         all_option=all_option,
         default=default,
         letter=letter,
@@ -104,7 +116,7 @@ def columns(
 def key(
     option: str = "key",
     letter: str | None = None,
-    choices: tuple = choice.ID_CHOICES,
+    choices: tuple = ID_CHOICES,
     help_message: str = "Key for the process.",
     all_option: bool = False,
     default: str | int | tuple = 0,

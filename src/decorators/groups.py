@@ -9,12 +9,14 @@ from src.defaults.click import (
     OPTIONS_COLOR,
 )
 
-main_group = group(
+group_args = dict(
     context_settings=CLICK_CONTEXT_SETTINGS,
     cls=HelpColorsGroup,
     help_headers_color=HEADERS_COLOR,
     help_options_color=OPTIONS_COLOR,
 )
+
+main_group = group(**group_args)
 
 
 @main_group
@@ -40,12 +42,7 @@ def cli() -> None:
     pass
 
 
-cli_subgroup = cli.group(
-    context_settings=CLICK_CONTEXT_SETTINGS,
-    cls=HelpColorsGroup,
-    help_headers_color=HEADERS_COLOR,
-    help_options_color=OPTIONS_COLOR,
-)
+cli_subgroup = cli.group(**group_args)
 
 
 @cli_subgroup
@@ -62,7 +59,22 @@ def duplicates() -> None:
 
 @cli_subgroup
 def transform() -> None:
-    """Transform, merge and compare album lists."""
+    """Transform, merge and compare lists."""
+    pass
+
+
+transform_subgroup = transform.group(**group_args)
+
+
+@transform_subgroup
+def albums() -> None:
+    """Transform, merge and compare lists of albums."""
+    pass
+
+
+@transform_subgroup
+def tracks() -> None:
+    """Transform, merge and compare lists of tracks."""
     pass
 
 

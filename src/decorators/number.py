@@ -109,7 +109,7 @@ def aoty_score(
 
 def prog_score(
     name: str | None = "ProgArchives",
-    default_value: float | None = None,
+    default_value: int | None = None,
     letter: str | None = None,
     option: str | None = None,
     show_min_max: bool = True,
@@ -138,7 +138,7 @@ def prog_score(
     )
 
 
-def albums(
+def albums_score(
     name: str | None = "albums",
     integer: bool = False,
     default: int | None = None,
@@ -146,7 +146,6 @@ def albums(
     option: str | None = "album",
     show_min_max: bool = True,
     show_name: bool = False,
-    show_score: bool = True,
     maximum: bool = False,
     help_message: str | None = None,
 ):
@@ -162,14 +161,14 @@ def albums(
         option=option,
         show_min_max=show_min_max,
         show_name=show_name,
-        show_score=show_score,
+        show_score=True,
         maximum=maximum,
         help_message=help_message,
         elements="",
     )
 
 
-def tracks(
+def tracks_score(
     name: str | None = "tracks",
     integer: bool = True,
     default: int | None = None,
@@ -177,7 +176,6 @@ def tracks(
     option: str | None = "tracks",
     show_min_max: bool = True,
     show_name: bool = False,
-    show_score: bool = True,
     maximum: bool = False,
     help_message: str | None = None,
 ):
@@ -193,7 +191,7 @@ def tracks(
         option=option,
         show_min_max=show_min_max,
         show_name=show_name,
-        show_score=show_score,
+        show_score=True,
         maximum=maximum,
         help_message=help_message,
         elements=None,
@@ -201,14 +199,11 @@ def tracks(
 
 
 def ratings(
-    name: str | None = "ratings",
-    integer: bool = True,
+    name: str = "ratings",
     default: int | None = None,
     letter: str | None = None,
     option: str | None = "ratings",
     show_min_max: bool = True,
-    show_name: bool = True,
-    show_score: bool = False,
     maximum: bool = False,
     help_message: str | None = None,
 ):
@@ -220,13 +215,13 @@ def ratings(
         )
     return __number__(
         name=name,
-        integer=integer,
+        integer=True,
         default_value=default,
         letter=letter,
         option=option,
         show_min_max=show_min_max,
-        show_name=show_name,
-        show_score=show_score,
+        show_name=True,
+        show_score=False,
         maximum=maximum,
         help_message=help_message,
         elements="tracks",
@@ -234,26 +229,23 @@ def ratings(
 
 
 def similarity(
-    name: str | None = "rate of similarity",
-    integer: bool = False,
+    name: str = "rate of similarity",
     default_value: int | None = 0.6,
     letter: str | None = "s",
     option: str | None = None,
     show_min_max: bool = True,
-    show_name: bool = True,
-    show_score: bool = False,
     maximum: bool = False,
     help_message: str | None = None,
 ):
     return __number__(
         name=name,
-        integer=integer,
+        integer=False,
         default_value=default_value,
         letter=letter,
         option=option,
         show_min_max=show_min_max,
-        show_name=show_name,
-        show_score=show_score,
+        show_name=True,
+        show_score=False,
         maximum=maximum,
         help_message=help_message,
         elements="matches",
@@ -261,26 +253,49 @@ def similarity(
 
 
 def num_results(
-    name: str | None = "results",
-    integer: bool = True,
+    name: str = "results",
     default_value: int | None = 15,
     letter: str | None = "r",
     option: str | None = "results",
-    show_min_max: bool = True,
-    show_name: bool = True,
-    show_score: bool = False,
     help_message: str = "Limit of results to return.",
 ):
     return __number__(
         name=name,
-        integer=integer,
+        integer=True,
         default_value=default_value,
         letter=letter,
         option=option,
-        show_min_max=show_min_max,
-        show_name=show_name,
-        show_score=show_score,
+        show_min_max=True,
+        show_name=True,
+        show_score=False,
         maximum=True,
         help_message=help_message,
         elements="matches",
+    )
+
+
+def limit_per_column(
+    name: str,
+    entries: str = "albums",
+    default_value: int | None = None,
+    letter: str | None = None,
+    option: str | None = None,
+    help_message: str | None = None,
+):
+    if not help_message:
+        help_message = f"Limit of {entries} returned per {name} column."
+    if not option:
+        option = f"limit-{name.lower()}"
+    return __number__(
+        name=name,
+        integer=True,
+        default_value=default_value,
+        letter=letter,
+        option=option,
+        show_min_max=False,
+        show_name=True,
+        show_score=False,
+        maximum=True,
+        help_message=help_message,
+        elements=entries,
     )

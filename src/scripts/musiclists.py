@@ -16,8 +16,8 @@ from src.defaults.download import AOTY_TYPES, PROG_TYPES
 from src.files import from_dir
 
 
-@de.aoty
-def aoty(
+@de.download_aoty
+def download_aoty(
     types: tuple,
     min_score: int,
     max_score: int,
@@ -43,8 +43,8 @@ def aoty(
     )
 
 
-@de.prog
-def prog(
+@de.download_prog
+def download_prog(
     types: tuple,
     min_score: int,
     max_score: int,
@@ -78,8 +78,8 @@ def prog(
     )
 
 
-@de.find
-def find(
+@de.dedup_find
+def dedup_find(
     search: list,
     columns: tuple,
     data_1: str,
@@ -101,8 +101,8 @@ def find(
     within `data_1` and then for duplicates of that entry in `data_2`.
     Otherwise, it compares all entries in `data_1` against `data_2`.
     """
-    ml_1 = MusicList().load(data_1)
-    ml_2 = MusicList().load(data_2)
+    ml_1 = MusicList().load(data_1, type_="albums")
+    ml_2 = MusicList().load(data_2, type_="albums")
     if search:
         ml_1 = ml_1.search_album(
             " ".join(search), columns, max_results, in_list=True
@@ -118,10 +118,92 @@ def find(
     )
 
 
-@de.union
-def union(
+@de.albums_filter
+def albums_filter(
+    data: str,
+    name: str,
+    min_score: int,
+    max_score: int,
+    min_ratings: int,
+    max_ratings: int,
+    columns: tuple,
+    sort_by: tuple,
+    limit_artist: int,
+    limit_year: int,
+    quiet: bool,
+    verbose: bool,
+    debug: bool,
+):
+    """
+    Filter a list of albums.
+
+    This function processes a list, filtering it based on album scores
+    (`min_album_score`, `max_album_score`), ratings count (`min_ratings`,
+    `max_ratings`), selected columns (`columns`).
+
+    The resulting list is then sorted according to the parameters and saved.
+    """
+    MusicList().load(name=data, type_="albums").contextualize(
+        num_filter={
+            "user_score": (min_score, max_score),
+            "user_ratings": (min_ratings, max_ratings),
+        },
+        sort_by={k: ALBUM_SORT_BY[k] for k in sort_by},
+        limit_per={"artist": limit_artist, "year": limit_year},
+        select_rename=(ALBUM_COLUMNS.keys() if "all" in columns else columns),
+    ).save(name if name else data, location="filtered")
+
+
+@de.tracks_filter
+def tracks_filter(
+    data: str,
+    name: str,
+    min_score: int,
+    max_score: int,
+    min_album_score: int,
+    max_album_score: int,
+    min_ratings: int,
+    max_ratings: int,
+    columns: tuple,
+    sort_by: tuple,
+    limit_album: int,
+    limit_artist: int,
+    limit_year: int,
+    quiet: bool,
+    verbose: bool,
+    debug: bool,
+):
+    """
+    Filter a list of tracks.
+
+    This function processes a list, filtering it based on album scores
+    (`min_album_score`, `max_album_score`), ratings count (`min_ratings`,
+    `max_ratings`), selected columns (`columns`), and track scores (`min_score`,
+    `max_score`).
+
+    The resulting list is then sorted according to the parameters and saved.
+    """
+    MusicList().load(data, type_="tracks").contextualize(
+        num_filter={
+            "track_score": (min_score, max_score),
+            "user_score": (min_album_score, max_album_score),
+            "track_ratings": (min_ratings, max_ratings),
+        },
+        sort_by={k: TRACK_SORT_BY[k] for k in sort_by},
+        limit_per={
+            "album": limit_album,
+            "artist": limit_artist,
+            "year": limit_year,
+        },
+        select_rename=(TRACK_COLUMNS.keys() if "all" in columns else columns),
+    ).save(name if name else data, location="filtered")
+
+
+@de.albums_union
+def albums_union(
     data_1: str,
     data_2: str,
+    name: str,
     columns: tuple,
     key: str,
     dedup: bool,
@@ -141,20 +223,57 @@ def union(
     specified `dedup_key`, in addition to performing the standard deduplication
     by `key`.
     """
-    MusicList().load(data_1).union_with(
-        other=MusicList().load(data_2),
+    MusicList().load(data_1, type_="albums").union_with(
+        other=MusicList().load(data_2, type_="albums"),
         columns=tuple(ALBUM_COLUMNS.keys() if "all" in columns else columns),
         save=True,
+        name=name,
         key=key,
         dedup=dedup,
         dedup_key=dedup_key,
     )
 
 
-@de.intersect
-def intersect(
+@de.tracks_union
+def tracks_union(
     data_1: str,
     data_2: str,
+    name: str,
+    columns: tuple,
+    key: str,
+    dedup: bool,
+    dedup_key: str,
+    quiet: bool,
+    verbose: bool,
+    debug: bool,
+):
+    """
+    Merge downloaded lists into one, returning any album of each.
+
+    This function combines album data from two sources (`data_1` and `data_2`),
+    selecting only the specified `columns` and joining the lists based on the
+    given `key`.
+
+    If `dedup` is enabled, the function will remove duplicates based on the
+    specified `dedup_key`, in addition to performing the standard deduplication
+    by `key`.
+    """
+    MusicList().load(data_1, type_="tracks").union_with(
+        other=MusicList().load(data_2, type_="tracks"),
+        columns=tuple(TRACK_COLUMNS.keys() if "all" in columns else columns),
+        save=True,
+        name=name,
+        key=key,
+        dedup=dedup,
+        dedup_key=dedup_key,
+    )
+
+
+@de.albums_intersect
+def albums_intersect(
+    data_1: str,
+    data_2: str,
+    name: str,
     columns: tuple,
     key: str,
     quiet: bool,
@@ -168,18 +287,47 @@ def intersect(
     and `data_2`), selecting only the specified `columns` and using the given
     `key` to perform the comparison.
     """
-    MusicList().load(data_1).intersect_with(
-        other=MusicList().load(data_2),
+    MusicList().load(data_1, type_="albums").intersect_with(
+        other=MusicList().load(data_2, type_="albums"),
         columns=tuple(ALBUM_COLUMNS.keys() if "all" in columns else columns),
         save=True,
+        name=name,
         key=key,
     )
 
 
-@de.diff
-def diff(
+@de.tracks_intersect
+def tracks_intersect(
     data_1: str,
     data_2: str,
+    name: str,
+    columns: tuple,
+    key: str,
+    quiet: bool,
+    verbose: bool,
+    debug: bool,
+):
+    """
+    Join lists, only returning tracks that are in both lists.
+
+    This function identifies the tracks present in both data lists (`data_1`
+    and `data_2`), selecting only the specified `columns` and using the given
+    `key` to perform the comparison.
+    """
+    MusicList().load(data_1, type_="tracks").intersect_with(
+        other=MusicList().load(data_2, type_="tracks"),
+        columns=tuple(TRACK_COLUMNS.keys() if "all" in columns else columns),
+        save=True,
+        name=name,
+        key=key,
+    )
+
+
+@de.albums_diff
+def albums_diff(
+    data_1: str,
+    data_2: str,
+    name: str,
     columns: tuple,
     key: str,
     dedup: bool,
@@ -191,34 +339,73 @@ def diff(
     """
     Find the difference between lists.
 
-    This function identifies the albums present in the first data list
+    This function identifies the entries present in the first data list
     (`data_1`) but not in the second (`data_2`), selecting only the specified
     `columns` and using the given `key` to perform the comparison.
 
-    If `dedup` is enabled, the function will remove any albums that appear in
+    If `dedup` is enabled, the function will remove any entries that appear in
     both lists (based on their `dedup_key`), in addition to calculating the
     difference between the two lists using the specified `key`.
     """
-    MusicList().load(data_1).diff_with(
-        other=MusicList().load(data_2),
+    MusicList().load(data_1, type_="albums").diff_with(
+        other=MusicList().load(data_2, type_="albums"),
         columns=tuple(ALBUM_COLUMNS.keys() if "all" in columns else columns),
         save=True,
+        name=name,
         key=key,
         dedup=dedup,
         dedup_key=dedup_key,
     )
 
 
-@de.albums
-def albums(
-    data: str,
+@de.tracks_diff
+def tracks_diff(
+    data_1: str,
+    data_2: str,
+    name: str,
+    columns: tuple,
+    key: str,
+    dedup: bool,
+    dedup_key: str,
+    quiet: bool,
+    verbose: bool,
+    debug: bool,
+):
+    """
+    Find the difference between lists.
+
+    This function identifies the entries present in the first data list
+    (`data_1`) but not in the second (`data_2`), selecting only the specified
+    `columns` and using the given `key` to perform the comparison.
+
+    If `dedup` is enabled, the function will remove any entries that appear in
+    both lists (based on their `dedup_key`), in addition to calculating the
+    difference between the two lists using the specified `key`.
+    """
+    MusicList().load(data_1, type_="tracks").diff_with(
+        other=MusicList().load(data_2, type_="tracks"),
+        columns=tuple(TRACK_COLUMNS.keys() if "all" in columns else columns),
+        save=True,
+        name=name,
+        key=key,
+        dedup=dedup,
+        dedup_key=dedup_key,
+    )
+
+
+@de.export_albums
+def export_albums(
     markdown: bool,
+    data: str,
+    name: str,
     min_score: int | float,
     max_score: int | float,
     min_ratings: int,
     max_ratings: int,
     columns: tuple,
     sort_by: tuple,
+    limit_artist: int,
+    limit_year: int,
     quiet: bool,
     verbose: bool,
     debug: bool,
@@ -233,28 +420,30 @@ def albums(
     The resulting list is then sorted and optionally formatted as Markdown
     before being exported to a text file.
     """
-    MusicList().load(data).contextualize(
+    MusicList().load(data, type_="albums").contextualize(
         num_filter={
             "user_score": (min_score, max_score),
             "user_ratings": (min_ratings, max_ratings),
         },
+        sort_by={k: ALBUM_SORT_BY[k] for k in sort_by},
+        limit_per={"artist": limit_artist, "year": limit_year},
         select_rename=(
             ALBUM_COLUMNS
             if "all" in columns
             else {k: ALBUM_COLUMNS[k] for k in columns}
         ),
-        sort_by={k: ALBUM_SORT_BY[k] for k in sort_by},
     ).table(
         save=True,
+        name=name if name else None,
         as_md=markdown,
-        name_postfix="_albums",
     )
 
 
-@de.tracks
-def tracks(
-    data: str,
+@de.export_tracks
+def export_tracks(
     markdown: bool,
+    data: str,
+    name: str,
     min_score: int,
     max_score: int,
     min_album_score: int,
@@ -263,6 +452,9 @@ def tracks(
     max_ratings: int,
     columns: tuple,
     sort_by: tuple,
+    limit_album: int,
+    limit_artist: int,
+    limit_year: int,
     quiet: bool,
     verbose: bool,
     debug: bool,
@@ -278,22 +470,27 @@ def tracks(
     The resulting list is then sorted and optionally formatted as Markdown
     before being exported to a text file.
     """
-    MusicList().load(data).tracks().contextualize(
+    MusicList().load(data, type_="tracks").contextualize(
         num_filter={
             "track_score": (min_score, max_score),
             "user_score": (min_album_score, max_album_score),
             "track_ratings": (min_ratings, max_ratings),
+        },
+        sort_by={k: TRACK_SORT_BY[k] for k in sort_by},
+        limit_per={
+            "album": limit_album,
+            "artist": limit_artist,
+            "year": limit_year,
         },
         select_rename=(
             TRACK_COLUMNS
             if "all" in columns
             else {k: TRACK_COLUMNS[k] for k in columns}
         ),
-        sort_by={k: TRACK_SORT_BY[k] for k in sort_by},
     ).table(
         save=True,
+        name=name if name else None,
         as_md=markdown,
-        name_postfix="_tracks",
     )
 
 

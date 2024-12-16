@@ -1,17 +1,17 @@
-import pprint
 from pathlib import Path
+from pprint import pformat
 
-import mutagen
+from mutagen import File
 
-from src import dump
 from src.attributes.local_dirs import album as album_attr, track as track_attr
 from src.classes.Album import Album
 from src.classes.MusicList import MusicList
 from src.debug import logging
 from src.defaults import defaults
+from src.dump import dirs
 
 
-def extract_tag(tag: list, key: str, sep: str = "; ") -> str | int:
+def __extract__(tag: list, key: str, sep: str = "; ") -> str | int:
     tag = sep.join(tag)
     if key in ("year", "total_tracks", "total_discs", "track_number", "disc"):
         tag = int(tag.split("/")[0])
@@ -33,9 +33,9 @@ def from_dir(
     album = Album()
     if not quiet:
         print(f"Registering music from '{source}'")
-    for d in dump.dirs(source):
+    for d in dirs(source):
         track_files = tuple(
-            mutagen.File(f, easy=True)
+            File(f, easy=True)
             for s in suffixes
             for f in sorted(d.glob(f"*.{s}"))
         )
@@ -45,7 +45,7 @@ def from_dir(
             tag = track_files[0].get(v)
             if not tag:
                 continue
-            album[k] = extract_tag(tag, k)
+            album[k] = __extract__(tag, k)
         album["album_path"] = d.as_posix()
         if not "year" in album:  # M4a Tags don't have year tag
             if "original_date" in album:
@@ -63,12 +63,12 @@ def from_dir(
                 f"`{album}`."
             )
             if debug:
-                logger.debug(pprint.pformat(track_files[0]))
+                logger.debug(pformat(track_files[0]))
         album["tracks"] = []
         for t in track_files:
             album["tracks"].append(
                 {
-                    k: extract_tag(t[v], k)
+                    k: __extract__(t[v], k)
                     for k, v in track_data.items()
                     if v in t
                 }
@@ -79,7 +79,9 @@ def from_dir(
     if not albums:
         logger.error(f"No albums found on `{source}`.")
         exit(1)
-    MusicList(albums).save("download.dirs")
+    ml = MusicList(albums)
+    ml.save(name="dirs")
+    ml.tracks().save()
 
 
 def playlist(data: str):

@@ -19,14 +19,14 @@ from src.get import data as get_data
 
 
 def __download__(
-    field: str,
+    name: str,
     function,
-    type1,
-    type2,
+    type_1,
+    type_2,
     score_key: str,
     min_score: int | float,
     max_score: int | float,
-    name: str | None = None,
+    website_name: str | None = None,
     ceil: bool = defaults.CEIL,
     quiet: bool = defaults.QUIET,
     verbose: bool = defaults.VERBOSE,
@@ -38,16 +38,16 @@ def __download__(
                 f"""
             Download process started:
             - Types: {(
-                    type1 if isinstance(type1, int) else
-                    tuple(t[0] for t in type1)
-                    if isinstance(type1[0], tuple)
-                    else type1
+                    type_1 if isinstance(type_1, int) else
+                    tuple(t[0] for t in type_1)
+                    if isinstance(type_1[0], tuple)
+                    else type_1
                 )}
             - Types: {(
-                    type2 if isinstance(type2, int) else
-                    tuple(t[0] for t in type2)
-                    if isinstance(type2[0], tuple)
-                    else type2
+                    type_2 if isinstance(type_2, int) else
+                    tuple(t[0] for t in type_2)
+                    if isinstance(type_2[0], tuple)
+                    else type_2
                 )}
             - Minimum score: {min_score}
             - Maximum score: {max_score}
@@ -55,8 +55,8 @@ def __download__(
             )
         )
     if not quiet:
-        if name:
-            print(f"Downloading lists from {name}:")
+        if website_name:
+            print(f"Downloading lists from {website_name}:")
         else:
             print("Downloading lists:")
     data = (
@@ -64,8 +64,8 @@ def __download__(
     )  # type: list[dict[str, str | int | float | list | dict | timedelta]]
     until = dump.until(
         function=function,
-        type1=type1,
-        type2=type2,
+        type1=type_1,
+        type2=type_2,
         score_key=score_key,
         min_score=min_score,
         max_score=max_score,
@@ -81,7 +81,9 @@ def __download__(
     else:
         for album in until:
             data.append(album)
-    MusicList(data).save(f"download.{field}")
+    ml = MusicList(data)
+    ml.save(name)
+    ml.tracks().save()
 
 
 def aoty(
@@ -95,14 +97,14 @@ def aoty(
     debug: bool = defaults.DEBUG,
 ):
     __download__(
-        field=field,
+        name=field,
         function=dump.aoty,
-        type1=types,
-        type2=start_page,
+        type_1=types,
+        type_2=start_page,
         score_key="user_score",
         min_score=min_score,
         max_score=max_score,
-        name="AOTY",
+        website_name="AOTY",
         quiet=quiet,
         verbose=verbose,
         debug=debug,
@@ -122,14 +124,14 @@ def prog(
     if not quiet:
         print("Generating list of genres...")
     __download__(
-        field=field,
+        name=field,
         function=dump.prog,
-        type1=tuple(get_data.prog_genres().items()),
-        type2=tuple((t, PROG_TYPES[t]) for t in types),
+        type_1=tuple(get_data.prog_genres().items()),
+        type_2=tuple((t, PROG_TYPES[t]) for t in types),
         score_key="user_score",
         min_score=min_score,
         max_score=max_score,
-        name="Progarchives",
+        website_name="Progarchives",
         ceil=ceil,
         quiet=quiet,
         verbose=verbose,

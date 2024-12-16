@@ -22,8 +22,17 @@ def count_time(func):
     return wrapper
 
 
-def subcomm(supercomm: object) -> object:
+def comm(name: str | None = None):
+    return cli.command(
+        name=name,
+        context_settings=CLICK_CONTEXT_SETTINGS,
+        cls=HelpColorsCommand,
+    )
+
+
+def subcomm(supercomm: object, name: str | None = None) -> object:
     return supercomm.command(
+        name=name,
         context_settings=CLICK_CONTEXT_SETTINGS,
         cls=HelpColorsCommand,
     )
@@ -31,10 +40,7 @@ def subcomm(supercomm: object) -> object:
 
 cli = groups.cli
 
-comm = cli.command(
-    context_settings=CLICK_CONTEXT_SETTINGS,
-    cls=HelpColorsCommand,
-)
+
 version = version_option(
     version=defaults.VERSION,
     prog_name=defaults.APP_NAME,
@@ -75,7 +81,7 @@ ceil = click.option(
     show_default=True,
     help="Round up (ceil) or down (floor) the score.",
 )
-dedup = click.option(
+use_dedup = click.option(
     "-d",
     "--dedup/--no-dedup",
     is_flag=True,
@@ -107,6 +113,12 @@ search = click.argument(
     nargs=-1,
     required=False,
 )
+name = click.option(
+    "-n",
+    "--name",
+    type=click.STRING,
+    help="Use a personalized name instead of an auto-generated one.",
+)
 
 
 def add_decorators(func, decorators: tuple):
@@ -115,7 +127,12 @@ def add_decorators(func, decorators: tuple):
     return func
 
 
-def command(func: object, decorators: tuple, group: object = None) -> object:
+def command(
+    func: object,
+    decorators: tuple,
+    group: object = None,
+    name: str | None = None,
+) -> object:
     return add_decorators(
         func,
         (
@@ -123,61 +140,8 @@ def command(func: object, decorators: tuple, group: object = None) -> object:
             debug,
             verbose,
             quiet,
-            subcomm(group) if group else comm,
+            subcomm(group, name) if group else comm(name),
         )
         + decorators
         + (count_time,),
     )
-
-
-def dirs(func):
-    """
-    return command(
-        func,
-        (
-            path.source,
-            path.dirs(letter="p", no_name=True),
-        ),
-        groups.search,
-    )
-    """
-
-
-def wanted(func):
-    """
-    return command(
-        func,
-        (
-            path.wanted(letter="p", no_name=True),
-            dedup,
-            path.merge(read=True),
-            path.dirs(read=True),
-        ),
-        groups.search,
-    )
-    """
-
-
-def leftover(func):
-    """
-    return command(
-        func,
-        (
-            path.leftover(letter="p", no_name=True),
-            dedup,
-            path.dirs(read=True),
-            path.merge(read=True),
-        ),
-        groups.search,
-    )
-    """
-
-
-def copy(func):
-    """
-    return command(
-        func,
-        (path.source, path.destination, path.wanted(read=True)),
-        groups.operations,
-    )
-    """

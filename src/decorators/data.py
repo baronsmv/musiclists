@@ -4,7 +4,7 @@ from pathlib import Path
 
 import click
 
-from src.defaults.choice import DATA_CHOICE
+from src.defaults.choice import ALL_ALBUMS, ALL_TRACKS
 
 
 def source(
@@ -12,7 +12,9 @@ def source(
     parameter: str = "data",
     suffix: str | None = None,
     default: int = 0,
+    tracks: bool = False,
 ):
+    choices = tuple((ALL_TRACKS if tracks else ALL_ALBUMS).keys())
     help_message = (
         "Source for the data" + (" " + suffix if suffix else "") + "."
     )
@@ -22,24 +24,18 @@ def source(
         return click.option(
             f"-{letter}",
             f"--{parameter}",
-            type=click.Choice(
-                tuple(DATA_CHOICE.keys()),
-                case_sensitive=False,
-            ),
+            type=click.Choice(choices, case_sensitive=False),
             show_choices=True,
-            default=tuple(DATA_CHOICE.keys())[default],
+            default=choices[default],
             show_default=True,
             help=help_message,
         )
     else:
         return click.option(
             f"--{parameter}",
-            type=click.Choice(
-                tuple(DATA_CHOICE.keys()),
-                case_sensitive=False,
-            ),
+            type=click.Choice(choices, case_sensitive=False),
             show_choices=True,
-            default=tuple(DATA_CHOICE.keys())[default],
+            default=choices[default],
             show_default=True,
             help=help_message,
         )

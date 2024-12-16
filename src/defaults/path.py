@@ -1,30 +1,72 @@
 #!/usr/bin/env python3
 
 from pathlib import Path
+from typing import Literal
 
-CURRENT_DIR = Path(__file__).parent
-SRC_DIR = CURRENT_DIR.parent
-ROOT_DIR = SRC_DIR.parent
+DEFAULTS = Path(__file__).parent
+SRC = DEFAULTS.parent
+ROOT = SRC.parent
+DATA = ROOT / "data"
+OUTPUT = ROOT / "output"
 
-DATA_DIR = Path(ROOT_DIR / "data")
-OUTPUT_DIR = Path(ROOT_DIR / "output")
-DEDUP_DIR = Path(DATA_DIR / "dedup")
-UNION_DIR = Path(DATA_DIR / "union")
-INTERSECT_DIR = Path(DATA_DIR / "intersect")
-DIFF_DIR = Path(DATA_DIR / "diff")
+DEDUP = DATA / "dedup"
+ALBUMS = DATA / "albums"
+TRACKS = DATA / "tracks"
 
-DIRS = {
-    "download": DATA_DIR,
-    "output": OUTPUT_DIR,
-    "dedup": DEDUP_DIR,
-    "union": UNION_DIR,
-    "intersect": INTERSECT_DIR,
-    "diff": DIFF_DIR,
-}  # type: dict[str: Path]
+ALBUMS_DEDUP = DEDUP / "albums"
+TRACKS_DEDUP = DEDUP / "tracks"
 
-VALID_LOCATION = {"download", "output", "dedup", "union", "intersect", "diff"}
+ALBUMS_DOWNLOAD = ALBUMS / "download"
+ALBUMS_FILTERED = ALBUMS / "filtered"
+ALBUMS_UNION = ALBUMS / "union"
+ALBUMS_INTERSECT = ALBUMS / "intersect"
+ALBUMS_DIFF = ALBUMS / "diff"
+ALBUMS_OUTPUT = OUTPUT / "albums"
 
-for d in DIRS.values():
+TRACKS_DOWNLOAD = TRACKS / "download"
+TRACKS_FILTERED = TRACKS / "filtered"
+TRACKS_UNION = TRACKS / "union"
+TRACKS_INTERSECT = TRACKS / "intersect"
+TRACKS_DIFF = TRACKS / "diff"
+TRACKS_OUTPUT = OUTPUT / "tracks"
+
+ALL_PARENTS = {
+    "data": DATA,
+    "output": OUTPUT,
+    "dedup": DEDUP,
+    "albums": ALBUMS,
+    "tracks": TRACKS,
+}
+ALBUMS_LOCATIONS = {
+    "albums-download": ALBUMS_DOWNLOAD,
+    "albums-dedup": ALBUMS_DEDUP,
+    "albums-filtered": ALBUMS_FILTERED,
+    "albums-union": ALBUMS_UNION,
+    "albums-intersect": ALBUMS_INTERSECT,
+    "albums-diff": ALBUMS_DIFF,
+    "albums-output": ALBUMS_OUTPUT,
+}
+TRACKS_LOCATIONS = {
+    "tracks-download": TRACKS_DOWNLOAD,
+    "tracks-dedup": TRACKS_DEDUP,
+    "tracks-filtered": TRACKS_FILTERED,
+    "tracks-union": TRACKS_UNION,
+    "tracks-intersect": TRACKS_INTERSECT,
+    "tracks-diff": TRACKS_DIFF,
+    "tracks-output": TRACKS_OUTPUT,
+}
+DATA_LOCATIONS = ALBUMS_LOCATIONS | TRACKS_LOCATIONS
+ALL = ALL_PARENTS | DATA_LOCATIONS
+
+for d in ALL.values():
     d.mkdir(exist_ok=True)
 
-LOG_PATH = Path(DATA_DIR / "musiclists.log")
+VALID_LOCATIONS = set(ALL)
+VALID_TYPES = {"albums", "tracks"}
+
+LOCATION = Literal[
+    "download", "dedup", "filtered", "union", "intersect", "diff", "output"
+]
+TYPE = Literal["albums", "tracks"]
+
+LOG_PATH = DATA / "musiclists.log"

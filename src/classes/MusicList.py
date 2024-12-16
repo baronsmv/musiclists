@@ -6,8 +6,9 @@ import polars as pl
 
 from src.classes.Album import Album
 from src.classes.DuplicatesList import DuplicatesList
+from src.debug import logging
 from src.defaults import defaults
-from src.defaults.choice import ALL_CHOICE
+from src.defaults.path import TYPE, LOCATION
 from src.get.file import path, source
 
 
@@ -73,7 +74,8 @@ def choice(
 
 class MusicList(pl.DataFrame):
     name = ""
-    location = ""
+    type = "albums"
+    location = "download"
     exists = False
 
     def __str__(self) -> str:
@@ -81,8 +83,15 @@ class MusicList(pl.DataFrame):
 
     def get_attrs(self, other: Self) -> Self:
         self.name = other.name
+        self.type = other.type
         self.location = other.location
         self.exists = other.exists
+        return self
+
+    def unpack_attrs(self, name: str, type_: TYPE, location: LOCATION) -> Self:
+        self.name, self.type, self.location, self.exists = source(
+            name, type_, location
+        )
         return self
 
     def as_df(self, as_md: bool) -> str:
@@ -96,17 +105,20 @@ class MusicList(pl.DataFrame):
 
     def tracks(self) -> Self:
         ml = self.explode("tracks")
-        ml = pl.concat(
-            [
-                ml,
-                pl.json_normalize(
-                    ml["tracks"],
-                    infer_schema_length=None,
-                ),
-            ],
-            how="horizontal",
-        )
-        return MusicList(ml).get_attrs(self)
+        ml = MusicList(
+            pl.concat(
+                [
+                    ml,
+                    pl.json_normalize(
+                        ml["tracks"],
+                        infer_schema_length=None,
+                    ),
+                ],
+                how="horizontal",
+            )
+        ).get_attrs(self)
+        ml.type = "tracks"
+        return ml
 
     def search_album(
         self,
@@ -149,11 +161,19 @@ class MusicList(pl.DataFrame):
     def has_duplicates(self, key: str = "id") -> bool:
         return not self.duplicates(key).is_empty()
 
-    def load(self, name: str) -> Self:
-        ml = MusicList(self.deserialize(ALL_CHOICE[name]))
-        ml.location, ml.name, ml.exists = source(name)
-        if not ml.exists:
-            raise KeyError(f"Couldn't find {name} in {ALL_CHOICE.keys()}.")
+    def load(
+        self, name: str, type_: TYPE, location: LOCATION | None = None
+    ) -> Self:
+        if not location:
+            name, *location = name.split(".")
+            if not location:
+                location = "download"
+        logger = logging.logger(self.load)
+        src = source(name, type_, location)
+        if not src[3]:
+            logger.error(f"{name} list doesn't exists and cannot be loaded.")
+            exit(1)
+        ml = MusicList(self.deserialize(path(*src[:3]))).unpack_attrs(*src[:3])
         return ml
 
     def warn_duplicates(self) -> None:
@@ -170,38 +190,48 @@ class MusicList(pl.DataFrame):
 
     def save(
         self,
-        name: str,
+        name: str | None = None,
+        type_: TYPE | None = None,
+        location: LOCATION | None = None,
         suffix: str | None = None,
         warn_duplicates: bool = False,
     ) -> None:
-        self.location, self.name, self.exists = source(name)
+        self.unpack_attrs(
+            name if name else self.name,
+            type_ if type_ else self.type,
+            location if location else self.location,
+        )
         if warn_duplicates:
             self.warn_duplicates()
-        self.serialize(path(self.name, self.location, suffix=suffix))
+        self.serialize(
+            path(
+                name=self.name,
+                type_=self.type,
+                location=self.location,
+                suffix=suffix,
+            )
+        )
         self.exists = True
 
     def table(
         self,
         save: bool = False,
         name: str | None = None,
-        name_prefix: str = "",
-        name_postfix: str = "",
         as_md: bool = True,
     ) -> str | None:
         txt = self.as_df(as_md=as_md)
         if save:
             with open(
                 path(
-                    name_prefix
+                    name=(name if name else self.name)
                     + (
-                        f"{self.location}-"
+                        f"-{ self.location}"
                         if self.location != "download"
                         else ""
-                    )
-                    + (name if name else self.name)
-                    + name_postfix,
-                    suffix="md" if as_md else "txt",
+                    ),
+                    type_=self.type,
                     location="output",
+                    suffix="md" if as_md else "txt",
                 ),
                 "w",
                 encoding="utf-8",
@@ -215,14 +245,17 @@ class MusicList(pl.DataFrame):
             other.select(self.columns).extend(self).unique()
         ).get_attrs(self)
 
+    def adapt(self, attrs: dict) -> bool:
+        col = self.columns
+        for k in tuple(attrs):
+            if k not in col:
+                del attrs[k]
+        return len(attrs) != 0
+
     def filter_by_num(
         self, attrs: dict[str, tuple[float | None, float | None]]
     ) -> Self:
-        col = self.columns
-        for k in tuple(attrs.keys()):
-            if k not in col:
-                del attrs[k]
-        if len(attrs) == 0:
+        if not self.adapt(attrs):
             return self
         return MusicList(
             self.filter(
@@ -236,23 +269,26 @@ class MusicList(pl.DataFrame):
         ).get_attrs(self)
 
     def sort_by(self, attrs: dict[str, bool]) -> Self:
-        col = self.columns
-        for k in tuple(attrs.keys()):
-            if k not in col:
-                del attrs[k]
-        if len(attrs) == 0:
+        if not self.adapt(attrs):
             return self
         return MusicList(
             self.sort(by=attrs.keys(), descending=list(attrs.values()))
         ).get_attrs(self)
 
-    def select_rename(self, attrs: dict) -> Self:
-        col = self.columns
-        for k in tuple(attrs.keys()):
-            if k not in col:
-                del attrs[k]
-        if len(attrs) == 0:
+    def limit_per(self, attrs: dict[str, int]) -> Self:
+        if not self.adapt(attrs):
             return self
+        ml = self
+        for k, v in attrs.items():
+            if v and v > 0:
+                ml = ml.group_by(k).head(v)
+        return MusicList(ml).get_attrs(self)
+
+    def select_rename(self, attrs: tuple | dict[str, str]) -> Self:
+        if not self.adapt(attrs):
+            return self
+        if isinstance(attrs, tuple):
+            return MusicList(self.select(attrs)).get_attrs(self)
         return MusicList(self.select(attrs.keys()).rename(attrs)).get_attrs(
             self
         )
@@ -261,20 +297,25 @@ class MusicList(pl.DataFrame):
         self,
         num_filter: dict[str, tuple[int | None, int | None]] | None,
         sort_by: dict[str, bool] | None,
-        select_rename: dict | tuple | list | None,
+        limit_per: dict[str, int] | None,
+        select_rename: dict | tuple | None,
     ) -> Self:
         ml = self
         if num_filter is not None:
             ml = ml.filter_by_num(num_filter)
         if sort_by is not None:
             ml = ml.sort_by(sort_by)
+        if limit_per is not None:
+            ml = ml.limit_per(limit_per)
         if select_rename is not None:
             ml = ml.select_rename(select_rename)
-        return ml.get_attrs(self)
+        return ml
 
     def duplicates_with(self, other: Self) -> DuplicatesList | None:
-        location, name, exists = source(f"dedup.{self}-{other}")
-        return DuplicatesList().load(name) if exists else None
+        name, _, _, exists = source(
+            f"{self}-{other}", type_=self.type, location="dedup"
+        )
+        return DuplicatesList().load(name, type_=self.type) if exists else None
 
     def duplicated_ids_with(
         self, other: Self, key: str = "id"
@@ -390,8 +431,9 @@ class MusicList(pl.DataFrame):
             )
         duplicates = DuplicatesList(data)
         duplicates.name = f"{self}-{other}"
+        duplicates.type = self.type
         if save:
-            duplicates.save(duplicates.name)
+            duplicates.save()
         else:
             return duplicates
 
@@ -424,6 +466,7 @@ class MusicList(pl.DataFrame):
         other: Self,
         columns: tuple,
         save: bool = True,
+        name: str | None = None,
         key: str = "id",
         dedup: bool = True,
         dedup_key: str = "internal_id",
@@ -434,10 +477,11 @@ class MusicList(pl.DataFrame):
             other.deduplicated_from(self, key=dedup_key) if dedup else other
         ).select(columns)
         union = MusicList(data.extend(other_data).unique(key, keep="first"))
-        union.name = f"{self}-{other}"
+        union.name = name if name else f"{self}-{other}"
+        union.type = self.type
         union.location = "union"
         if save:
-            union.save(f"{union.location}.{union.name}")
+            union.save()
         else:
             return union
 
@@ -446,6 +490,7 @@ class MusicList(pl.DataFrame):
         other: Self,
         columns: tuple,
         save: bool = True,
+        name: str | None = None,
         key: str = "id",
     ):
         columns += (key,)
@@ -454,10 +499,11 @@ class MusicList(pl.DataFrame):
         if di := other.duplicated_ids_with(self, key):
             other_data |= set(di)
         intersect = MusicList(data.filter(pl.col(key).is_in(other_data)))
-        intersect.name = f"{self}-{other}"
+        intersect.name = name if name else f"{self}-{other}"
+        intersect.type = self.type
         intersect.location = "intersect"
         if save:
-            intersect.save(f"{intersect.location}.{intersect.name}")
+            intersect.save()
         else:
             return intersect
 
@@ -466,6 +512,7 @@ class MusicList(pl.DataFrame):
         other: Self,
         columns: tuple,
         save: bool = True,
+        name: str | None = None,
         key: str = "id",
         dedup: bool = True,
         dedup_key: str = "internal_id",
@@ -476,9 +523,10 @@ class MusicList(pl.DataFrame):
         ).select(columns)
         other_data = set(other.get_column(key))
         diff = MusicList(data.filter(pl.col(key).is_in(other_data).not_()))
-        diff.name = f"{self}-{other}"
+        diff.name = name if name else f"{self}-{other}"
+        diff.type = self.type
         diff.location = "diff"
         if save:
-            diff.save(f"{diff.location}.{diff.name}")
+            diff.save()
         else:
             return diff
