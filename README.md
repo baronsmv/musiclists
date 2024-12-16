@@ -2,26 +2,31 @@
 
 ## Description
 
-A command-line tool for downloading, merging, and analyzing top album lists
-from websites like AOTY.org and ProgArchives.com.
+A command-line tool for downloading, filtering, and transforming top album and
+track lists from websites like AOTY.org and ProgArchives.com.
 
-The tool helps you easily aggregate and explore curated album rankings across different platforms, making it ideal for music enthusiasts and data-driven listeners.
+The tool helps you easily aggregate and explore curated album rankings across
+different platforms, making it ideal for music enthusiasts and data-driven
+listeners.
 
 ## Features
 
-- Download lists of the top albums from multiple platforms such as AOTY.org and ProgArchives.com.
-- Provide utilities for merging, subtracting, filtering, sorting, and processing the album data, as well as their tracks.
-- Export to multiple formats, for further analysis.
+- Download lists of the top albums and tracks from multiple platforms such as
+  AlbumOfTheYear.org and ProgArchives.com.
+- Find local albums and tracks in directories and add them to a list.
+- Manipulate individually the lists via filtering, sorting, and limiting of
+  entries.
+- Operate between lists as sets (union, intersection, difference).
+- Export to a text file.
 
 ## Planned Features
 
-- Find albums in directories and add them to a list.
-- Provide a uility to copy albums of a list, from a directory to another.
+- Copy albums of a list, from a directory to another.
+- Convert local albums lists (including transformed ones) to playlists.
 
 ## Dependencies
 
-- `bs4`, for navigating HTML tags.
-- `click` and `click_help_colors`, used in the CLI.
-- `polars`, to storage the data in DataFrames.
-- `pathlib`, to deal easily with files and directories.
-- `pyexiftool`, to extract data from files.
+- `bs4`, to navigate and parse HTML tags and values.
+- `click` and `click_help_colors`, to implement the CLI.
+- `mutagen`, to extract metadata from track files.
+- `polars`, to storage and manipulate data.
