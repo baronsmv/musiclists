@@ -115,7 +115,7 @@ class MusicList(pl.DataFrame):
                     ),
                 ],
                 how="horizontal",
-            )
+            ).drop("tracks")
         ).get_attrs(self)
         ml.type = "tracks"
         return ml
@@ -275,13 +275,17 @@ class MusicList(pl.DataFrame):
             self.sort(by=attrs.keys(), descending=list(attrs.values()))
         ).get_attrs(self)
 
-    def limit_per(self, attrs: dict[str, int]) -> Self:
+    def limit_per(self, attrs: dict[str, int], sort: bool = True) -> Self:
         if not self.adapt(attrs):
             return self
-        ml = self
+        ml = (
+            self.sort_by({"track_score": True, "user_score": True})
+            if sort
+            else self
+        )
         for k, v in attrs.items():
             if v and v > 0:
-                ml = ml.group_by(k).head(v)
+                ml = ml.group_by(k, maintain_order=sort).head(v)
         return MusicList(ml).get_attrs(self)
 
     def select_rename(self, attrs: tuple | dict[str, str]) -> Self:
@@ -303,10 +307,10 @@ class MusicList(pl.DataFrame):
         ml = self
         if num_filter is not None:
             ml = ml.filter_by_num(num_filter)
-        if sort_by is not None:
-            ml = ml.sort_by(sort_by)
         if limit_per is not None:
             ml = ml.limit_per(limit_per)
+        if sort_by is not None:
+            ml = ml.sort_by(sort_by)
         if select_rename is not None:
             ml = ml.select_rename(select_rename)
         return ml

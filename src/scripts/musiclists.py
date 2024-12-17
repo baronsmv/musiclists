@@ -149,7 +149,7 @@ def albums_filter(
             "user_ratings": (min_ratings, max_ratings),
         },
         sort_by={k: ALBUM_SORT_BY[k] for k in sort_by},
-        limit_per={"artist": limit_artist, "year": limit_year},
+        limit_per={"year": limit_year, "artist": limit_artist},
         select_rename=(ALBUM_COLUMNS.keys() if "all" in columns else columns),
     ).save(name if name else data, location="filtered")
 
@@ -191,9 +191,9 @@ def tracks_filter(
         },
         sort_by={k: TRACK_SORT_BY[k] for k in sort_by},
         limit_per={
-            "album": limit_album,
-            "artist": limit_artist,
             "year": limit_year,
+            "artist": limit_artist,
+            "id": limit_album,
         },
         select_rename=(TRACK_COLUMNS.keys() if "all" in columns else columns),
     ).save(name if name else data, location="filtered")
@@ -426,7 +426,7 @@ def export_albums(
             "user_ratings": (min_ratings, max_ratings),
         },
         sort_by={k: ALBUM_SORT_BY[k] for k in sort_by},
-        limit_per={"artist": limit_artist, "year": limit_year},
+        limit_per={"year": limit_year, "artist": limit_artist},
         select_rename=(
             ALBUM_COLUMNS
             if "all" in columns
@@ -478,9 +478,9 @@ def export_tracks(
         },
         sort_by={k: TRACK_SORT_BY[k] for k in sort_by},
         limit_per={
-            "album": limit_album,
-            "artist": limit_artist,
             "year": limit_year,
+            "artist": limit_artist,
+            "id": limit_album,
         },
         select_rename=(
             TRACK_COLUMNS
