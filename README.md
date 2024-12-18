@@ -151,4 +151,4 @@ supporting and donating to the websites that made it possible, helping them
 keep running:
 
 - [Help Support Album of the Year](https://www.albumoftheyear.org/donate/)
-- [Help Support ProgArchives](https://www.paypal.com/donate/?hosted_button_id=DRNRB8RG8NUN2)
+- [Help Support Prog Archives](https://www.paypal.com/donate/?hosted_button_id=DRNRB8RG8NUN2)
