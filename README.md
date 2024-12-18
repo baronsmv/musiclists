@@ -3,7 +3,7 @@
 ## Description
 
 A command-line tool for downloading, filtering, and transforming top album and
-track lists from websites like AOTY.org and ProgArchives.com.
+track lists from music review websites.
 
 The tool helps you easily aggregate and explore curated album rankings across
 different platforms, making it ideal for music enthusiasts and data-driven
@@ -12,7 +12,8 @@ listeners.
 ### Features
 
 - Download lists of the top albums and tracks from multiple platforms such as
-  AlbumOfTheYear.org and ProgArchives.com.
+  [AlbumOfTheYear.org](https://www.albumoftheyear.org/) and
+  [ProgArchives.com](https://www.progarchives.com/).
 - Find local albums and tracks in directories and add them to a list.
 - Manipulate individually the lists via filtering, sorting, and limiting of
   entries.
@@ -30,6 +31,15 @@ listeners.
 - `click` and `click_help_colors`, to implement the CLI.
 - `mutagen`, to extract metadata from track files.
 - `polars`, to storage and manipulate data.
+
+### Donating and supporting the web platforms
+
+If you like this project or it's helpful to you in any way, consider
+supporting and donating to the websites that made it possible, helping them
+keep running:
+
+- [Help Support Album of the Year](https://www.albumoftheyear.org/donate/)
+- [Help Support ProgArchives](https://www.paypal.com/donate/?hosted_button_id=DRNRB8RG8NUN2)
 
 ## Commands
 
