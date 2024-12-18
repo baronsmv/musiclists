@@ -61,9 +61,9 @@ Usage: musiclists transform [albums|tracks] [OPTIONS] COMMAND [ARGS]...
 
 Commands:
   diff       Find the difference between lists.
-  filter     Filter a list of tracks.
-  intersect  Join lists, only returning tracks that are in both lists.
-  union      Merge downloaded lists into one, returning any album of each.
+  filter     Filter a list.
+  intersect  Join lists, only returning entries that are in both lists.
+  union      Merge downloaded lists into one, returning any entry of each.
 ```
 
 ## Options
@@ -74,13 +74,12 @@ Commands:
 Usage: musiclists download [aoty|prog] [OPTIONS]
 
 Options:
-  -t, --types [all|Studio|DVD|Boxset,Compilation|Live|Singles,EPs,FanClub,Promo]
-                                  Types of ProgArchives albums to download.
+  -t, --types                     Types of albums to download.
   -c, --ceil / -f, --floor        Round up (ceil) or down (floor) the score.
   -s, --min-score INTEGER         Minimum score threshold for including
-                                  ProgArchives albums.
+                                  albums.
   -S, --max-score INTEGER         Maximum score threshold for including
-                                  ProgArchives albums.
+                                  albums.
 ```
 
 ### Finding duplicated entries
@@ -89,10 +88,9 @@ Options:
 Usage: musiclists duplicates find [OPTIONS] [SEARCH]...
 
 Options:
-  -c, --columns [all|id|internal_id|artist|album|year|type|position|user_score|user_ratings|album_path|album_url|cover_url]
-                                  Columns to consider for the process.
-  -d, --data-1 [aoty|prog]        Source for the data 1.
-  -D, --data-2 [aoty|prog]        Source for the data 2.
+  -c, --columns                   Columns to consider for the process.
+  -d, --data-1                    Source for the data 1.
+  -D, --data-2                    Source for the data 2.
   -H, --highest / -A, --all-matches
                                   Returns only the highest match of each
                                   entry, or every match.
@@ -108,7 +106,7 @@ Usage: musiclists export [albums|tracks] [OPTIONS]
 
 Options:
   -m, --markdown / --no-markdown  Output as MarkDown.
-  -d, --data [aoty|prog]          Source for the data.
+  -d, --data                      Source for the data.
   -n, --name TEXT                 Use a personalized name instead of an auto-
                                   generated one.
   -s, --min-score INTEGER         Minimum score threshold for including
@@ -119,12 +117,10 @@ Options:
                                   albums.
   --max-album-score FLOAT         Maximum score threshold for including
                                   albums.
-  -r, --min-ratings INTEGER       Minimum ratings for including tracks.
-  -R, --max-ratings INTEGER       Maximum ratings for including tracks.
-  -c, --columns [all|track_score|track_ratings|track_number|track_title|track_length|track_disc|track_path|featuring|track_url|id|internal_id|artist|album|year|type|position|user_score|user_ratings|album_path|album_url|cover_url]
-                                  Columns to include.
-  --sort-by [track_score|track_ratings|track_number|track_title|track_length|track_disc|featuring|id|internal_id|artist|album|year|type|position|user_score|user_ratings]
-                                  Columns to sort by.
+  -r, --min-ratings INTEGER       Minimum ratings for including entries.
+  -R, --max-ratings INTEGER       Maximum ratings for including entries.
+  -c, --columns                   Columns to include.
+  -C, --sort-by                   Columns to sort by.
   -a, --limit-album INTEGER       Limit of albums returned per album column.
   -A, --limit-artist INTEGER      Limit of tracks returned per artist column.
   -y, --limit-year INTEGER        Limit of tracks returned per year column.
@@ -136,15 +132,13 @@ Options:
 Usage: musiclists transform [albums|tracks] [diff|intersect|union] [OPTIONS]
 
 Options:
-  -d, --data-1 [aoty|prog]        Source for the data 1.
-  -D, --data-2 [aoty|prog]        Source for the data 2.
+  -d, --data-1                    Source for the data 1.
+  -D, --data-2                    Source for the data 2.
   -n, --name TEXT                 Use a personalized name instead of an auto-
                                   generated one.
-  -c, --columns [all|track_score|track_ratings|track_number|track_title|track_length|track_disc|track_path|featuring|track_url|id|internal_id|artist|album|year|type|position|user_score|user_ratings|album_path|album_url|cover_url]
-                                  Columns to consider for the process.
-  -k, --key [id|internal_id]      Key for the diff process.
+  -c, --columns                   Columns to consider for the process.
+  -k, --key                       Key for the diff process.
   -d, --dedup / --no-dedup        Deduplicate the output based on its
                                   deduplicates file.
-  -K, --dedup-key [id|internal_id]
-                                  Key for the dedup process.
+  -K, --dedup-key                 Key for the dedup process.
 ```
