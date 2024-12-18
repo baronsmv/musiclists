@@ -137,7 +137,7 @@ Options:
   -n, --name TEXT                 Use a personalized name instead of an auto-
                                   generated one.
   -c, --columns                   Columns to consider for the process.
-  -k, --key                       Key for the diff process.
+  -k, --key                       Key for the process.
   -d, --dedup / --no-dedup        Deduplicate the output based on its
                                   deduplicates file.
   -K, --dedup-key                 Key for the dedup process.
