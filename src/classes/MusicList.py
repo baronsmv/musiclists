@@ -94,10 +94,12 @@ class MusicList(pl.DataFrame):
         )
         return self
 
-    def as_df(self, as_md: bool) -> str:
-        with export_config(as_md):
-            st = str(pl.DataFrame(self))
-        return st
+    def to_string(self, markdown: bool) -> str:
+        with export_config(markdown):
+            ml = str(pl.DataFrame(self))
+            if markdown:
+                ml = ml.replace("$", "\$")
+        return ml
 
     def albums(self) -> Iterator[Album]:
         for r in self.rows(named=True):
@@ -180,7 +182,7 @@ class MusicList(pl.DataFrame):
         if self.has_duplicates():
             table = (
                 self.duplicates().select("id", "artist", "album", "year")
-            ).as_df(as_md=True)
+            ).to_string(markdown=True)
             warn(
                 "Duplicated ID in the DataFrame:\n"
                 + table
@@ -219,7 +221,7 @@ class MusicList(pl.DataFrame):
         name: str | None = None,
         as_md: bool = True,
     ) -> str | None:
-        txt = self.as_df(as_md=as_md)
+        txt = self.to_string(markdown=as_md)
         if save:
             with open(
                 path(
