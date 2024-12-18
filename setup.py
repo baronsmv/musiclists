@@ -11,6 +11,7 @@ setuptools.setup(
         "bs4",
         "click",
         "click_help_colors",
+        "m3u8",
         "mutagen",
         "polars",
     ),

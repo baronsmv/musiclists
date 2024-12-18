@@ -13,7 +13,7 @@ from src.defaults.choice import (
     TRACK_SORT_BY,
 )
 from src.defaults.download import AOTY_TYPES, PROG_TYPES
-from src.files import from_dir
+from src.files import from_dir, to_playlist
 
 
 @de.download_aoty
@@ -509,6 +509,29 @@ def get(
     """
     from_dir(
         source=path,
+        quiet=quiet,
+        verbose=verbose,
+        debug=debug,
+    )
+
+
+@de.playlist
+def playlist(
+    data: str,
+    path: Path,
+    quiet: bool,
+    verbose: bool,
+    debug: bool,
+):
+    """
+    Find album data from a directory.
+
+    This function scans the `PATH` directory, where albums are stored, and
+    extracts their data.
+    """
+    to_playlist(
+        data=data,
+        path=path,
         quiet=quiet,
         verbose=verbose,
         debug=debug,

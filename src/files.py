@@ -1,6 +1,7 @@
 from pathlib import Path
 from pprint import pformat
 
+from m3u8 import M3U8, model
 from mutagen import File
 
 from src.attributes.local_dirs import album as album_attr, track as track_attr
@@ -84,5 +85,26 @@ def from_dir(
     ml.tracks().save()
 
 
-def playlist(data: str):
-    pass
+def to_playlist(
+    data: str,
+    path: Path,
+    path_column: str = "track_path",
+    as_uri: bool = False,
+    quiet: bool = defaults.QUIET,
+    verbose: bool = defaults.VERBOSE,
+    debug: bool = defaults.DEBUG,
+):
+    logger = logging.logger(to_playlist)
+    ml = MusicList().load(data, type_="tracks")
+    if path_column in ml.columns:
+        paths = ml.get_column(path_column).to_list()
+    else:
+        logger.error(f"No path column `{path_column}` in `{data}` MusicList.")
+        exit(1)
+    pl = M3U8()
+    for p in paths:
+        track_path = Path(p).as_uri() if as_uri else p
+        segment = model.Segment(uri=track_path)
+        pl.segments.append(segment)
+    with open(path, "w") as f:
+        f.write(pl.dumps())

@@ -6,7 +6,7 @@ from time import time
 import click
 from click_help_colors import HelpColorsCommand, version_option
 
-from src.decorators import groups
+from src.decorators.groups import cli
 from src.defaults import defaults
 from src.defaults.click import CLICK_CONTEXT_SETTINGS
 
@@ -20,25 +20,6 @@ def count_time(func):
         return result
 
     return wrapper
-
-
-def comm(name: str | None = None):
-    return cli.command(
-        name=name,
-        context_settings=CLICK_CONTEXT_SETTINGS,
-        cls=HelpColorsCommand,
-    )
-
-
-def subcomm(supercomm: object, name: str | None = None) -> object:
-    return supercomm.command(
-        name=name,
-        context_settings=CLICK_CONTEXT_SETTINGS,
-        cls=HelpColorsCommand,
-    )
-
-
-cli = groups.cli
 
 
 version = version_option(
@@ -121,7 +102,23 @@ name = click.option(
 )
 
 
-def add_decorators(func, decorators: tuple):
+def __command__(name_: str | None = None):
+    return cli.command(
+        name=name_,
+        context_settings=CLICK_CONTEXT_SETTINGS,
+        cls=HelpColorsCommand,
+    )
+
+
+def __sub_command__(group: object, name_: str | None = None) -> object:
+    return group.command(
+        name=name_,
+        context_settings=CLICK_CONTEXT_SETTINGS,
+        cls=HelpColorsCommand,
+    )
+
+
+def __add_decorators__(func, decorators: tuple):
     for dec in reversed(decorators):
         func = dec(func)
     return func
@@ -130,17 +127,17 @@ def add_decorators(func, decorators: tuple):
 def command(
     func: object,
     decorators: tuple,
-    group: object = None,
-    name: str | None = None,
+    group: click.group = None,
+    name_: str | None = None,
 ) -> object:
-    return add_decorators(
+    return __add_decorators__(
         func,
         (
             version,
             debug,
             verbose,
             quiet,
-            subcomm(group, name) if group else comm(name),
+            __sub_command__(group, name_) if group else __command__(name_),
         )
         + decorators
         + (count_time,),

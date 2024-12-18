@@ -7,7 +7,8 @@ from src.defaults.choice import (
     TRACK_COLUMNS,
     ALBUM_SORT_BY,
     ALBUM_COLUMNS,
-    ID_CHOICES,
+    ALBUM_ID,
+    TRACK_ID,
 )
 from src.defaults.download import AOTY_TYPES, PROG_TYPES
 
@@ -116,14 +117,14 @@ def columns(
 def key(
     option: str = "key",
     letter: str | None = None,
-    choices: tuple = ID_CHOICES,
+    tracks: bool = False,
     help_message: str = "Key for the process.",
     all_option: bool = False,
     default: str | int | tuple = 0,
 ):
     return __choice__(
         option=option,
-        choices=choices,
+        choices=TRACK_ID if tracks else ALBUM_ID,
         help_message=help_message,
         all_option=all_option,
         default=default,

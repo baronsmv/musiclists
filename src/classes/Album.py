@@ -8,6 +8,14 @@ from unicodedata import normalize
 from src.defaults.defaults import ALBUM_REPR_SEP, ID_LENGTH, ID_SEP
 
 
+def normalize_attr(attr: str, length: int):
+    for pattern in (r"[Tt]he ", r" EP", r".*: "):
+        attr = re.sub(pattern, "", attr)
+    attr = str(normalize("NFKD", attr).encode("ascii", "ignore"))[2:]
+    attr = re.sub(r"[^0-9a-zA-Z]+", "", attr)
+    return attr[:length].lower()
+
+
 class Album(UserDict):
     def __str__(self):
         return (
@@ -17,20 +25,19 @@ class Album(UserDict):
             + (" (" + str(self.get("year")) + ")" if "year" in self else "")
         )
 
-    def compute_id(self) -> None:
+    def compute_id(
+        self,
+        attrs: tuple[str] = ("artist", "year", "album"),
+        attr_length: int = ID_LENGTH,
+        id_sep: str = ID_SEP,
+    ) -> None:
         result = ""
-        sep_length = len(ID_SEP)
-        for attr in ("artist", "year", "album"):
-            field = self.get(attr, None)
-            if field is None:
+        sep_length = len(id_sep)
+        for attr in attrs:
+            sub_id = self.get(attr, None)
+            if sub_id is None:
                 continue
-            field = str(field)
-            for pattern in (r"[Tt]he ", r" EP", r".*: "):
-                field = re.sub(pattern, "", field)
-            field = str(normalize("NFKD", field).encode("ascii", "ignore"))[2:]
-            field = re.sub(r"[^0-9a-zA-Z]+", "", field)
-            field = field[:ID_LENGTH].lower()
-            result += ID_SEP + field
+            result += id_sep + normalize_attr(sub_id, attr_length)
         self["id"] = result[sep_length:]
 
     def similarity_with(

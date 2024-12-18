@@ -51,13 +51,11 @@ __albums_filters__ = (
 )
 __tracks_filters__ = (
     (
-        data.source(letter="d"),
+        data.source(letter="d", tracks=True),
         name,
         number.tracks_score(letter="s", default=TRACK_MIN_SCORE),
         number.tracks_score(letter="S", default=TRACK_MAX_SCORE, maximum=True),
-        number.albums_score(
-            default=ALBUM_MIN_SCORE, show_name=True
-        ),
+        number.albums_score(default=ALBUM_MIN_SCORE, show_name=True),
         number.albums_score(
             default=ALBUM_MAX_SCORE,
             show_name=True,
@@ -134,7 +132,7 @@ def download_aoty(func):
             number.aoty_score(letter="S", maximum=True),
         ),
         group=groups.download,
-        name="aoty",
+        name_="aoty",
     )
 
 
@@ -148,15 +146,15 @@ def download_prog(func):
             number.prog_score(letter="S", maximum=True),
         ),
         group=groups.download,
-        name="prog",
+        name_="prog",
     )
 
 
 def get(func):
     return command(
         func,
-        (data.path(),),
-        groups.files,
+        decorators=(data.path(),),
+        group=groups.files,
     )
 
 
@@ -175,7 +173,7 @@ def dedup_find(func):
             number.num_results(),
         ),
         group=groups.duplicates,
-        name="find",
+        name_="find",
     )
 
 
@@ -196,12 +194,13 @@ def __transform__(
             *(__tracks_source__ if tracks else __albums_source__),
             choice.key(
                 letter="k",
+                tracks=tracks,
                 help_message=f"Key for the {name_} process.",
             ),
             *(__dedup__ if dedup and not filters else ()),
         ),
         group=groups.tracks if tracks else groups.albums,
-        name=name_,
+        name_=name_,
     )
 
 
@@ -245,7 +244,7 @@ def __export__(func, tracks: bool = False):
             *(__tracks_filters__ if tracks else __albums_filters__),
         ),
         group=groups.export,
-        name="tracks" if tracks else "albums",
+        name_="tracks" if tracks else "albums",
     )
 
 
@@ -255,3 +254,14 @@ def export_albums(func):
 
 def export_tracks(func):
     return __export__(func, tracks=True)
+
+
+def playlist(func):
+    return command(
+        func,
+        decorators=(
+            data.source(letter="d", default=0, tracks=True),
+            data.path(exists=False, is_file=True),
+        ),
+        group=groups.files,
+    )

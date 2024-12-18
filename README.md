@@ -19,16 +19,13 @@ listeners.
   entries.
 - Operate between lists as sets (union, intersection, difference).
 - Export to a text file.
-
-### Planned Features
-
-- Copy albums of a list, from a directory to another.
 - Convert local albums lists (including transformed ones) to playlists.
 
 ### Dependencies
 
 - `bs4`, to navigate and parse HTML tags and values.
 - `click` and `click_help_colors`, to implement the CLI.
+- `m3u8` to write data into a playlist.
 - `mutagen`, to extract metadata from track files.
 - `polars`, to storage and manipulate data.
 

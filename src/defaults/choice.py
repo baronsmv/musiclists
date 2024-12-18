@@ -32,16 +32,17 @@ ALL_ALBUMS = (
 TRACKS = __search__(path.TRACKS_DOWNLOAD)
 TRACKS_FILTERED = __search__(path.TRACKS_FILTERED, postfix="filter")
 TRACKS_UNION = __search__(path.TRACKS_UNION, postfix="union")
-TRACKS_INTERSECT = __search__(path.TRACKS_INTERSECT, postfix="inter")
+TRACKS_INTERSECT = __search__(path.TRACKS_INTERSECT, postfix="intersect")
 TRACKS_DIFF = __search__(path.TRACKS_DIFF, postfix="diff")
 ALL_TRACKS = (
     TRACKS | TRACKS_FILTERED | TRACKS_UNION | TRACKS_INTERSECT | TRACKS_DIFF
 )
 
-ID_CHOICES = (
+ALBUM_ID = (
     "id",
     "internal_id",
 )
+TRACK_ID = ("track_id",)
 
 ALBUM_COLUMNS = {
     "id": "ID",

@@ -107,18 +107,24 @@ class MusicList(pl.DataFrame):
 
     def tracks(self) -> Self:
         ml = self.explode("tracks")
-        ml = MusicList(
-            pl.concat(
-                [
-                    ml,
-                    pl.json_normalize(
-                        ml["tracks"],
-                        infer_schema_length=None,
-                    ),
-                ],
-                how="horizontal",
-            ).drop("tracks")
-        ).get_attrs(self)
+        ml = pl.concat(
+            [
+                ml,
+                pl.json_normalize(
+                    ml["tracks"],
+                    infer_schema_length=None,
+                ),
+            ],
+            how="horizontal",
+        ).drop("tracks")
+        ml = ml.with_columns(
+            (
+                pl.col("id").cast(pl.Utf8)
+                + pl.col("track_number").cast(pl.Utf8).str.zfill(4)
+                + pl.col("track_title").cast(pl.Utf8).str.slice(0, 5)
+            ).alias("track_id")
+        )
+        ml = MusicList(ml).get_attrs(self)
         ml.type = "tracks"
         return ml
 
@@ -170,6 +176,8 @@ class MusicList(pl.DataFrame):
             name, *location = name.split(".")
             if not location:
                 location = "download"
+            elif isinstance(location, (list, tuple)) and len(location) > 0:
+                location = location[0]
         logger = logging.logger(self.load)
         src = source(name, type_, location)
         if not src[3]:
