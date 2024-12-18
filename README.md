@@ -34,7 +34,7 @@ listeners.
 ## Commands
 
 ```
-musiclists [OPTIONS] COMMAND [ARGS]...
+Usage: musiclists [OPTIONS] COMMAND [ARGS]...
 
 Commands:
   download    Download lists of albums and tracks from music databases.
@@ -47,7 +47,7 @@ Commands:
 ### Subcommands of download
 
 ```
-musiclists download [OPTIONS] COMMAND [ARGS]...
+Usage: musiclists download [OPTIONS] COMMAND [ARGS]...
 
 Commands:
   aoty  Download a list of top albums and tracks from AlbumOfTheYear.org.
@@ -86,7 +86,7 @@ Options:
 ### Finding duplicated entries
 
 ```
-musiclists duplicates find [OPTIONS] [SEARCH]...
+Usage: musiclists duplicates find [OPTIONS] [SEARCH]...
 
 Options:
   -c, --columns [all|id|internal_id|artist|album|year|type|position|user_score|user_ratings|album_path|album_url|cover_url]
