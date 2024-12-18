@@ -32,15 +32,6 @@ listeners.
 - `mutagen`, to extract metadata from track files.
 - `polars`, to storage and manipulate data.
 
-### Donating and supporting the web platforms
-
-If you like this project or it's helpful to you in any way, consider
-supporting and donating to the websites that made it possible, helping them
-keep running:
-
-- [Help Support Album of the Year](https://www.albumoftheyear.org/donate/)
-- [Help Support ProgArchives](https://www.paypal.com/donate/?hosted_button_id=DRNRB8RG8NUN2)
-
 ## Commands
 
 ```
@@ -152,3 +143,12 @@ Options:
                                   deduplicates file.
   -K, --dedup-key                 Key for the dedup process.
 ```
+
+## Donating and supporting the web platforms
+
+If you like this project or it's helpful to you in any way, consider
+supporting and donating to the websites that made it possible, helping them
+keep running:
+
+- [Help Support Album of the Year](https://www.albumoftheyear.org/donate/)
+- [Help Support ProgArchives](https://www.paypal.com/donate/?hosted_button_id=DRNRB8RG8NUN2)
