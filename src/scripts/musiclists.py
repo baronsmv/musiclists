@@ -26,7 +26,7 @@ def download_aoty(
     debug: bool,
 ):
     """
-    Download a list of top albums from AlbumOfTheYear.org (AOTY).
+    Download a list of top albums and tracks from AlbumOfTheYear.org.
 
     This function retrieves albums whose scores fall within the range defined by
     `min_score` and `max_score`. The albums are fetched starting from the one
@@ -54,7 +54,7 @@ def download_prog(
     debug: bool,
 ):
     """
-    Download a list of top albums from ProgArchives.com.
+    Download a list of top albums and tracks from ProgArchives.com.
 
     This function retrieves albums whose scores fall within the range defined by
     `min_score` and `max_score`. The albums are fetched starting from the one

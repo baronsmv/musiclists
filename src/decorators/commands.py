@@ -36,6 +36,7 @@ __albums_filters__ = (
             help_msg="Columns to include.",
         ),
         choice.columns(
+            letter="C",
             option="sort-by",
             sorting=True,
             default=("id",),
@@ -55,10 +56,9 @@ __tracks_filters__ = (
         number.tracks_score(letter="s", default=TRACK_MIN_SCORE),
         number.tracks_score(letter="S", default=TRACK_MAX_SCORE, maximum=True),
         number.albums_score(
-            letter="a", default=ALBUM_MIN_SCORE, show_name=True
+            default=ALBUM_MIN_SCORE, show_name=True
         ),
         number.albums_score(
-            letter="A",
             default=ALBUM_MAX_SCORE,
             show_name=True,
             maximum=True,
@@ -79,6 +79,7 @@ __tracks_filters__ = (
             help_msg="Columns to include.",
         ),
         choice.columns(
+            letter="C",
             option="sort-by",
             tracks=True,
             sorting=True,
