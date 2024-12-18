@@ -57,7 +57,7 @@ Commands:
 ### Subcommands of transform
 
 ```
-Usage: musiclists transform tracks [OPTIONS] COMMAND [ARGS]...
+Usage: musiclists transform [albums|tracks] [OPTIONS] COMMAND [ARGS]...
 
 Commands:
   diff       Find the difference between lists.
@@ -71,7 +71,7 @@ Commands:
 ### Downloading a list
 
 ```
-Usage: musiclists download prog [OPTIONS]
+Usage: musiclists download [aoty|prog] [OPTIONS]
 
 Options:
   -t, --types [all|Studio|DVD|Boxset,Compilation|Live|Singles,EPs,FanClub,Promo]
@@ -104,7 +104,7 @@ Options:
 ### Exporting or filtering a list
 
 ```
-Usage: musiclists export tracks [OPTIONS]
+Usage: musiclists export [albums|tracks] [OPTIONS]
 
 Options:
   -m, --markdown / --no-markdown  Output as MarkDown.
@@ -133,7 +133,7 @@ Options:
 ### Getting a set operation result between two lists
 
 ```
-Usage: musiclists transform tracks diff [OPTIONS]
+Usage: musiclists transform [albums|tracks] [diff|intersect|union] [OPTIONS]
 
 Options:
   -d, --data-1 [aoty|prog]        Source for the data 1.
