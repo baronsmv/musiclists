@@ -128,7 +128,7 @@ Commands:
   union      Merge downloaded lists into one, returning any album of each.
 ```
 
-### Getting the difference between two lists
+### Getting a set operation result between two lists
 
 ```
 Usage: musiclists transform tracks diff [OPTIONS]
