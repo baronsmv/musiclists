@@ -144,7 +144,7 @@ Options:
   -K, --dedup-key                 Key for the dedup process.
 ```
 
-## Donating and supporting the web platforms
+## Donating and Supporting
 
 If you like this project or it's helpful to you in any way, consider
 supporting and donating to the websites that made it possible, helping them
