@@ -33,7 +33,7 @@ listeners.
 
 ## Commands and options
 
-```sh
+```
 musiclists [OPTIONS] COMMAND [ARGS]...
 
 Commands:
@@ -46,7 +46,7 @@ Commands:
 
 ### Subcommands of download
 
-```sh
+```
 musiclists download [OPTIONS] COMMAND [ARGS]...
 
 Commands:
@@ -56,7 +56,7 @@ Commands:
 
 ### Downloading a list
 
-```sh
+```
 Usage: musiclists download prog [OPTIONS]
 
 Options:
@@ -71,7 +71,7 @@ Options:
 
 ### Finding duplicated entries
 
-```sh
+```
 musiclists duplicates find [OPTIONS] [SEARCH]...
 
 Options:
@@ -89,7 +89,7 @@ Options:
 
 ### Exporting or filtering a list
 
-```sh
+```
 Usage: musiclists export tracks [OPTIONS]
 
 Options:
@@ -118,7 +118,7 @@ Options:
 
 ### Subcommands of transform
 
-```sh
+```
 Usage: musiclists transform tracks [OPTIONS] COMMAND [ARGS]...
 
 Commands:
@@ -130,7 +130,7 @@ Commands:
 
 ### Getting the difference between two lists
 
-```sh
+```
 Usage: musiclists transform tracks diff [OPTIONS]
 
 Options:
