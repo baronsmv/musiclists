@@ -31,7 +31,7 @@ listeners.
 - `mutagen`, to extract metadata from track files.
 - `polars`, to storage and manipulate data.
 
-## Commands and options
+## Commands
 
 ```
 musiclists [OPTIONS] COMMAND [ARGS]...
@@ -53,6 +53,20 @@ Commands:
   aoty  Download a list of top albums and tracks from AlbumOfTheYear.org.
   prog  Download a list of top albums and tracks from ProgArchives.com.
 ```
+
+### Subcommands of transform
+
+```
+Usage: musiclists transform tracks [OPTIONS] COMMAND [ARGS]...
+
+Commands:
+  diff       Find the difference between lists.
+  filter     Filter a list of tracks.
+  intersect  Join lists, only returning tracks that are in both lists.
+  union      Merge downloaded lists into one, returning any album of each.
+```
+
+## Options
 
 ### Downloading a list
 
@@ -114,18 +128,6 @@ Options:
   -a, --limit-album INTEGER       Limit of albums returned per album column.
   -A, --limit-artist INTEGER      Limit of tracks returned per artist column.
   -y, --limit-year INTEGER        Limit of tracks returned per year column.
-```
-
-### Subcommands of transform
-
-```
-Usage: musiclists transform tracks [OPTIONS] COMMAND [ARGS]...
-
-Commands:
-  diff       Find the difference between lists.
-  filter     Filter a list of tracks.
-  intersect  Join lists, only returning tracks that are in both lists.
-  union      Merge downloaded lists into one, returning any album of each.
 ```
 
 ### Getting a set operation result between two lists
