@@ -259,7 +259,7 @@ def export_tracks(func):
 
 
 def playlist(func):
-    if len(ALL_TRACKS) < 2:
+    if len(ALL_TRACKS) < 1:
         return func
     return command(
         func,

@@ -1,23 +1,25 @@
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
 [project]
-name = "musiclists_baronsmv"
-version = "0.1"
+name = "musiclists"
+version = "0.2.2"
 authors = [
   { name="Mauricio Valentín Barón Salinas", email="baronsmv@gmail.com" },
 ]
 description = "Download, filter and transform data from music review aggregator websites."
-readme = "README.md"
+readme = { file = "README.md", content-type = "text/markdown" }
+license = { file = "LICENSE" }
 requires-python = ">=3.8"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: GPL-3.0 license ",
-    "Operating System :: OS Independent",
+dependencies = [
+    "bs4",
+    "click",
+    "click_help_colors",
+    "m3u8",
+    "mutagen",
+    "polars"
 ]
 
-[project.urls]
+[project.scripts]
+musiclists = "src.scripts.musiclists:cli"
 
+[project.urls]
 Homepage = "https://github.com/baronsmv/musiclists"
 Issues = "https://github.com/baronsmv/musiclists/issues"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 APP_NAME = "MusicLists"
-VERSION = "0.1"
+VERSION = "0.2.1"
 
 QUIET = False
 VERBOSE = False
