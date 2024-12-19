@@ -25,7 +25,9 @@ def __choice__(
         choices = tuple(choices.keys())
     if all_option:
         choices = ("all",) + choices
-    multiple = True if isinstance(default, tuple) or all_option else False
+    if all_option and isinstance(default, (int, str)):
+        default = (default,)
+    multiple = isinstance(default, tuple)
     if isinstance(default, int) or isinstance(default[0], int):
         default = (
             tuple(choices[d] for d in default)

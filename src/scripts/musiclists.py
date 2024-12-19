@@ -524,10 +524,10 @@ def playlist(
     debug: bool,
 ):
     """
-    Find album data from a directory.
+    Export a list to a playlist.
 
-    This function scans the `PATH` directory, where albums are stored, and
-    extracts their data.
+    This function extracts the paths of a list (if available) and parses them
+    into a M3U8 playlist.
     """
     to_playlist(
         data=data,

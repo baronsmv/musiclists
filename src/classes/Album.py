@@ -37,7 +37,7 @@ class Album(UserDict):
             sub_id = self.get(attr, None)
             if sub_id is None:
                 continue
-            result += id_sep + normalize_attr(sub_id, attr_length)
+            result += id_sep + normalize_attr(str(sub_id), attr_length)
         self["id"] = result[sep_length:]
 
     def similarity_with(

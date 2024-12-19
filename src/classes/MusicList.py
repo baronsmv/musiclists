@@ -255,11 +255,15 @@ class MusicList(pl.DataFrame):
             other.select(self.columns).extend(self).unique()
         ).get_attrs(self)
 
-    def adapt(self, attrs: dict) -> bool:
-        col = self.columns
-        for k in tuple(attrs):
-            if k not in col:
-                del attrs[k]
+    def adapt(self, attrs: dict | list, *others: Self) -> bool:
+        col = set(self.columns)
+        for o in others:
+            col &= set(o.columns)  # type: ignore
+        if isinstance(attrs, dict):
+            for key in [k for k in attrs if k not in col]:
+                del attrs[key]
+        elif isinstance(attrs, list):
+            attrs[:] = [v for v in attrs if v in col]
         return len(attrs) != 0
 
     def filter_by_num(
@@ -485,6 +489,8 @@ class MusicList(pl.DataFrame):
         dedup: bool = True,
         dedup_key: str = "internal_id",
     ) -> Self | None:
+        columns = list(columns)
+        self.adapt(columns, other)
         columns += (key, dedup_key)
         data = self.select(columns)
         other_data = (
@@ -507,6 +513,8 @@ class MusicList(pl.DataFrame):
         name: str | None = None,
         key: str = "id",
     ):
+        columns = list(columns)
+        self.adapt(columns, other)
         columns += (key,)
         data = self.select(columns)
         other_data = set(other.get_column(key))
@@ -531,6 +539,8 @@ class MusicList(pl.DataFrame):
         dedup: bool = True,
         dedup_key: str = "internal_id",
     ) -> Self | None:
+        columns = list(columns)
+        self.adapt(columns, other)
         columns += (key, dedup_key)
         data = (
             self.deduplicated_from(other, key=dedup_key) if dedup else self

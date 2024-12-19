@@ -97,7 +97,7 @@ __albums_source__ = (
         data.source(letter="d", suffix="1", default=0),
         data.source(letter="D", suffix="2", default=1),
         name,
-        choice.columns(letter="c"),
+        choice.columns(letter="c", default="all"),
     )
     if len(ALL_ALBUMS) >= 2
     else ()
@@ -107,7 +107,7 @@ __tracks_source__ = (
         data.source(letter="d", suffix="1", default=0, tracks=True),
         data.source(letter="D", suffix="2", default=1, tracks=True),
         name,
-        choice.columns(letter="c", tracks=True),
+        choice.columns(letter="c", default="all", tracks=True),
     )
     if len(ALL_TRACKS) >= 2
     else ()
