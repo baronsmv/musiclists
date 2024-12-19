@@ -59,6 +59,7 @@ ALBUM_COLUMNS = {
     "cover_url": "Cover URL",
 }
 TRACK_COLUMNS = {
+    "track_id": "Track ID",
     "track_score": "TSC",
     "track_ratings": "TRT",
     "track_number": "No.",

@@ -491,7 +491,10 @@ class MusicList(pl.DataFrame):
     ) -> Self | None:
         columns = list(columns)
         self.adapt(columns, other)
-        columns += (key, dedup_key)
+        if key not in columns:
+            columns += (key,)
+        if dedup_key not in columns:
+            columns += (dedup_key,)
         data = self.select(columns)
         other_data = (
             other.deduplicated_from(self, key=dedup_key) if dedup else other
@@ -515,7 +518,8 @@ class MusicList(pl.DataFrame):
     ):
         columns = list(columns)
         self.adapt(columns, other)
-        columns += (key,)
+        if key not in columns:
+            columns += (key,)
         data = self.select(columns)
         other_data = set(other.get_column(key))
         if di := other.duplicated_ids_with(self, key):
@@ -541,7 +545,10 @@ class MusicList(pl.DataFrame):
     ) -> Self | None:
         columns = list(columns)
         self.adapt(columns, other)
-        columns += (key, dedup_key)
+        if key not in columns:
+            columns += (key,)
+        if dedup_key not in columns:
+            columns += (dedup_key,)
         data = (
             self.deduplicated_from(other, key=dedup_key) if dedup else self
         ).select(columns)
