@@ -237,6 +237,8 @@ def tracks_diff(func):
 
 
 def __export__(func, tracks: bool = False):
+    if len(ALL_TRACKS if tracks else ALL_ALBUMS) < 1:
+        return func
     return command(
         func,
         decorators=(
@@ -257,6 +259,8 @@ def export_tracks(func):
 
 
 def playlist(func):
+    if len(ALL_TRACKS) < 2:
+        return func
     return command(
         func,
         decorators=(

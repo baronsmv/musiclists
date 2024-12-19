@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "musiclists_baronsmv"
+version = "0.1"
+authors = [
+  { name="Mauricio Valentín Barón Salinas", email="baronsmv@gmail.com" },
+]
+description = "Download, filter and transform data from music review aggregator websites."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GPL-3.0 license ",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+
+Homepage = "https://github.com/baronsmv/musiclists"
+Issues = "https://github.com/baronsmv/musiclists/issues"
